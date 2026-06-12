@@ -183,6 +183,40 @@
             padding-top: 0;
         }
 
+        /* ==================== MÓVIL: DESPLEGABLES ==================== */
+        .mobile-select-wrapper {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .mobile-select-wrapper select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-select-wrapper select:focus {
+            outline: none;
+            border-color: #2a8fa8;
+            box-shadow: 0 0 0 3px rgba(42, 143, 168, 0.1);
+        }
+
+        .mobile-select-wrapper select::-webkit-appearance {
+            appearance: none;
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232a8fa8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 35px;
+        }
+
+        /* ==================== DESKTOP: RADIO BUTTONS ==================== */
         .options-header {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
@@ -193,6 +227,7 @@
             color: #999;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            display: none;
         }
 
         .option-label {
@@ -202,7 +237,7 @@
         }
 
         .options-container {
-            display: grid;
+            display: none;
             grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
             gap: 6px;
         }
@@ -815,13 +850,23 @@
                 font-size: 14px;
             }
 
+            /* Mostrar radio buttons en desktop */
+            .options-header {
+                display: grid !important;
+            }
+
+            .options-container {
+                display: grid !important;
+            }
+
             .radio-label {
                 padding: 10px 6px;
                 font-size: 13px;
             }
 
-            .options-header {
-                font-size: 10px;
+            /* Ocultar desplegables en desktop */
+            .mobile-select-wrapper {
+                display: none !important;
             }
 
             .results-hero {
@@ -930,11 +975,22 @@
             </div>
 
             <form id="ipssForm">
-                <!-- Preguntas 1-6 -->
+                <!-- PREGUNTA 1 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">1</div>
                         <div class="question-text">Durante más o menos los últimos 30 días, ¿cuántas veces ha tenido la sensación de no vaciar completamente la vejiga?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q1_select" name="q1_select" onchange="syncSelect(this, 'q1')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -954,10 +1010,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 2 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">2</div>
                         <div class="question-text">¿Cuántas veces ha tenido que orinar nuevamente en las 2 horas siguientes?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q2_select" name="q2_select" onchange="syncSelect(this, 'q2')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -977,10 +1045,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 3 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">3</div>
                         <div class="question-text">¿Cuántas veces ha notado interrupciones al orinar?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q3_select" name="q3_select" onchange="syncSelect(this, 'q3')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -1000,10 +1080,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 4 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">4</div>
                         <div class="question-text">¿Cuántas veces ha tenido dificultad para aguantar las ganas de orinar?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q4_select" name="q4_select" onchange="syncSelect(this, 'q4')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -1023,10 +1115,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 5 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">5</div>
                         <div class="question-text">¿Cuántas veces ha observado que el chorro de orina es débil?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q5_select" name="q5_select" onchange="syncSelect(this, 'q5')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -1046,10 +1150,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 6 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">6</div>
                         <div class="question-text">¿Cuántas veces ha tenido que hacer fuerza para comenzar a orinar?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q6_select" name="q6_select" onchange="syncSelect(this, 'q6')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -1069,11 +1185,22 @@
                     </div>
                 </div>
 
-                <!-- Pregunta 7 -->
+                <!-- PREGUNTA 7 -->
                 <div class="form-group quality-section">
                     <div class="form-group-header">
                         <div class="question-number">7</div>
                         <div class="question-text">¿Cuántas veces se levanta por la noche a orinar?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q7_select" name="q7_select" onchange="syncSelect(this, 'q7')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">1 vez</option>
+                            <option value="2">2 veces</option>
+                            <option value="3">3 veces</option>
+                            <option value="4">4 veces</option>
+                            <option value="5">5+ veces</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -1093,11 +1220,23 @@
                     </div>
                 </div>
 
-                <!-- Pregunta 8 -->
+                <!-- PREGUNTA 8 -->
                 <div class="form-group quality-section">
                     <div class="form-group-header">
                         <div class="question-number">8</div>
                         <div class="question-text">¿Cómo se sentiría si tuviera que vivir con estos síntomas?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q8_select" name="q8_select" onchange="syncSelect(this, 'q8')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Encantado</option>
+                            <option value="1">Muy bien</option>
+                            <option value="2">Bien</option>
+                            <option value="3">Indiferente</option>
+                            <option value="4">Mal</option>
+                            <option value="5">Muy mal</option>
+                            <option value="6">Fatal</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Encantado</div>
@@ -1259,8 +1398,30 @@
         const progressFill = document.getElementById('progressFill');
         const answeredCount = document.getElementById('answered');
 
+        // Sincronizar select con radio buttons
+        function syncSelect(selectElement, questionName) {
+            const value = selectElement.value;
+            if (value !== '') {
+                const radioButton = form.querySelector(`input[name="${questionName}"][value="${value}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                }
+            } else {
+                form.querySelectorAll(`input[name="${questionName}"]`).forEach(radio => radio.checked = false);
+            }
+            updateProgress();
+        }
+
+        // Actualizar select cuando se hace click en radio buttons
         form.querySelectorAll('input[type="radio"]').forEach(input => {
-            input.addEventListener('change', updateProgress);
+            input.addEventListener('change', function() {
+                const questionName = this.name;
+                const selectElement = document.getElementById(`${questionName}_select`);
+                if (selectElement) {
+                    selectElement.value = this.value;
+                }
+                updateProgress();
+            });
         });
 
         function updateProgress() {
@@ -1333,6 +1494,7 @@
             formSection.style.display = 'block';
             resultsSection.classList.remove('show');
             form.reset();
+            document.querySelectorAll('select').forEach(s => s.value = '');
             updateProgress();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -1348,6 +1510,7 @@
 
         function resetForm() {
             form.reset();
+            document.querySelectorAll('select').forEach(s => s.value = '');
             updateProgress();
         }
 
