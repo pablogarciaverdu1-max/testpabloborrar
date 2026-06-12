@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación IPSS - GARCIA REBOLL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        /* ==================== HEADER ==================== */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #1a5f7a 0%, #2a8fa8 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(26, 95, 122, 0.3);
+            letter-spacing: -1px;
+        }
+
+        .clinic-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a5f7a;
+            letter-spacing: -0.3px;
+        }
+
+        .clinic-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ==================== FORMULARIO ==================== */
+        .form-section {
+            display: block;
+            background: white;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h1 {
+            font-size: 32px;
+            color: #1a5f7a;
+            margin-bottom: 10px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .form-header p {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .progress-container {
+            margin-bottom: 35px;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e8e8e8;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1a5f7a 0%, #2a8fa8 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .info-banner {
+            background: #f0f8fb;
+            border-left: 4px solid #2a8fa8;
+            padding: 18px;
+            margin-bottom: 35px;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .form-group {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: #fafbfc;
+            border-radius: 8px;
+            border: 1px solid #e8ecf1;
+        }
+
+        .form-group-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            width: 32px;
+            height: 32px;
+            background: #2a8fa8;
+            color: white;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .question-text {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+            line-height: 1.5;
+            padding-top: 2px;
+        }
+
+        .options-header {
+            display: flex;
+            gap: 10px;
+            margin: 18px 0 12px 0;
+            font-size: 10px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .option-label {
+            flex: 1;
+            text-align: center;
+            min-width: 50px;
+        }
+
+        .options-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            flex: 1;
+            min-width: 58px;
+            text-align: center;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-label {
+            display: block;
+            padding: 10px 6px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .radio-label:hover {
+            border-color: #2a8fa8;
+            background: #f9fafb;
+        }
+
+        .radio-option input[type="radio"]:checked + .radio-label {
+            background: #2a8fa8;
+            color: white;
+            border-color: #2a8fa8;
+            box-shadow: 0 4px 12px rgba(42, 143, 168, 0.25);
+        }
+
+        .quality-section {
+            margin-top: 35px;
+            padding-top: 35px;
+            border-top: 2px solid #e8e8e8;
+        }
+
+        .form-footer {
+            margin-top: 35px;
+            padding-top: 35px;
+            border-top: 1px solid #e8e8e8;
+        }
+
+        .disclaimer {
+            background: #f9f9f9;
+            padding: 18px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            border-left: 4px solid #999;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 35px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a5f7a 0%, #2a8fa8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #164d63 0%, #236b8a 100%);
+            box-shadow: 0 6px 20px rgba(26, 95, 122, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            border-color: #2a8fa8;
+        }
+
+        /* ==================== RESULTADOS ==================== */
+        .results-section {
+            display: none;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .results-hero {
+            background: linear-gradient(135deg, #1a5f7a 0%, #2a8fa8 100%);
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .results-logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .results-title {
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 35px;
+            letter-spacing: -0.3px;
+            line-height: 1.4;
+        }
+
+        .score-display {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 40px 30px;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
+        .score-label {
+            font-size: 11px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .score-main {
+            font-size: 56px;
+            font-weight: 300;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .score-reference {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .grade-badge {
+            display: inline-block;
+            background: white;
+            color: #1a5f7a;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .grade-mild {
+            color: #2e7d32;
+            background: #e8f5e9;
+        }
+
+        .grade-moderate {
+            color: #e65100;
+            background: #fff3e0;
+        }
+
+        .grade-severe {
+            color: #c62828;
+            background: #ffebee;
+        }
+
+        .results-content {
+            padding: 50px 20px;
+        }
+
+        .content-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .symptoms-recommendations {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+
+        .symptom-card {
+            padding: 28px;
+            border-radius: 8px;
+            border-left: 5px solid;
+        }
+
+        .symptom-mild {
+            background: #f1f8f4;
+            border-left-color: #2e7d32;
+        }
+
+        .symptom-moderate {
+            background: #fff8f0;
+            border-left-color: #e65100;
+        }
+
+        .symptom-severe {
+            background: #fef5f5;
+            border-left-color: #c62828;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .card-text {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .card-text ul {
+            list-style: none;
+            margin-top: 12px;
+        }
+
+        .card-text li {
+            padding: 6px 0;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .card-text li:before {
+            content: "→ ";
+            margin-right: 8px;
+            font-weight: 600;
+        }
+
+        .symptom-mild .card-text { color: #2e7d32; }
+        .symptom-moderate .card-text { color: #e65100; }
+        .symptom-severe .card-text { color: #c62828; }
+
+        .symptom-mild .card-title { color: #2e7d32; }
+        .symptom-moderate .card-title { color: #e65100; }
+        .symptom-severe .card-title { color: #c62828; }
+
+        .symptom-mild .card-text li:before { color: #2e7d32; }
+        .symptom-moderate .card-text li:before { color: #e65100; }
+        .symptom-severe .card-text li:before { color: #c62828; }
+
+        .cta-section {
+            background: linear-gradient(135deg, #1a5f7a 0%, #2a8fa8 100%);
+            color: white;
+            padding: 50px 40px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .cta-title {
+            font-size: 26px;
+            margin-bottom: 12px;
+            font-weight: 400;
+            letter-spacing: -0.3px;
+        }
+
+        .cta-text {
+            font-size: 15px;
+            margin-bottom: 28px;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #2a8fa8;
+            padding: 13px 45px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .contact-section {
+            background: #f8f9fa;
+            padding: 45px 40px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+
+        .contact-title {
+            font-size: 20px;
+            color: #1a5f7a;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .contact-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 28px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .form-group-contact {
+            grid-column: auto;
+        }
+
+        .form-group-contact label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+            font-size: 12px;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group-contact input,
+        .form-group-contact select,
+        .form-group-contact textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-group-contact input:focus,
+        .form-group-contact select:focus,
+        .form-group-contact textarea:focus {
+            outline: none;
+            border-color: #2a8fa8;
+            box-shadow: 0 0 0 3px rgba(42, 143, 168, 0.1);
+        }
+
+        .form-group-contact textarea {
+            resize: vertical;
+            min-height: 90px;
+            grid-column: 1 / -1;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #1a5f7a 0%, #2a8fa8 100%);
+            color: white;
+            padding: 12px 45px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 95, 122, 0.3);
+        }
+
+        .btn-back {
+            background: white;
+            color: #333;
+            padding: 12px 45px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            border-color: #2a8fa8;
+            background: #f8f9fa;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 14px 18px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2e7d32;
+            display: none;
+            font-size: 13px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 50px 0;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2a8fa8;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .clinic-info {
+            background: #f0f8fb;
+            padding: 28px;
+            border-left: 5px solid #2a8fa8;
+            border-radius: 6px;
+            margin-top: 40px;
+        }
+
+        .clinic-info h3 {
+            color: #1a5f7a;
+            margin-bottom: 14px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .clinic-detail {
+            font-size: 12px;
+            margin: 8px 0;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .clinic-title {
+                font-size: 18px;
+            }
+
+            .form-header h1 {
+                font-size: 24px;
+            }
+
+            .results-title {
+                font-size: 20px;
+            }
+
+            .score-main {
+                font-size: 42px;
+            }
+
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                padding: 30px 20px;
+            }
+
+            .stat-number {
+                font-size: 24px;
+            }
+
+            .stat-label {
+                font-size: 11px;
+            }
+
+            .symptoms-recommendations {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-section {
+                padding: 35px 20px;
+            }
+
+            .results-content {
+                padding: 35px 20px;
+            }
+
+            .contact-section {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo-brand">
+            <div class="logo">GR</div>
+            <div>
+                <div class="clinic-title">GARCIA REBOLL</div>
+                <div class="clinic-subtitle">Especialistas en Urología</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORMULARIO IPSS -->
+    <div class="form-section" id="formSection">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>Evaluación de Síntomas</h1>
+                <p>Cuestionario IPSS (Índice Internacional de Síntomas Prostáticos)</p>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-text">Progreso: <span id="answered">0</span>/8 preguntas</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div class="info-banner">
+                Responda cada pregunta según su experiencia en los últimos 30 días. Esta evaluación es confidencial y se procesa localmente en su navegador.
+            </div>
+
+            <form id="ipssForm">
+                <!-- Preguntas 1-6 -->
+                <div class="form-group">
+                    <div class="form-group-header">
+                        <div class="question-number">1</div>
+                        <div class="question-text">Durante más o menos los últimos 30 días, ¿cuántas veces ha tenido la sensación de no vaciar completamente la vejiga?</div>
+                    </div>
+                    <div class="options-header">
+                        <div class="option-label">Ninguna</div>
+                        <div class="option-label">Casi nunca</div>
+                        <div class="option-label">A veces</div>
+                        <div class="option-label">Bastante</div>
+                        <div class="option-label">Casi siempre</div>
+                        <div class="option-label">Siempre</div>
+                    </div>
+                    <div class="options-container">
+                        <div class="radio-option"><input type="radio" name="q1" value="0" id="q1_0"><label for="q1_0" class="radio-label">0</label></div>
+                        <div class="radio-option"><input type="radio" name="q1" value="1" id="q1_1"><label for="q1_1" class="radio-label">1</label></div>
+                        <div class="radio-option"><input type="radio" name="q1" value="2" id="q1_2"><label for="q1_2" class="radio-label">2</label></div>
+                        <div class="radio-option"><input type="radio" name="q1" value="3" id="q1_3"><label for="q1_3" class="radio-label">3</label></div>
+                        <div class="radio-option"><input type="radio" name="q1" value="4" id="q1_4"><label for="q1_4" class="radio-label">4</label></div>
+                        <div class="radio-option"><input type="radio" name="q1" value="5" id="q1_5"><label for="q1_5" class="radio-label">5</label></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-group-header">
+                        <div class="question-number">2</div>
+                        <div class="question-text">¿Cuántas veces ha tenido que orinar nuevamente en las 2 horas siguientes?</div>
+                    </div>
+                    <div class="options-header">
+                        <div class="option-label">Ninguna</div>
+                        <div class="option-label">Casi nunca</div>
+                        <div class="option-label">A veces</div>
+                        <div class="option-label">Bastante</div>
+                        <div class="option-label">Casi siempre</div>
+                        <div class="option-label">Siempre</div>
+                    </div>
+                    <div class="options-container">
+                        <div class="radio-option"><input type="radio" name="q2" value="0" id="q2_0"><label for="q2_0" class="radio-label">0</label></div>
+                        <div class="radio-option"><input type="radio" name="q2" value="1" id="q2_1"><label for="q2_1" class="radio-label">1</label></div>
+                        <div class="radio-option"><input type="radio" name="q2" value="2" id="q2_2"><label for="q2_2" class="radio-label">2</label></div>
+                        <div class="radio-option"><input type="radio" name="q2" value="3" id="q2_3"><label for="q2_3" class="radio-label">3</label></div>
+                        <div class="radio-option"><input type="radio" name="q2" value="4" id="q2_4"><label for="q2_4" class="radio-label">4</label></div>
+                        <div class="radio-option"><input type="radio" name="q2" value="5" id="q2_5"><label for="q2_5" class="radio-label">5</label></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-group-header">
+                        <div class="question-number">3</div>
+                        <div class="question-text">¿Cuántas veces ha notado interrupciones al orinar?</div>
+                    </div>
+                    <div class="options-header">
+                        <div class="option-label">Ninguna</div>
+                        <div class="option-label">Casi nunca</div>
+                        <div class="option-label">A veces</div>
+                        <div class="option-label">Bastante</div>
+                        <div class="option-label">Casi siempre</div>
+                        <div class="option-label">Siempre</div>
+                    </div>
+                    <div class="options-container">
+                        <div class="radio-option"><input type="radio" name="q3" value="0" id="q3_0"><label for="q3_0" class="radio-label">0</label></div>
+                        <div class="radio-option"><input type="radio" name="q3" value="1" id="q3_1"><label for="q3_1" class="radio-label">1</label></div>
+                        <div class="radio-option"><input type="radio" name="q3" value="2" id="q3_2"><label for="q3_2" class="radio-label">2</label></div>
+                        <div class="radio-option"><input type="radio" name="q3" value="3" id="q3_3"><label for="q3_3" class="radio-label">3</label></div>
+                        <div class="radio-option"><input type="radio" name="q3" value="4" id="q3_4"><label for="q3_4" class="radio-label">4</label></div>
+                        <div class="radio-option"><input type="radio" name="q3" value="5" id="q3_5"><label for="q3_5" class="radio-label">5</label></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-group-header">
+                        <div class="question-number">4</div>
+                        <div class="question-text">¿Cuántas veces ha tenido dificultad para aguantar las ganas de orinar?</div>
+                    </div>
+                    <div class="options-header">
+                        <div class="option-label">Ninguna</div>
+                        <div class="option-label">Casi nunca</div>
+                        <div class="option-label">A veces</div>
+                        <div class="option-label">Bastante</div>
+                        <div class="option-label">Casi siempre</div>
+                        <div class="option-label">Siempre</div>
+                    </div>
+                    <div class="options-container">
+                        <div class="radio-option"><input type="radio" name="q4" value="0" id="q4_0"><label for="q4_0" class="radio-label">0</label></div>
+                        <div class="radio-option"><input type="radio" name="q4" value="1" id="q4_1"><label for="q4_1" class="radio-label">1</label></div>
+                        <div class="radio-option"><input type="radio" name="q4" value="2" id="q4_2"><label for="q4_2" class="radio-label">2</label></div>
+                        <div class="radio-option"><input type="radio" name="q4" value="3" id="q4_3"><label for="q4_3" class="radio-label">3</label></div>
+                        <div class="radio-option"><input type="radio" name="q4" value="4" id="q4_4"><label for="q4_4" class="radio-label">4</label></div>
+                        <div class="radio-option"><input type="radio" name="q4" value="5" id="q4_5"><label for="q4_5" class="radio-label">5</label></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-group-header">
+                        <div class="question-number">5</div>
+                        <div class="question-text">¿Cuántas veces ha observado que el chorro de orina es débil?</div>
+                    </div>
+                    <div class="options-header">
+                        <div class="option-label">Ninguna</div>
+                        <div class="option-label">Casi nunca</div>
+                        <div class="option-label">A veces</div>
+                        <div class="option-label">Bastante</div>
+                        <div class="option-label">Casi siempre</div>
+                        <div class="option-label">Siempre</div>
+                    </div>
+                    <div class="options-container">
+                        <div class="radio-option"><input type="radio" name="q5" value="0" id="q5_0"><label for="q5_0" class="radio-label">0</label></div>
+                        <div class="radio-option"><input type="radio" name="q5" value="1" id="q5_1"><label for="q5_1" class="radio-label">1</label></div>
+                        <div class="radio-option"><input type="radio" name="q5" value="2" id="q5_2"><label for="q5_2" class="radio-label">2</label></div>
+                        <div class="radio-option"><input type="radio" name="q5" value="3" id="q5_3"><label for="q5_3" class="radio-label">3</label></div>
+                        <div class="radio-option"><input type="radio" name="q5" value="4" id="q5_4"><label for="q5_4" class="radio-label">4</label></div>
+                        <div class="radio-option"><input type="radio" name="q5" value="5" id="q5_5"><label for="q5_5" class="radio-label">5</label></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-group-header">
+                        <div class="question-number">6</div>
+                        <div class="question-text">¿Cuántas veces ha tenido que hacer fuerza para comenzar a orinar?</div>
+                    </div>
+                    <div class="options-header">
+                        <div class="option-label">Ninguna</div>
+                        <div class="option-label">Casi nunca</div>
+                        <div class="option-label">A veces</div>
+                        <div class="option-label">Bastante</div>
+                        <div class="option-label">Casi siempre</div>
+                        <div class="option-label">Siempre</div>
+                    </div>
+                    <div class="options-container">
+                        <div class="radio-option"><input type="radio" name="q6" value="0" id="q6_0"><label for="q6_0" class="radio-label">0</label></div>
+                        <div class="radio-option"><input type="radio" name="q6" value="1" id="q6_1"><label for="q6_1" class="radio-label">1</label></div>
+                        <div class="radio-option"><input type="radio" name="q6" value="2" id="q6_2"><label for="q6_2" class="radio-label">2</label></div>
+                        <div class="radio-option"><input type="radio" name="q6" value="3" id="q6_3"><label for="q6_3" class="radio-label">3</label></div>
+                        <div class="radio-option"><input type="radio" name="q6" value="4" id="q6_4"><label for="q6_4" class="radio-label">4</label></div>
+                        <div class="radio-option"><input type="radio" name="q6" value="5" id="q6_5"><label for="q6_5" class="radio-label">5</label></div>
+                    </div>
+                </div>
+
+                <!-- Pregunta 7 -->
+                <div class="form-group quality-section">
+                    <div class="form-group-header">
+                        <div class="question-number">7</div>
+                        <div class="question-text">¿Cuántas veces se levanta por la noche a orinar?</div>
+                    </div>
+                    <div class="options-header">
+                        <div class="option-label">Ninguna</div>
+                        <div class="option-label">1 vez</div>
+                        <div class="option-label">2 veces</div>
+                        <div class="option-label">3 veces</div>
+                        <div class="option-label">4 veces</div>
+                        <div class="option-label">5+ veces</div>
+                    </div>
+                    <div class="options-container">
+                        <div class="radio-option"><input type="radio" name="q7" value="0" id="q7_0"><label for="q7_0" class="radio-label">0</label></div>
+                        <div class="radio-option"><input type="radio" name="q7" value="1" id="q7_1"><label for="q7_1" class="radio-label">1</label></div>
+                        <div class="radio-option"><input type="radio" name="q7" value="2" id="q7_2"><label for="q7_2" class="radio-label">2</label></div>
+                        <div class="radio-option"><input type="radio" name="q7" value="3" id="q7_3"><label for="q7_3" class="radio-label">3</label></div>
+                        <div class="radio-option"><input type="radio" name="q7" value="4" id="q7_4"><label for="q7_4" class="radio-label">4</label></div>
+                        <div class="radio-option"><input type="radio" name="q7" value="5" id="q7_5"><label for="q7_5" class="radio-label">5</label></div>
+                    </div>
+                </div>
+
+                <!-- Pregunta 8 -->
+                <div class="form-group quality-section">
+                    <div class="form-group-header">
+                        <div class="question-number">8</div>
+                        <div class="question-text">¿Cómo se sentiría si tuviera que vivir con estos síntomas?</div>
+                    </div>
+                    <div class="options-header">
+                        <div class="option-label">Encantado</div>
+                        <div class="option-label">Muy bien</div>
+                        <div class="option-label">Bien</div>
+                        <div class="option-label">Indiferente</div>
+                        <div class="option-label">Mal</div>
+                        <div class="option-label">Muy mal</div>
+                        <div class="option-label">Fatal</div>
+                    </div>
+                    <div class="options-container">
+                        <div class="radio-option"><input type="radio" name="q8" value="0" id="q8_0"><label for="q8_0" class="radio-label">0</label></div>
+                        <div class="radio-option"><input type="radio" name="q8" value="1" id="q8_1"><label for="q8_1" class="radio-label">1</label></div>
+                        <div class="radio-option"><input type="radio" name="q8" value="2" id="q8_2"><label for="q8_2" class="radio-label">2</label></div>
+                        <div class="radio-option"><input type="radio" name="q8" value="3" id="q8_3"><label for="q8_3" class="radio-label">3</label></div>
+                        <div class="radio-option"><input type="radio" name="q8" value="4" id="q8_4"><label for="q8_4" class="radio-label">4</label></div>
+                        <div class="radio-option"><input type="radio" name="q8" value="5" id="q8_5"><label for="q8_5" class="radio-label">5</label></div>
+                        <div class="radio-option"><input type="radio" name="q8" value="6" id="q8_6"><label for="q8_6" class="radio-label">6</label></div>
+                    </div>
+                </div>
+
+                <div class="form-footer">
+                    <div class="disclaimer">
+                        Este cuestionario es una herramienta de orientación. Los resultados no son un diagnóstico. Consulte con un especialista en urología para una evaluación completa.
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">Limpiar</button>
+                        <button type="button" class="btn btn-primary" id="calculateBtn" onclick="calculateScore()" disabled>Ver Resultados</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="stats-section">
+                <div class="stat-item">
+                    <div class="stat-number">+30</div>
+                    <div class="stat-label">Años de Experiencia</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Experiencia Cualificada</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">33</div>
+                    <div class="stat-label">Compañías Colaboradoras</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">+700</div>
+                    <div class="stat-label">Pacientes Satisfechos</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="results-section" id="resultsSection">
+        <div class="results-hero">
+            <div class="results-logo">GR</div>
+            <h2 class="results-title">Resultado de Índice Internacional de Síntomas Prostáticos</h2>
+
+            <div class="score-display">
+                <div class="score-label">Tu Puntuación</div>
+                <div class="score-main" id="scoreNumber">0</div>
+                <div class="score-reference">de 35 puntos</div>
+                <div class="grade-badge" id="gradeBadge">Leve</div>
+            </div>
+        </div>
+
+        <div class="results-content">
+            <div class="content-wrapper">
+                <div class="symptoms-recommendations">
+                    <div class="symptom-card symptom-mild" id="symptomCard">
+                        <div class="card-title">Situación Clínica</div>
+                        <div class="card-text" id="symptomText">Sus síntomas son mínimos y no requieren intervención inmediata.</div>
+                    </div>
+
+                    <div class="symptom-card symptom-mild" id="recommendationCard">
+                        <div class="card-title">Recomendación</div>
+                        <div class="card-text" id="recommendationText">
+                            <ul>
+                                <li>Mantener estilo de vida saludable</li>
+                                <li>Reducir líquidos por la noche</li>
+                                <li>Revisión médica anual</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-section">
+                    <h3 class="cta-title">Próximo Paso</h3>
+                    <p class="cta-text">Completa el formulario a continuación para agendar una consulta con nuestros especialistas</p>
+                    <button class="cta-button" onclick="scrollToForm()">Agendar Consulta</button>
+                </div>
+
+                <div class="contact-section">
+                    <h3 class="contact-title">Agendar Cita Médica</h3>
+                    <p class="contact-subtitle">Completa tus datos para que nos pongamos en contacto</p>
+
+                    <div class="success-message" id="successMessage">
+                        Gracias. Tu solicitud ha sido enviada. Nos contactaremos pronto.
+                    </div>
+
+                    <form id="contactForm" onsubmit="handleSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group-contact">
+                                <label for="nombre">Nombre Completo</label>
+                                <input type="text" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="form-group-contact">
+                                <label for="email">Correo Electrónico</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group-contact">
+                                <label for="telefono">Teléfono</label>
+                                <input type="tel" id="telefono" name="telefono" required>
+                            </div>
+                            <div class="form-group-contact">
+                                <label for="horario">Preferencia de Horario</label>
+                                <select id="horario" name="horario" required>
+                                    <option value="">Selecciona un horario</option>
+                                    <option value="manana">Mañana (9:00 - 13:00)</option>
+                                    <option value="tarde">Tarde (16:00 - 20:00)</option>
+                                    <option value="flexible">Sin preferencia</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group-contact">
+                            <label for="mensaje">Comentarios</label>
+                            <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos si tienes alguna pregunta..."></textarea>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-submit">Agendar Cita</button>
+                            <button type="button" class="btn-back" onclick="backToForm()">Volver</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="clinic-info">
+                    <h3>GARCIA REBOLL</h3>
+                    <div class="clinic-detail">Teléfono: +34 638 896 575</div>
+                    <div class="clinic-detail">Email: info@clinicagarciareboll.com</div>
+                    <div class="clinic-detail">Ubicación: Valencia, España</div>
+                    <div class="clinic-detail">Horario: Lunes a Viernes 9:00 - 20:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('ipssForm');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const formSection = document.getElementById('formSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const progressFill = document.getElementById('progressFill');
+        const answeredCount = document.getElementById('answered');
+
+        // Monitorear cambios en los radio buttons
+        form.querySelectorAll('input[type="radio"]').forEach(input => {
+            input.addEventListener('change', updateProgress);
+        });
+
+        function updateProgress() {
+            const answered = form.querySelectorAll('input[type="radio"]:checked').length;
+            const percentage = (answered / 8) * 100;
+            answeredCount.textContent = answered;
+            progressFill.style.width = percentage + '%';
+            calculateBtn.disabled = answered !== 8;
+        }
+
+        function calculateScore() {
+            let score = 0;
+            let qualityScore = 0;
+
+            for (let i = 1; i <= 7; i++) {
+                const selected = form.querySelector(`input[name="q${i}"]:checked`);
+                if (selected) score += parseInt(selected.value);
+            }
+
+            const q8 = form.querySelector('input[name="q8"]:checked');
+            if (q8) qualityScore = parseInt(q8.value);
+
+            showResults(score, qualityScore);
+        }
+
+        function showResults(score, quality) {
+            document.getElementById('scoreNumber').textContent = score;
+
+            const badge = document.getElementById('gradeBadge');
+            const symptomCard = document.getElementById('symptomCard');
+            const recommendationCard = document.getElementById('recommendationCard');
+            const symptomText = document.getElementById('symptomText');
+            const recommendationText = document.getElementById('recommendationText');
+
+            let grade = '';
+            let color = '';
+
+            if (score <= 7) {
+                grade = 'Síntomas Leves';
+                color = 'mild';
+                symptomText.textContent = 'Sus síntomas son mínimos. No requiere tratamiento inmediato en la mayoría de casos.';
+                recommendationText.innerHTML = '<ul><li>Mantener estilo de vida saludable</li><li>Reducir líquidos por la noche</li><li>Ejercicio regular</li><li>Revisión médica anual</li></ul>';
+            } else if (score <= 19) {
+                grade = 'Síntomas Moderados';
+                color = 'moderate';
+                symptomText.textContent = 'Sus síntomas son moderados y afectan su calidad de vida. Requiere evaluación y posible tratamiento.';
+                recommendationText.innerHTML = '<ul><li>Consulta con especialista recomendada</li><li>Evaluación diagnóstica completa</li><li>Opciones farmacológicas disponibles</li><li>Seguimiento cada 3-6 meses</li></ul>';
+            } else {
+                grade = 'Síntomas Graves';
+                color = 'severe';
+                symptomText.textContent = 'Sus síntomas son significativos y afectan su calidad de vida. Evaluación urgente por especialista necesaria.';
+                recommendationText.innerHTML = '<ul><li>Consulta urgente con especialista</li><li>Evaluación diagnóstica completa</li><li>Análisis de orina y pruebas complementarias</li><li>Opciones terapéuticas especializadas</li></ul>';
+            }
+
+            badge.textContent = grade;
+            badge.className = `grade-badge grade-${color}`;
+            symptomCard.className = `symptom-card symptom-${color}`;
+            recommendationCard.className = `symptom-card symptom-${color}`;
+
+            formSection.style.display = 'none';
+            resultsSection.classList.add('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollToForm() {
+            document.querySelector('.contact-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function backToForm() {
+            formSection.style.display = 'block';
+            resultsSection.classList.remove('show');
+            form.reset();
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            document.getElementById('successMessage').classList.add('show');
+            document.getElementById('contactForm').reset();
+            setTimeout(() => {
+                document.getElementById('successMessage').classList.remove('show');
+            }, 5000);
+        }
+
+        function resetForm() {
+            form.reset();
+            updateProgress();
+        }
+
+        updateProgress();
+    </script>
+</body>
+</html>
