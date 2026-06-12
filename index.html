@@ -185,20 +185,25 @@
 
         /* ==================== MÓVIL: DESPLEGABLES ==================== */
         .mobile-select-wrapper {
-            display: block;
-            margin-bottom: 10px;
+            display: block !important;
+            margin-bottom: 0px;
         }
 
         .mobile-select-wrapper select {
             width: 100%;
-            padding: 12px;
+            padding: 12px 12px;
+            padding-right: 35px;
             border: 2px solid #ddd;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 14px;
             font-family: inherit;
-            background: white;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232a8fa8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 10px center;
+            background-size: 12px 8px;
             cursor: pointer;
             transition: all 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
         }
 
         .mobile-select-wrapper select:focus {
@@ -207,39 +212,37 @@
             box-shadow: 0 0 0 3px rgba(42, 143, 168, 0.1);
         }
 
-        .mobile-select-wrapper select::-webkit-appearance {
-            appearance: none;
-            padding-right: 30px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232a8fa8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 35px;
-        }
-
         /* ==================== DESKTOP: RADIO BUTTONS ==================== */
         .options-header {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-            gap: 5px;
-            margin: 12px 0 10px 0;
-            font-size: 9px;
-            font-weight: 600;
-            color: #999;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            display: none;
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         .option-label {
-            text-align: center;
-            min-width: 45px;
-            word-break: break-word;
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         .options-container {
-            display: none;
-            grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
-            gap: 6px;
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .radio-option {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         .radio-option {
@@ -853,19 +856,50 @@
             /* Mostrar radio buttons en desktop */
             .options-header {
                 display: grid !important;
+                visibility: visible !important;
+                height: auto !important;
+                margin: 12px 0 10px 0 !important;
+                padding: 0 !important;
+            }
+
+            .option-label {
+                display: block !important;
+                visibility: visible !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .options-container {
                 display: grid !important;
+                visibility: visible !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .radio-option {
+                display: block !important;
+                visibility: visible !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .radio-label {
                 padding: 10px 6px;
                 font-size: 13px;
+                display: flex !important;
+                visibility: visible !important;
+                height: auto !important;
             }
 
             /* Ocultar desplegables en desktop */
             .mobile-select-wrapper {
+                display: none !important;
+            }
+
+            .mobile-select-wrapper select {
                 display: none !important;
             }
 
@@ -984,12 +1018,12 @@
                     <div class="mobile-select-wrapper">
                         <select id="q1_select" name="q1_select" onchange="syncSelect(this, 'q1')">
                             <option value="">Selecciona una opción</option>
-                            <option value="0">Ninguna</option>
-                            <option value="1">Casi nunca</option>
-                            <option value="2">A veces</option>
-                            <option value="3">Bastante</option>
-                            <option value="4">Casi siempre</option>
-                            <option value="5">Siempre</option>
+                            <option value="0">0 - Ninguna</option>
+                            <option value="1">1 - Casi nunca</option>
+                            <option value="2">2 - A veces</option>
+                            <option value="3">3 - Bastante</option>
+                            <option value="4">4 - Casi siempre</option>
+                            <option value="5">5 - Siempre</option>
                         </select>
                     </div>
                     <div class="options-header">
@@ -1019,12 +1053,12 @@
                     <div class="mobile-select-wrapper">
                         <select id="q2_select" name="q2_select" onchange="syncSelect(this, 'q2')">
                             <option value="">Selecciona una opción</option>
-                            <option value="0">Ninguna</option>
-                            <option value="1">Casi nunca</option>
-                            <option value="2">A veces</option>
-                            <option value="3">Bastante</option>
-                            <option value="4">Casi siempre</option>
-                            <option value="5">Siempre</option>
+                            <option value="0">0 - Ninguna</option>
+                            <option value="1">1 - Casi nunca</option>
+                            <option value="2">2 - A veces</option>
+                            <option value="3">3 - Bastante</option>
+                            <option value="4">4 - Casi siempre</option>
+                            <option value="5">5 - Siempre</option>
                         </select>
                     </div>
                     <div class="options-header">
@@ -1054,12 +1088,12 @@
                     <div class="mobile-select-wrapper">
                         <select id="q3_select" name="q3_select" onchange="syncSelect(this, 'q3')">
                             <option value="">Selecciona una opción</option>
-                            <option value="0">Ninguna</option>
-                            <option value="1">Casi nunca</option>
-                            <option value="2">A veces</option>
-                            <option value="3">Bastante</option>
-                            <option value="4">Casi siempre</option>
-                            <option value="5">Siempre</option>
+                            <option value="0">0 - Ninguna</option>
+                            <option value="1">1 - Casi nunca</option>
+                            <option value="2">2 - A veces</option>
+                            <option value="3">3 - Bastante</option>
+                            <option value="4">4 - Casi siempre</option>
+                            <option value="5">5 - Siempre</option>
                         </select>
                     </div>
                     <div class="options-header">
@@ -1089,12 +1123,12 @@
                     <div class="mobile-select-wrapper">
                         <select id="q4_select" name="q4_select" onchange="syncSelect(this, 'q4')">
                             <option value="">Selecciona una opción</option>
-                            <option value="0">Ninguna</option>
-                            <option value="1">Casi nunca</option>
-                            <option value="2">A veces</option>
-                            <option value="3">Bastante</option>
-                            <option value="4">Casi siempre</option>
-                            <option value="5">Siempre</option>
+                            <option value="0">0 - Ninguna</option>
+                            <option value="1">1 - Casi nunca</option>
+                            <option value="2">2 - A veces</option>
+                            <option value="3">3 - Bastante</option>
+                            <option value="4">4 - Casi siempre</option>
+                            <option value="5">5 - Siempre</option>
                         </select>
                     </div>
                     <div class="options-header">
@@ -1124,12 +1158,12 @@
                     <div class="mobile-select-wrapper">
                         <select id="q5_select" name="q5_select" onchange="syncSelect(this, 'q5')">
                             <option value="">Selecciona una opción</option>
-                            <option value="0">Ninguna</option>
-                            <option value="1">Casi nunca</option>
-                            <option value="2">A veces</option>
-                            <option value="3">Bastante</option>
-                            <option value="4">Casi siempre</option>
-                            <option value="5">Siempre</option>
+                            <option value="0">0 - Ninguna</option>
+                            <option value="1">1 - Casi nunca</option>
+                            <option value="2">2 - A veces</option>
+                            <option value="3">3 - Bastante</option>
+                            <option value="4">4 - Casi siempre</option>
+                            <option value="5">5 - Siempre</option>
                         </select>
                     </div>
                     <div class="options-header">
@@ -1159,12 +1193,12 @@
                     <div class="mobile-select-wrapper">
                         <select id="q6_select" name="q6_select" onchange="syncSelect(this, 'q6')">
                             <option value="">Selecciona una opción</option>
-                            <option value="0">Ninguna</option>
-                            <option value="1">Casi nunca</option>
-                            <option value="2">A veces</option>
-                            <option value="3">Bastante</option>
-                            <option value="4">Casi siempre</option>
-                            <option value="5">Siempre</option>
+                            <option value="0">0 - Ninguna</option>
+                            <option value="1">1 - Casi nunca</option>
+                            <option value="2">2 - A veces</option>
+                            <option value="3">3 - Bastante</option>
+                            <option value="4">4 - Casi siempre</option>
+                            <option value="5">5 - Siempre</option>
                         </select>
                     </div>
                     <div class="options-header">
@@ -1194,12 +1228,12 @@
                     <div class="mobile-select-wrapper">
                         <select id="q7_select" name="q7_select" onchange="syncSelect(this, 'q7')">
                             <option value="">Selecciona una opción</option>
-                            <option value="0">Ninguna</option>
-                            <option value="1">1 vez</option>
-                            <option value="2">2 veces</option>
-                            <option value="3">3 veces</option>
-                            <option value="4">4 veces</option>
-                            <option value="5">5+ veces</option>
+                            <option value="0">0 - Ninguna</option>
+                            <option value="1">1 - 1 vez</option>
+                            <option value="2">2 - 2 veces</option>
+                            <option value="3">3 - 3 veces</option>
+                            <option value="4">4 - 4 veces</option>
+                            <option value="5">5 - 5+ veces</option>
                         </select>
                     </div>
                     <div class="options-header">
@@ -1229,13 +1263,13 @@
                     <div class="mobile-select-wrapper">
                         <select id="q8_select" name="q8_select" onchange="syncSelect(this, 'q8')">
                             <option value="">Selecciona una opción</option>
-                            <option value="0">Encantado</option>
-                            <option value="1">Muy bien</option>
-                            <option value="2">Bien</option>
-                            <option value="3">Indiferente</option>
-                            <option value="4">Mal</option>
-                            <option value="5">Muy mal</option>
-                            <option value="6">Fatal</option>
+                            <option value="0">0 - Encantado</option>
+                            <option value="1">1 - Muy bien</option>
+                            <option value="2">2 - Bien</option>
+                            <option value="3">3 - Indiferente</option>
+                            <option value="4">4 - Mal</option>
+                            <option value="5">5 - Muy mal</option>
+                            <option value="6">6 - Fatal</option>
                         </select>
                     </div>
                     <div class="options-header">
