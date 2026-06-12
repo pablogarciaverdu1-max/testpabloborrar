@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Evaluación IPSS - GARCIA REBOLL</title>
     <style>
         * {
@@ -11,31 +11,39 @@
             box-sizing: border-box;
         }
 
+        html {
+            font-size: 16px;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
             background: #f8f9fa;
             color: #333;
+            line-height: 1.5;
         }
 
         /* ==================== HEADER ==================== */
         .header {
             background: white;
             border-bottom: 1px solid #e8e8e8;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .logo-brand {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .logo {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             background: linear-gradient(135deg, #1a5f7a 0%, #2a8fa8 100%);
             border-radius: 8px;
             display: flex;
@@ -43,24 +51,26 @@
             justify-content: center;
             color: white;
             font-weight: 900;
-            font-size: 18px;
+            font-size: 16px;
             box-shadow: 0 4px 12px rgba(26, 95, 122, 0.3);
             letter-spacing: -1px;
+            flex-shrink: 0;
         }
 
         .clinic-title {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 600;
             color: #1a5f7a;
             letter-spacing: -0.3px;
         }
 
         .clinic-subtitle {
-            font-size: 13px;
+            font-size: 11px;
             color: #999;
-            margin-top: 5px;
+            margin-top: 3px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            width: 100%;
         }
 
         /* ==================== FORMULARIO ==================== */
@@ -68,7 +78,7 @@
             display: block;
             background: white;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 20px;
         }
 
         .form-container {
@@ -78,31 +88,32 @@
 
         .form-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
+            padding-top: 10px;
         }
 
         .form-header h1 {
-            font-size: 32px;
+            font-size: 24px;
             color: #1a5f7a;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 500;
             letter-spacing: -0.5px;
         }
 
         .form-header p {
-            font-size: 15px;
+            font-size: 13px;
             color: #666;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         .progress-container {
-            margin-bottom: 35px;
+            margin-bottom: 25px;
         }
 
         .progress-text {
-            font-size: 12px;
+            font-size: 11px;
             color: #999;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
@@ -110,7 +121,7 @@
 
         .progress-bar {
             width: 100%;
-            height: 4px;
+            height: 3px;
             background: #e8e8e8;
             border-radius: 2px;
             overflow: hidden;
@@ -126,17 +137,17 @@
         .info-banner {
             background: #f0f8fb;
             border-left: 4px solid #2a8fa8;
-            padding: 18px;
-            margin-bottom: 35px;
+            padding: 12px;
+            margin-bottom: 25px;
             border-radius: 4px;
-            font-size: 13px;
-            line-height: 1.6;
+            font-size: 12px;
+            line-height: 1.5;
             color: #555;
         }
 
         .form-group {
-            margin-bottom: 35px;
-            padding: 25px;
+            margin-bottom: 20px;
+            padding: 15px;
             background: #fafbfc;
             border-radius: 8px;
             border: 1px solid #e8ecf1;
@@ -145,59 +156,93 @@
         .form-group-header {
             display: flex;
             align-items: flex-start;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 15px;
         }
 
         .question-number {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 32px;
-            width: 32px;
-            height: 32px;
+            min-width: 28px;
+            width: 28px;
+            height: 28px;
             background: #2a8fa8;
             color: white;
             border-radius: 50%;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             flex-shrink: 0;
         }
 
         .question-text {
-            font-size: 14px;
+            font-size: 13px;
             color: #333;
             font-weight: 500;
-            line-height: 1.5;
-            padding-top: 2px;
+            line-height: 1.4;
+            padding-top: 0;
         }
 
+        /* ==================== MÓVIL: DESPLEGABLES ==================== */
+        .mobile-select-wrapper {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .mobile-select-wrapper select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-select-wrapper select:focus {
+            outline: none;
+            border-color: #2a8fa8;
+            box-shadow: 0 0 0 3px rgba(42, 143, 168, 0.1);
+        }
+
+        .mobile-select-wrapper select::-webkit-appearance {
+            appearance: none;
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232a8fa8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 35px;
+        }
+
+        /* ==================== DESKTOP: RADIO BUTTONS ==================== */
         .options-header {
-            display: flex;
-            gap: 10px;
-            margin: 18px 0 12px 0;
-            font-size: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            gap: 5px;
+            margin: 12px 0 10px 0;
+            font-size: 9px;
             font-weight: 600;
             color: #999;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            display: none;
         }
 
         .option-label {
-            flex: 1;
             text-align: center;
-            min-width: 50px;
+            min-width: 45px;
+            word-break: break-word;
         }
 
         .options-container {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+            gap: 6px;
         }
 
         .radio-option {
-            flex: 1;
-            min-width: 58px;
             text-align: center;
         }
 
@@ -207,16 +252,24 @@
 
         .radio-label {
             display: block;
-            padding: 10px 6px;
+            padding: 8px 4px;
             background: white;
             border: 2px solid #ddd;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: #333;
             transition: all 0.2s ease;
             user-select: none;
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radio-label:active {
+            transform: scale(0.95);
         }
 
         .radio-label:hover {
@@ -232,45 +285,49 @@
         }
 
         .quality-section {
-            margin-top: 35px;
-            padding-top: 35px;
+            margin-top: 25px;
+            padding-top: 25px;
             border-top: 2px solid #e8e8e8;
         }
 
         .form-footer {
-            margin-top: 35px;
-            padding-top: 35px;
+            margin-top: 25px;
+            padding-top: 25px;
             border-top: 1px solid #e8e8e8;
         }
 
         .disclaimer {
             background: #f9f9f9;
-            padding: 18px;
+            padding: 12px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             color: #666;
-            line-height: 1.6;
-            margin-bottom: 25px;
+            line-height: 1.5;
+            margin-bottom: 20px;
             border-left: 4px solid #999;
         }
 
         .button-group {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 20px;
         }
 
         .btn {
-            padding: 12px 35px;
+            padding: 10px 25px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
+            flex: 1;
+            min-width: 130px;
+            max-width: 200px;
         }
 
         .btn-primary {
@@ -278,16 +335,15 @@
             color: white;
         }
 
-        .btn-primary:hover:not(:disabled) {
-            background: linear-gradient(135deg, #164d63 0%, #236b8a 100%);
-            box-shadow: 0 6px 20px rgba(26, 95, 122, 0.3);
-            transform: translateY(-2px);
+        .btn-primary:active:not(:disabled) {
+            transform: scale(0.95);
         }
 
         .btn-primary:disabled {
             background: #ccc;
             cursor: not-allowed;
             box-shadow: none;
+            opacity: 0.6;
         }
 
         .btn-secondary {
@@ -296,9 +352,8 @@
             border: 2px solid #ddd;
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:active {
             background: #e8e8e8;
-            border-color: #2a8fa8;
         }
 
         /* ==================== RESULTADOS ==================== */
@@ -321,70 +376,69 @@
         .results-hero {
             background: linear-gradient(135deg, #1a5f7a 0%, #2a8fa8 100%);
             color: white;
-            padding: 50px 20px;
+            padding: 30px 20px;
             text-align: center;
         }
 
         .results-logo {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 25px;
-            font-size: 20px;
+            margin: 0 auto 15px;
+            font-size: 18px;
             font-weight: 900;
             letter-spacing: -0.5px;
         }
 
         .results-title {
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 400;
-            margin-bottom: 35px;
+            margin-bottom: 25px;
             letter-spacing: -0.3px;
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
         .score-display {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 40px 30px;
+            padding: 30px 20px;
             max-width: 380px;
             margin: 0 auto;
         }
 
         .score-label {
-            font-size: 11px;
+            font-size: 10px;
             opacity: 0.9;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-weight: 700;
         }
 
         .score-main {
-            font-size: 56px;
+            font-size: 48px;
             font-weight: 300;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             letter-spacing: -1px;
         }
 
         .score-reference {
-            font-size: 13px;
+            font-size: 12px;
             opacity: 0.9;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .grade-badge {
             display: inline-block;
             background: white;
             color: #1a5f7a;
-            padding: 10px 25px;
+            padding: 8px 20px;
             border-radius: 30px;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -406,7 +460,7 @@
         }
 
         .results-content {
-            padding: 50px 20px;
+            padding: 30px 20px;
         }
 
         .content-wrapper {
@@ -416,13 +470,13 @@
 
         .symptoms-recommendations {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 35px;
-            margin-bottom: 50px;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .symptom-card {
-            padding: 28px;
+            padding: 20px;
             border-radius: 8px;
             border-left: 5px solid;
         }
@@ -443,28 +497,28 @@
         }
 
         .card-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .card-text {
-            font-size: 13px;
-            line-height: 1.8;
+            font-size: 12px;
+            line-height: 1.6;
             color: #333;
         }
 
         .card-text ul {
             list-style: none;
-            margin-top: 12px;
+            margin-top: 10px;
         }
 
         .card-text li {
-            padding: 6px 0;
-            font-size: 13px;
-            line-height: 1.6;
+            padding: 5px 0;
+            font-size: 12px;
+            line-height: 1.5;
         }
 
         .card-text li:before {
@@ -488,23 +542,23 @@
         .cta-section {
             background: linear-gradient(135deg, #1a5f7a 0%, #2a8fa8 100%);
             color: white;
-            padding: 50px 40px;
+            padding: 30px 20px;
             border-radius: 8px;
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
         }
 
         .cta-title {
-            font-size: 26px;
-            margin-bottom: 12px;
+            font-size: 20px;
+            margin-bottom: 10px;
             font-weight: 400;
             letter-spacing: -0.3px;
         }
 
         .cta-text {
-            font-size: 15px;
-            margin-bottom: 28px;
-            line-height: 1.6;
+            font-size: 13px;
+            margin-bottom: 20px;
+            line-height: 1.5;
             opacity: 0.95;
         }
 
@@ -512,7 +566,7 @@
             display: inline-block;
             background: white;
             color: #2a8fa8;
-            padding: 13px 45px;
+            padding: 11px 35px;
             border-radius: 6px;
             font-weight: 700;
             text-transform: uppercase;
@@ -520,39 +574,38 @@
             cursor: pointer;
             border: none;
             transition: all 0.3s ease;
-            font-size: 13px;
+            font-size: 12px;
         }
 
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        .cta-button:active {
+            transform: scale(0.95);
         }
 
         .contact-section {
             background: #f8f9fa;
-            padding: 45px 40px;
+            padding: 25px 20px;
             border-radius: 8px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .contact-title {
-            font-size: 20px;
+            font-size: 16px;
             color: #1a5f7a;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: 600;
         }
 
         .contact-subtitle {
-            font-size: 13px;
+            font-size: 12px;
             color: #999;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
         }
 
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-bottom: 18px;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .form-group-contact {
@@ -561,9 +614,9 @@
 
         .form-group-contact label {
             display: block;
-            margin-bottom: 7px;
+            margin-bottom: 5px;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
             color: #333;
             text-transform: uppercase;
             letter-spacing: 0.3px;
@@ -573,7 +626,7 @@
         .form-group-contact select,
         .form-group-contact textarea {
             width: 100%;
-            padding: 11px 14px;
+            padding: 10px 12px;
             border: 2px solid #ddd;
             border-radius: 6px;
             font-size: 13px;
@@ -591,52 +644,57 @@
 
         .form-group-contact textarea {
             resize: vertical;
-            min-height: 90px;
+            min-height: 80px;
             grid-column: 1 / -1;
         }
 
         .form-buttons {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
-            margin-top: 28px;
+            margin-top: 20px;
             flex-wrap: wrap;
         }
 
         .btn-submit {
             background: linear-gradient(135deg, #1a5f7a 0%, #2a8fa8 100%);
             color: white;
-            padding: 12px 45px;
+            padding: 10px 30px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+            max-width: 180px;
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26, 95, 122, 0.3);
+        .btn-submit:active {
+            transform: scale(0.95);
         }
 
         .btn-back {
             background: white;
             color: #333;
-            padding: 12px 45px;
+            padding: 10px 30px;
             border: 2px solid #ddd;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+            max-width: 180px;
         }
 
-        .btn-back:hover {
+        .btn-back:active {
             border-color: #2a8fa8;
             background: #f8f9fa;
         }
@@ -644,12 +702,12 @@
         .success-message {
             background: #e8f5e9;
             color: #2e7d32;
-            padding: 14px 18px;
+            padding: 12px 15px;
             border-radius: 6px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-left: 4px solid #2e7d32;
             display: none;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .success-message.show {
@@ -658,108 +716,229 @@
 
         .stats-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 25px;
-            margin: 50px 0;
-            padding: 40px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+            padding: 25px;
             background: #f8f9fa;
             border-radius: 8px;
         }
 
         .stat-item {
             text-align: center;
-            padding: 20px;
+            padding: 15px;
         }
 
         .stat-number {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 700;
             color: #2a8fa8;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             letter-spacing: -0.5px;
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: 10px;
             color: #666;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
-            line-height: 1.5;
+            line-height: 1.3;
         }
 
         .clinic-info {
             background: #f0f8fb;
-            padding: 28px;
+            padding: 20px;
             border-left: 5px solid #2a8fa8;
             border-radius: 6px;
-            margin-top: 40px;
+            margin-top: 30px;
         }
 
         .clinic-info h3 {
             color: #1a5f7a;
-            margin-bottom: 14px;
-            font-size: 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
             font-weight: 600;
         }
 
         .clinic-detail {
-            font-size: 12px;
-            margin: 8px 0;
+            font-size: 11px;
+            margin: 6px 0;
             color: #333;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
-        @media (max-width: 768px) {
-            .clinic-title {
-                font-size: 18px;
-            }
-
+        /* ==================== TABLET ==================== */
+        @media (min-width: 480px) {
             .form-header h1 {
-                font-size: 24px;
+                font-size: 28px;
             }
 
-            .results-title {
-                font-size: 20px;
+            .question-text {
+                font-size: 14px;
             }
 
-            .score-main {
-                font-size: 42px;
+            .btn {
+                min-width: 140px;
+                max-width: none;
+                flex: 0;
             }
 
             .stats-section {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-                padding: 30px 20px;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+            }
+
+            .stat-item {
+                padding: 10px;
             }
 
             .stat-number {
+                font-size: 28px;
+            }
+        }
+
+        /* ==================== DESKTOP ==================== */
+        @media (min-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+
+            .logo {
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
+            }
+
+            .clinic-title {
                 font-size: 24px;
             }
 
-            .stat-label {
-                font-size: 11px;
+            .form-section {
+                padding: 40px 20px;
             }
 
-            .symptoms-recommendations {
-                grid-template-columns: 1fr;
-                gap: 25px;
+            .form-container {
+                max-width: 800px;
             }
 
-            .form-row {
-                grid-template-columns: 1fr;
+            .form-header {
+                margin-bottom: 40px;
             }
 
-            .cta-section {
-                padding: 35px 20px;
+            .form-header h1 {
+                font-size: 32px;
+            }
+
+            .form-header p {
+                font-size: 15px;
+            }
+
+            .form-group {
+                margin-bottom: 35px;
+                padding: 25px;
+            }
+
+            .question-number {
+                width: 32px;
+                height: 32px;
+                font-size: 13px;
+                gap: 15px;
+            }
+
+            .question-text {
+                font-size: 14px;
+            }
+
+            /* Mostrar radio buttons en desktop */
+            .options-header {
+                display: grid !important;
+            }
+
+            .options-container {
+                display: grid !important;
+            }
+
+            .radio-label {
+                padding: 10px 6px;
+                font-size: 13px;
+            }
+
+            /* Ocultar desplegables en desktop */
+            .mobile-select-wrapper {
+                display: none !important;
+            }
+
+            .results-hero {
+                padding: 50px 20px;
+            }
+
+            .results-title {
+                font-size: 28px;
+            }
+
+            .score-main {
+                font-size: 56px;
             }
 
             .results-content {
-                padding: 35px 20px;
+                padding: 50px 20px;
+            }
+
+            .symptoms-recommendations {
+                grid-template-columns: 1fr 1fr;
+                gap: 35px;
+            }
+
+            .card-title {
+                font-size: 13px;
+            }
+
+            .card-text {
+                font-size: 13px;
+            }
+
+            .cta-section {
+                padding: 50px 40px;
+            }
+
+            .cta-title {
+                font-size: 26px;
             }
 
             .contact-section {
-                padding: 30px 20px;
+                padding: 45px 40px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 18px;
+            }
+
+            .form-group-contact textarea {
+                grid-column: 1 / -1;
+            }
+
+            .btn {
+                flex: 0;
+                min-width: 150px;
+                max-width: none;
+                padding: 12px 35px;
+                font-size: 13px;
+            }
+
+            .stats-section {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 25px;
+                padding: 40px;
+            }
+
+            .stat-number {
+                font-size: 32px;
+            }
+
+            .stat-label {
+                font-size: 12px;
             }
         }
     </style>
@@ -796,11 +975,22 @@
             </div>
 
             <form id="ipssForm">
-                <!-- Preguntas 1-6 -->
+                <!-- PREGUNTA 1 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">1</div>
                         <div class="question-text">Durante más o menos los últimos 30 días, ¿cuántas veces ha tenido la sensación de no vaciar completamente la vejiga?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q1_select" name="q1_select" onchange="syncSelect(this, 'q1')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -820,10 +1010,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 2 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">2</div>
                         <div class="question-text">¿Cuántas veces ha tenido que orinar nuevamente en las 2 horas siguientes?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q2_select" name="q2_select" onchange="syncSelect(this, 'q2')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -843,10 +1045,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 3 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">3</div>
                         <div class="question-text">¿Cuántas veces ha notado interrupciones al orinar?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q3_select" name="q3_select" onchange="syncSelect(this, 'q3')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -866,10 +1080,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 4 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">4</div>
                         <div class="question-text">¿Cuántas veces ha tenido dificultad para aguantar las ganas de orinar?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q4_select" name="q4_select" onchange="syncSelect(this, 'q4')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -889,10 +1115,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 5 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">5</div>
                         <div class="question-text">¿Cuántas veces ha observado que el chorro de orina es débil?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q5_select" name="q5_select" onchange="syncSelect(this, 'q5')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -912,10 +1150,22 @@
                     </div>
                 </div>
 
+                <!-- PREGUNTA 6 -->
                 <div class="form-group">
                     <div class="form-group-header">
                         <div class="question-number">6</div>
                         <div class="question-text">¿Cuántas veces ha tenido que hacer fuerza para comenzar a orinar?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q6_select" name="q6_select" onchange="syncSelect(this, 'q6')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">Casi nunca</option>
+                            <option value="2">A veces</option>
+                            <option value="3">Bastante</option>
+                            <option value="4">Casi siempre</option>
+                            <option value="5">Siempre</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -935,11 +1185,22 @@
                     </div>
                 </div>
 
-                <!-- Pregunta 7 -->
+                <!-- PREGUNTA 7 -->
                 <div class="form-group quality-section">
                     <div class="form-group-header">
                         <div class="question-number">7</div>
                         <div class="question-text">¿Cuántas veces se levanta por la noche a orinar?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q7_select" name="q7_select" onchange="syncSelect(this, 'q7')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Ninguna</option>
+                            <option value="1">1 vez</option>
+                            <option value="2">2 veces</option>
+                            <option value="3">3 veces</option>
+                            <option value="4">4 veces</option>
+                            <option value="5">5+ veces</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Ninguna</div>
@@ -959,11 +1220,23 @@
                     </div>
                 </div>
 
-                <!-- Pregunta 8 -->
+                <!-- PREGUNTA 8 -->
                 <div class="form-group quality-section">
                     <div class="form-group-header">
                         <div class="question-number">8</div>
                         <div class="question-text">¿Cómo se sentiría si tuviera que vivir con estos síntomas?</div>
+                    </div>
+                    <div class="mobile-select-wrapper">
+                        <select id="q8_select" name="q8_select" onchange="syncSelect(this, 'q8')">
+                            <option value="">Selecciona una opción</option>
+                            <option value="0">Encantado</option>
+                            <option value="1">Muy bien</option>
+                            <option value="2">Bien</option>
+                            <option value="3">Indiferente</option>
+                            <option value="4">Mal</option>
+                            <option value="5">Muy mal</option>
+                            <option value="6">Fatal</option>
+                        </select>
                     </div>
                     <div class="options-header">
                         <div class="option-label">Encantado</div>
@@ -1125,9 +1398,30 @@
         const progressFill = document.getElementById('progressFill');
         const answeredCount = document.getElementById('answered');
 
-        // Monitorear cambios en los radio buttons
+        // Sincronizar select con radio buttons
+        function syncSelect(selectElement, questionName) {
+            const value = selectElement.value;
+            if (value !== '') {
+                const radioButton = form.querySelector(`input[name="${questionName}"][value="${value}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                }
+            } else {
+                form.querySelectorAll(`input[name="${questionName}"]`).forEach(radio => radio.checked = false);
+            }
+            updateProgress();
+        }
+
+        // Actualizar select cuando se hace click en radio buttons
         form.querySelectorAll('input[type="radio"]').forEach(input => {
-            input.addEventListener('change', updateProgress);
+            input.addEventListener('change', function() {
+                const questionName = this.name;
+                const selectElement = document.getElementById(`${questionName}_select`);
+                if (selectElement) {
+                    selectElement.value = this.value;
+                }
+                updateProgress();
+            });
         });
 
         function updateProgress() {
@@ -1200,6 +1494,7 @@
             formSection.style.display = 'block';
             resultsSection.classList.remove('show');
             form.reset();
+            document.querySelectorAll('select').forEach(s => s.value = '');
             updateProgress();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -1215,6 +1510,7 @@
 
         function resetForm() {
             form.reset();
+            document.querySelectorAll('select').forEach(s => s.value = '');
             updateProgress();
         }
 
