@@ -3,1575 +3,2422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluación IPSS - GARCIA REBOLL</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>🏍️ VIASCOOTER GRUPO VÍA - CRM Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script async defer src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
     <style>
-/* ========================================
-   ESTILOS GENERALES Y VARIABLES
-   ======================================== */
-
-:root {
-    --primary-color: #003d7a;
-    --primary-light: #0056b3;
-    --primary-dark: #002d5a;
-    --accent-color: #ff6b35;
-    --success-color: #28a745;
-    --background-color: #f8f9fa;
-    --text-color: #333333;
-    --light-gray: #e9ecef;
-    --border-color: #dee2e6;
-    --transition: all 0.3s ease;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-    color: var(--text-color);
-    background-color: var(--background-color);
-    line-height: 1.6;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* ==================== HEADER ==================== */
-.header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.logo-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-}
-
-.logo {
-    width: 40px;
-    height: 40px;
-    background: var(--accent-color);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 900;
-    font-size: 16px;
-    box-shadow: 0 4px 12px rgba(26, 95, 122, 0.3);
-    letter-spacing: -1px;
-    flex-shrink: 0;
-}
-
-.clinic-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: white;
-    letter-spacing: -0.3px;
-}
-
-.clinic-subtitle {
-    font-size: 11px;
-    color: rgba(255,255,255,0.8);
-    margin-top: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    width: 100%;
-}
-
-/* ==================== FORMULARIO ==================== */
-.form-section {
-    display: block;
-    background: white;
-    min-height: 100vh;
-    padding: 20px;
-}
-
-.form-container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.form-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding-top: 10px;
-}
-
-.form-header h1 {
-    font-size: 24px;
-    color: var(--primary-color);
-    margin-bottom: 8px;
-    font-weight: 500;
-    letter-spacing: -0.5px;
-}
-
-.form-header p {
-    font-size: 13px;
-    color: #666;
-    line-height: 1.5;
-}
-
-.progress-container {
-    margin-bottom: 25px;
-}
-
-.progress-text {
-    font-size: 11px;
-    color: #999;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 3px;
-    background: #e8e8e8;
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    width: 0%;
-    transition: width 0.3s ease;
-}
-
-.info-banner {
-    background: #f0f8fb;
-    border-left: 4px solid var(--primary-light);
-    padding: 12px;
-    margin-bottom: 25px;
-    border-radius: 4px;
-    font-size: 12px;
-    line-height: 1.5;
-    color: #555;
-}
-
-.form-group {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #fafbfc;
-    border-radius: 8px;
-    border: 1px solid #e8ecf1;
-}
-
-.form-group-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-.question-number {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 28px;
-    width: 28px;
-    height: 28px;
-    background: var(--primary-light);
-    color: white;
-    border-radius: 50%;
-    font-weight: 600;
-    font-size: 12px;
-    flex-shrink: 0;
-}
-
-.question-text {
-    font-size: 13px;
-    color: #333;
-    font-weight: 500;
-    line-height: 1.4;
-    padding-top: 0;
-}
-
-/* ==================== MÓVIL: DESPLEGABLES ==================== */
-.mobile-select-wrapper {
-    display: block !important;
-    margin-bottom: 0px;
-}
-
-.mobile-select-wrapper select {
-    width: 100%;
-    padding: 12px 12px;
-    padding-right: 35px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: inherit;
-    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23003d7a' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 10px center;
-    background-size: 12px 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-}
-
-.mobile-select-wrapper select:focus {
-    outline: none;
-    border-color: var(--primary-light);
-    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
-}
-
-/* ==================== DESKTOP: RADIO BUTTONS ==================== */
-.options-header {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.option-label {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.options-container {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.radio-option {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.radio-option {
-    text-align: center;
-}
-
-.radio-option input[type="radio"] {
-    display: none;
-}
-
-.radio-label {
-    display: block;
-    padding: 8px 4px;
-    background: white;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 600;
-    color: #333;
-    transition: all 0.2s ease;
-    user-select: none;
-    min-height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.radio-label:active {
-    transform: scale(0.95);
-}
-
-.radio-label:hover {
-    border-color: var(--primary-light);
-    background: #f9fafb;
-}
-
-.radio-option input[type="radio"]:checked + .radio-label {
-    background: var(--primary-light);
-    color: white;
-    border-color: var(--primary-light);
-    box-shadow: 0 4px 12px rgba(0, 86, 179, 0.25);
-}
-
-.quality-section {
-    margin-top: 25px;
-    padding-top: 25px;
-    border-top: 2px solid #e8e8e8;
-}
-
-.form-footer {
-    margin-top: 25px;
-    padding-top: 25px;
-    border-top: 1px solid #e8e8e8;
-}
-
-.disclaimer {
-    background: #f9f9f9;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 11px;
-    color: #666;
-    line-height: 1.5;
-    margin-bottom: 20px;
-    border-left: 4px solid #999;
-}
-
-.button-group {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.btn {
-    padding: 10px 25px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    flex: 1;
-    min-width: 130px;
-    max-width: 200px;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    color: white;
-}
-
-.btn-primary:active:not(:disabled) {
-    transform: scale(0.95);
-}
-
-.btn-primary:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    box-shadow: none;
-    opacity: 0.6;
-}
-
-.btn-secondary {
-    background: #f0f0f0;
-    color: #333;
-    border: 2px solid #ddd;
-}
-
-.btn-secondary:active {
-    background: #e8e8e8;
-}
-
-/* ==================== RESULTADOS ==================== */
-.results-section {
-    display: none;
-    background: white;
-    min-height: 100vh;
-}
-
-.results-section.show {
-    display: block;
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.results-hero {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    color: white;
-    padding: 30px 20px;
-    text-align: center;
-}
-
-.results-logo {
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 15px;
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: -0.5px;
-}
-
-.results-title {
-    font-size: 20px;
-    font-weight: 400;
-    margin-bottom: 25px;
-    letter-spacing: -0.3px;
-    line-height: 1.3;
-}
-
-.score-display {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 30px 20px;
-    max-width: 380px;
-    margin: 0 auto;
-}
-
-.score-label {
-    font-size: 10px;
-    opacity: 0.9;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-    font-weight: 700;
-}
-
-.score-main {
-    font-size: 48px;
-    font-weight: 300;
-    margin-bottom: 5px;
-    letter-spacing: -1px;
-}
-
-.score-reference {
-    font-size: 12px;
-    opacity: 0.9;
-    margin-bottom: 15px;
-}
-
-.grade-badge {
-    display: inline-block;
-    background: white;
-    color: var(--primary-color);
-    padding: 8px 20px;
-    border-radius: 30px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.grade-mild {
-    color: #2e7d32;
-    background: #e8f5e9;
-}
-
-.grade-moderate {
-    color: #e65100;
-    background: #fff3e0;
-}
-
-.grade-severe {
-    color: #c62828;
-    background: #ffebee;
-}
-
-.results-content {
-    padding: 30px 20px;
-}
-
-.content-wrapper {
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-.symptoms-recommendations {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.symptom-card {
-    padding: 20px;
-    border-radius: 8px;
-    border-left: 5px solid;
-}
-
-.symptom-mild {
-    background: #f1f8f4;
-    border-left-color: #2e7d32;
-}
-
-.symptom-moderate {
-    background: #fff8f0;
-    border-left-color: #e65100;
-}
-
-.symptom-severe {
-    background: #fef5f5;
-    border-left-color: #c62828;
-}
-
-.card-title {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-}
-
-.card-text {
-    font-size: 12px;
-    line-height: 1.6;
-    color: #333;
-}
-
-.card-text ul {
-    list-style: none;
-    margin-top: 10px;
-}
-
-.card-text li {
-    padding: 5px 0;
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.card-text li:before {
-    content: "→ ";
-    margin-right: 8px;
-    font-weight: 600;
-}
-
-.symptom-mild .card-text { color: #2e7d32; }
-.symptom-moderate .card-text { color: #e65100; }
-.symptom-severe .card-text { color: #c62828; }
-
-.symptom-mild .card-title { color: #2e7d32; }
-.symptom-moderate .card-title { color: #e65100; }
-.symptom-severe .card-title { color: #c62828; }
-
-.symptom-mild .card-text li:before { color: #2e7d32; }
-.symptom-moderate .card-text li:before { color: #e65100; }
-.symptom-severe .card-text li:before { color: #c62828; }
-
-.cta-section {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    color: white;
-    padding: 30px 20px;
-    border-radius: 8px;
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.cta-title {
-    font-size: 20px;
-    margin-bottom: 10px;
-    font-weight: 400;
-    letter-spacing: -0.3px;
-}
-
-.cta-text {
-    font-size: 13px;
-    margin-bottom: 20px;
-    line-height: 1.5;
-    opacity: 0.95;
-}
-
-.cta-button {
-    display: inline-block;
-    background: white;
-    color: var(--primary-light);
-    padding: 11px 35px;
-    border-radius: 6px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    border: none;
-    transition: all 0.3s ease;
-    font-size: 12px;
-}
-
-.cta-button:active {
-    transform: scale(0.95);
-}
-
-.contact-section {
-    background: #f8f9fa;
-    padding: 25px 20px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-}
-
-.contact-title {
-    font-size: 16px;
-    color: var(--primary-color);
-    margin-bottom: 5px;
-    font-weight: 600;
-}
-
-.contact-subtitle {
-    font-size: 12px;
-    color: #999;
-    margin-bottom: 20px;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.form-group-contact {
-    grid-column: auto;
-}
-
-.form-group-contact label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    font-size: 11px;
-    color: #333;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.form-group-contact input,
-.form-group-contact select,
-.form-group-contact textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 13px;
-    font-family: inherit;
-    transition: all 0.2s ease;
-}
-
-.form-group-contact input:focus,
-.form-group-contact select:focus,
-.form-group-contact textarea:focus {
-    outline: none;
-    border-color: var(--primary-light);
-    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
-}
-
-.form-group-contact textarea {
-    resize: vertical;
-    min-height: 80px;
-    grid-column: 1 / -1;
-}
-
-.form-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-
-.btn-submit {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    color: white;
-    padding: 10px 30px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    flex: 1;
-    min-width: 120px;
-    max-width: 180px;
-}
-
-.btn-submit:active {
-    transform: scale(0.95);
-}
-
-.btn-back {
-    background: white;
-    color: #333;
-    padding: 10px 30px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    flex: 1;
-    min-width: 120px;
-    max-width: 180px;
-}
-
-.btn-back:active {
-    border-color: var(--primary-light);
-    background: #f8f9fa;
-}
-
-.success-message {
-    background: #e8f5e9;
-    color: #2e7d32;
-    padding: 12px 15px;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    border-left: 4px solid #2e7d32;
-    display: none;
-    font-size: 12px;
-}
-
-.success-message.show {
-    display: block;
-}
-
-.stats-section {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin: 30px 0;
-    padding: 25px;
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-
-.stat-item {
-    text-align: center;
-    padding: 15px;
-}
-
-.stat-number {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--primary-light);
-    margin-bottom: 5px;
-    letter-spacing: -0.5px;
-}
-
-.stat-label {
-    font-size: 10px;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-    line-height: 1.3;
-}
-
-.clinic-info {
-    background: #f0f8fb;
-    padding: 20px;
-    border-left: 5px solid var(--primary-light);
-    border-radius: 6px;
-    margin-top: 30px;
-}
-
-.clinic-info h3 {
-    color: var(--primary-color);
-    margin-bottom: 10px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.clinic-detail {
-    font-size: 11px;
-    margin: 6px 0;
-    color: #333;
-    line-height: 1.4;
-}
-
-/* ==================== TABLET ==================== */
-@media (min-width: 480px) {
-    .form-header h1 {
-        font-size: 28px;
-    }
-
-    .question-text {
-        font-size: 14px;
-    }
-
-    .btn {
-        min-width: 140px;
-        max-width: none;
-        flex: 0;
-    }
-
-    .stats-section {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-    }
-
-    .stat-item {
-        padding: 10px;
-    }
-
-    .stat-number {
-        font-size: 28px;
-    }
-}
-
-/* ==================== DESKTOP ==================== */
-@media (min-width: 768px) {
-    .header {
-        padding: 20px;
-    }
-
-    .logo {
-        width: 50px;
-        height: 50px;
-        font-size: 18px;
-    }
-
-    .clinic-title {
-        font-size: 24px;
-    }
-
-    .form-section {
-        padding: 40px 20px;
-    }
-
-    .form-container {
-        max-width: 800px;
-    }
-
-    .form-header {
-        margin-bottom: 40px;
-    }
-
-    .form-header h1 {
-        font-size: 32px;
-    }
-
-    .form-header p {
-        font-size: 15px;
-    }
-
-    .form-group {
-        margin-bottom: 35px;
-        padding: 25px;
-    }
-
-    .question-number {
-        width: 32px;
-        height: 32px;
-        font-size: 13px;
-        gap: 15px;
-    }
-
-    .question-text {
-        font-size: 14px;
-    }
-
-    /* Mostrar radio buttons en desktop */
-    .options-header {
-        display: grid !important;
-        visibility: visible !important;
-        height: auto !important;
-        margin: 12px 0 10px 0 !important;
-        padding: 0 !important;
-    }
-
-    .option-label {
-        display: block !important;
-        visibility: visible !important;
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .options-container {
-        display: grid !important;
-        visibility: visible !important;
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .radio-option {
-        display: block !important;
-        visibility: visible !important;
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .radio-label {
-        padding: 10px 6px;
-        font-size: 13px;
-        display: flex !important;
-        visibility: visible !important;
-        height: auto !important;
-    }
-
-    /* Ocultar desplegables en desktop */
-    .mobile-select-wrapper {
-        display: none !important;
-    }
-
-    .mobile-select-wrapper select {
-        display: none !important;
-    }
-
-    .results-hero {
-        padding: 50px 20px;
-    }
-
-    .results-title {
-        font-size: 28px;
-    }
-
-    .score-main {
-        font-size: 56px;
-    }
-
-    .results-content {
-        padding: 50px 20px;
-    }
-
-    .symptoms-recommendations {
-        grid-template-columns: 1fr 1fr;
-        gap: 35px;
-    }
-
-    .card-title {
-        font-size: 13px;
-    }
-
-    .card-text {
-        font-size: 13px;
-    }
-
-    .cta-section {
-        padding: 50px 40px;
-    }
-
-    .cta-title {
-        font-size: 26px;
-    }
-
-    .contact-section {
-        padding: 45px 40px;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 18px;
-    }
-
-    .form-group-contact textarea {
-        grid-column: 1 / -1;
-    }
-
-    .btn {
-        flex: 0;
-        min-width: 150px;
-        max-width: none;
-        padding: 12px 35px;
-        font-size: 13px;
-    }
-
-    .stats-section {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 25px;
-        padding: 40px;
-    }
-
-    .stat-number {
-        font-size: 32px;
-    }
-
-    .stat-label {
-        font-size: 12px;
-    }
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #fff;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 0 32px;
+            border-bottom: 1px solid #e5e5e5;
+            background: white;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 16px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-tab.active {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+        }
+
+        .content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .view {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+        }
+
+        .view.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CLIENTES VIEW */
+        .clientes-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+        }
+
+        .filters-panel {
+            background: #f9f9f9;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #e5e5e5;
+            height: fit-content;
+        }
+
+        .filter-group {
+            margin-bottom: 16px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .filter-input, .filter-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .clients-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .client-item {
+            background: white;
+            padding: 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .client-item:hover {
+            background: #f9f9f9;
+            border-color: #0066cc;
+            box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+        }
+
+        .client-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .client-info {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .client-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .days-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .days-ok {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .days-warning {
+            background: #ffccbc;
+            color: #d84315;
+        }
+
+        .days-error {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .days-none {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .btn-new-client {
+            width: 100%;
+            padding: 12px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 1000;
+            overflow-y: auto;
+            padding-top: 40px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 950px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9f9f9;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group.triple {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .action-item {
+            background: #f9f9f9;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .action-view {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .action-description-block {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            border-left: 3px solid #0066cc;
+            white-space: pre-wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+            border-color: #0066cc;
+        }
+
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .btn-success:hover {
+            background: #388e3c;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        /* ESTADO FUNEL */
+        .estado-funel {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 16px;
+            border-radius: 6px;
+            border-left: 4px solid #0066cc;
+            margin-bottom: 24px;
+        }
+
+        .estado-funel-label {
+            font-size: 12px;
+            color: #0066cc;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .estado-funel-valor {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0066cc;
+        }
+
+        /* CITAS CLIENTE */
+        .citas-cliente-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .cita-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #0066cc;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cita-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .cita-card-fecha {
+            font-weight: 700;
+            color: #0066cc;
+            margin-bottom: 8px;
+        }
+
+        .cita-card-servicio {
+            color: #333;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        /* RECAMBIOS */
+        .recambios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .recambio-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .recambio-item input {
+            margin: 0;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .recambio-info {
+            flex: 1;
+        }
+
+        .recambio-nombre {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .recambio-precio {
+            font-size: 12px;
+            color: #0066cc;
+            font-weight: 700;
+        }
+
+        .recambios-total {
+            background: #e3f2fd;
+            padding: 12px 16px;
+            border-radius: 6px;
+            border-left: 4px solid #0066cc;
+            margin-top: 16px;
+        }
+
+        .recambios-total-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .recambios-total-valor {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0066cc;
+        }
+
+        /* CREAR ACCIÓN MODAL */
+        .accion-editor-modal {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 8px;
+            width: 95%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 2000;
+            border-top: 4px solid #0066cc;
+        }
+
+        .accion-editor-modal.active {
+            display: flex;
+        }
+
+        .accion-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e5e5e5;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .accion-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* CITA DETALLES MODAL */
+        .cita-detalles-modal {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 8px;
+            width: 95%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 2000;
+            border-top: 4px solid #0066cc;
+        }
+
+        .cita-detalles-modal.active {
+            display: flex;
+        }
+
+        .cita-detalles-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e5e5e5;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .cita-detalles-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* CITA RÁPIDA MODAL */
+        .cita-rapida-modal {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e3f2fd;
+            border-radius: 8px;
+            width: 95%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 2000;
+            border: 3px solid #0066cc;
+        }
+
+        .cita-rapida-modal.active {
+            display: flex;
+        }
+
+        .cita-header {
+            padding: 16px 24px;
+            border-bottom: 3px solid #0066cc;
+            background: #bbdefb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .cita-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* BÚSQUEDA CLIENTE */
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .search-suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .suggestion-item:hover {
+            background: #f0f7ff;
+        }
+
+        /* CITAS TIPO SELECTOR */
+        .citas-selector-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .btn-toggle {
+            padding: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .btn-toggle.active {
+            border-color: #0066cc;
+            background: #e3f2fd;
+            color: #0066cc;
+        }
+
+        /* CITAS */
+        .citas-container {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 24px;
+        }
+
+        .citas-form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 6px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .citas-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .cita-item {
+            background: white;
+            padding: 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            border-left: 4px solid #0066cc;
+        }
+
+        .cita-tiempo {
+            font-weight: 600;
+            color: #0066cc;
+            margin-bottom: 8px;
+        }
+
+        .cita-cliente {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .cita-detalles {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* CALENDARIO */
+        .calendar-container {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .calendar-iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .calendar-info {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #0066cc;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #0066cc;
+            font-weight: 600;
+        }
+
+        /* PIPELINE */
+        .pipeline-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            flex: 1;
+        }
+
+        .pipeline-column {
+            background: #f9f9f9;
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+
+        .column-title {
+            font-weight: 700;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .column-count {
+            display: inline-block;
+            background: #ddd;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .dropzone {
+            flex: 1;
+            background: white;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            overflow-y: auto;
+        }
+
+        .dropzone.drag-over {
+            background: #e3f2fd;
+            border-color: #0066cc;
+        }
+
+        .order-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: grab;
+            transition: all 0.2s;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #0066cc;
+        }
+
+        .order-numero {
+            font-weight: 700;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .order-client {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #0066cc;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .order-client:hover {
+            color: #0052a3;
+        }
+
+        .order-info {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        /* INFORMES */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #e5e5e5;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0066cc;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .informes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            flex: 1;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .clientes-container, .citas-container {
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline-container {
+                grid-template-columns: 1fr;
+            }
+
+            .informes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-group, .form-group.triple {
+                grid-template-columns: 1fr;
+            }
+
+            .citas-selector-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* UTILIDADES */
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+
+        .save-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        @keyframes confettiFall {
+            to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .multi-select-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .required::after {
+            content: " *";
+            color: #f44336;
+        }
     </style>
 </head>
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <div class="logo-brand">
-            <div class="logo">GR</div>
-            <div>
-                <div class="clinic-title">GARCIA REBOLL</div>
-                <div class="clinic-subtitle">Especialistas en Urología</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- FORMULARIO IPSS -->
-    <div class="form-section" id="formSection">
-        <div class="form-container">
-            <div class="form-header">
-                <h1>Evaluación de Síntomas</h1>
-                <p>Cuestionario IPSS (Índice Internacional de Síntomas Prostáticos)</p>
-            </div>
-
-            <div class="progress-container">
-                <div class="progress-text">Progreso: <span id="answered">0</span>/8 preguntas</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-            </div>
-
-            <div class="info-banner">
-                Responda cada pregunta según su experiencia en los últimos 30 días. Esta evaluación es confidencial y se procesa localmente en su navegador.
-            </div>
-
-            <form id="ipssForm">
-                <!-- PREGUNTA 1 -->
-                <div class="form-group">
-                    <div class="form-group-header">
-                        <div class="question-number">1</div>
-                        <div class="question-text">Durante más o menos los últimos 30 días, ¿cuántas veces ha tenido la sensación de no vaciar completamente la vejiga?</div>
-                    </div>
-                    <div class="mobile-select-wrapper">
-                        <select id="q1_select" name="q1_select" onchange="syncSelect(this, 'q1')">
-                            <option value="">Selecciona una opción</option>
-                            <option value="0">0 - Ninguna</option>
-                            <option value="1">1 - Casi nunca</option>
-                            <option value="2">2 - A veces</option>
-                            <option value="3">3 - Bastante</option>
-                            <option value="4">4 - Casi siempre</option>
-                            <option value="5">5 - Siempre</option>
-                        </select>
-                    </div>
-                    <div class="options-header">
-                        <div class="option-label">Ninguna</div>
-                        <div class="option-label">Casi nunca</div>
-                        <div class="option-label">A veces</div>
-                        <div class="option-label">Bastante</div>
-                        <div class="option-label">Casi siempre</div>
-                        <div class="option-label">Siempre</div>
-                    </div>
-                    <div class="options-container">
-                        <div class="radio-option"><input type="radio" name="q1" value="0" id="q1_0"><label for="q1_0" class="radio-label">0</label></div>
-                        <div class="radio-option"><input type="radio" name="q1" value="1" id="q1_1"><label for="q1_1" class="radio-label">1</label></div>
-                        <div class="radio-option"><input type="radio" name="q1" value="2" id="q1_2"><label for="q1_2" class="radio-label">2</label></div>
-                        <div class="radio-option"><input type="radio" name="q1" value="3" id="q1_3"><label for="q1_3" class="radio-label">3</label></div>
-                        <div class="radio-option"><input type="radio" name="q1" value="4" id="q1_4"><label for="q1_4" class="radio-label">4</label></div>
-                        <div class="radio-option"><input type="radio" name="q1" value="5" id="q1_5"><label for="q1_5" class="radio-label">5</label></div>
-                    </div>
-                </div>
-
-                <!-- PREGUNTA 2 -->
-                <div class="form-group">
-                    <div class="form-group-header">
-                        <div class="question-number">2</div>
-                        <div class="question-text">¿Cuántas veces ha tenido que orinar nuevamente en las 2 horas siguientes?</div>
-                    </div>
-                    <div class="mobile-select-wrapper">
-                        <select id="q2_select" name="q2_select" onchange="syncSelect(this, 'q2')">
-                            <option value="">Selecciona una opción</option>
-                            <option value="0">0 - Ninguna</option>
-                            <option value="1">1 - Casi nunca</option>
-                            <option value="2">2 - A veces</option>
-                            <option value="3">3 - Bastante</option>
-                            <option value="4">4 - Casi siempre</option>
-                            <option value="5">5 - Siempre</option>
-                        </select>
-                    </div>
-                    <div class="options-header">
-                        <div class="option-label">Ninguna</div>
-                        <div class="option-label">Casi nunca</div>
-                        <div class="option-label">A veces</div>
-                        <div class="option-label">Bastante</div>
-                        <div class="option-label">Casi siempre</div>
-                        <div class="option-label">Siempre</div>
-                    </div>
-                    <div class="options-container">
-                        <div class="radio-option"><input type="radio" name="q2" value="0" id="q2_0"><label for="q2_0" class="radio-label">0</label></div>
-                        <div class="radio-option"><input type="radio" name="q2" value="1" id="q2_1"><label for="q2_1" class="radio-label">1</label></div>
-                        <div class="radio-option"><input type="radio" name="q2" value="2" id="q2_2"><label for="q2_2" class="radio-label">2</label></div>
-                        <div class="radio-option"><input type="radio" name="q2" value="3" id="q2_3"><label for="q2_3" class="radio-label">3</label></div>
-                        <div class="radio-option"><input type="radio" name="q2" value="4" id="q2_4"><label for="q2_4" class="radio-label">4</label></div>
-                        <div class="radio-option"><input type="radio" name="q2" value="5" id="q2_5"><label for="q2_5" class="radio-label">5</label></div>
-                    </div>
-                </div>
-
-                <!-- PREGUNTA 3 -->
-                <div class="form-group">
-                    <div class="form-group-header">
-                        <div class="question-number">3</div>
-                        <div class="question-text">¿Cuántas veces ha notado interrupciones al orinar?</div>
-                    </div>
-                    <div class="mobile-select-wrapper">
-                        <select id="q3_select" name="q3_select" onchange="syncSelect(this, 'q3')">
-                            <option value="">Selecciona una opción</option>
-                            <option value="0">0 - Ninguna</option>
-                            <option value="1">1 - Casi nunca</option>
-                            <option value="2">2 - A veces</option>
-                            <option value="3">3 - Bastante</option>
-                            <option value="4">4 - Casi siempre</option>
-                            <option value="5">5 - Siempre</option>
-                        </select>
-                    </div>
-                    <div class="options-header">
-                        <div class="option-label">Ninguna</div>
-                        <div class="option-label">Casi nunca</div>
-                        <div class="option-label">A veces</div>
-                        <div class="option-label">Bastante</div>
-                        <div class="option-label">Casi siempre</div>
-                        <div class="option-label">Siempre</div>
-                    </div>
-                    <div class="options-container">
-                        <div class="radio-option"><input type="radio" name="q3" value="0" id="q3_0"><label for="q3_0" class="radio-label">0</label></div>
-                        <div class="radio-option"><input type="radio" name="q3" value="1" id="q3_1"><label for="q3_1" class="radio-label">1</label></div>
-                        <div class="radio-option"><input type="radio" name="q3" value="2" id="q3_2"><label for="q3_2" class="radio-label">2</label></div>
-                        <div class="radio-option"><input type="radio" name="q3" value="3" id="q3_3"><label for="q3_3" class="radio-label">3</label></div>
-                        <div class="radio-option"><input type="radio" name="q3" value="4" id="q3_4"><label for="q3_4" class="radio-label">4</label></div>
-                        <div class="radio-option"><input type="radio" name="q3" value="5" id="q3_5"><label for="q3_5" class="radio-label">5</label></div>
-                    </div>
-                </div>
-
-                <!-- PREGUNTA 4 -->
-                <div class="form-group">
-                    <div class="form-group-header">
-                        <div class="question-number">4</div>
-                        <div class="question-text">¿Cuántas veces ha tenido dificultad para aguantar las ganas de orinar?</div>
-                    </div>
-                    <div class="mobile-select-wrapper">
-                        <select id="q4_select" name="q4_select" onchange="syncSelect(this, 'q4')">
-                            <option value="">Selecciona una opción</option>
-                            <option value="0">0 - Ninguna</option>
-                            <option value="1">1 - Casi nunca</option>
-                            <option value="2">2 - A veces</option>
-                            <option value="3">3 - Bastante</option>
-                            <option value="4">4 - Casi siempre</option>
-                            <option value="5">5 - Siempre</option>
-                        </select>
-                    </div>
-                    <div class="options-header">
-                        <div class="option-label">Ninguna</div>
-                        <div class="option-label">Casi nunca</div>
-                        <div class="option-label">A veces</div>
-                        <div class="option-label">Bastante</div>
-                        <div class="option-label">Casi siempre</div>
-                        <div class="option-label">Siempre</div>
-                    </div>
-                    <div class="options-container">
-                        <div class="radio-option"><input type="radio" name="q4" value="0" id="q4_0"><label for="q4_0" class="radio-label">0</label></div>
-                        <div class="radio-option"><input type="radio" name="q4" value="1" id="q4_1"><label for="q4_1" class="radio-label">1</label></div>
-                        <div class="radio-option"><input type="radio" name="q4" value="2" id="q4_2"><label for="q4_2" class="radio-label">2</label></div>
-                        <div class="radio-option"><input type="radio" name="q4" value="3" id="q4_3"><label for="q4_3" class="radio-label">3</label></div>
-                        <div class="radio-option"><input type="radio" name="q4" value="4" id="q4_4"><label for="q4_4" class="radio-label">4</label></div>
-                        <div class="radio-option"><input type="radio" name="q4" value="5" id="q4_5"><label for="q4_5" class="radio-label">5</label></div>
-                    </div>
-                </div>
-
-                <!-- PREGUNTA 5 -->
-                <div class="form-group">
-                    <div class="form-group-header">
-                        <div class="question-number">5</div>
-                        <div class="question-text">¿Cuántas veces ha observado que el chorro de orina es débil?</div>
-                    </div>
-                    <div class="mobile-select-wrapper">
-                        <select id="q5_select" name="q5_select" onchange="syncSelect(this, 'q5')">
-                            <option value="">Selecciona una opción</option>
-                            <option value="0">0 - Ninguna</option>
-                            <option value="1">1 - Casi nunca</option>
-                            <option value="2">2 - A veces</option>
-                            <option value="3">3 - Bastante</option>
-                            <option value="4">4 - Casi siempre</option>
-                            <option value="5">5 - Siempre</option>
-                        </select>
-                    </div>
-                    <div class="options-header">
-                        <div class="option-label">Ninguna</div>
-                        <div class="option-label">Casi nunca</div>
-                        <div class="option-label">A veces</div>
-                        <div class="option-label">Bastante</div>
-                        <div class="option-label">Casi siempre</div>
-                        <div class="option-label">Siempre</div>
-                    </div>
-                    <div class="options-container">
-                        <div class="radio-option"><input type="radio" name="q5" value="0" id="q5_0"><label for="q5_0" class="radio-label">0</label></div>
-                        <div class="radio-option"><input type="radio" name="q5" value="1" id="q5_1"><label for="q5_1" class="radio-label">1</label></div>
-                        <div class="radio-option"><input type="radio" name="q5" value="2" id="q5_2"><label for="q5_2" class="radio-label">2</label></div>
-                        <div class="radio-option"><input type="radio" name="q5" value="3" id="q5_3"><label for="q5_3" class="radio-label">3</label></div>
-                        <div class="radio-option"><input type="radio" name="q5" value="4" id="q5_4"><label for="q5_4" class="radio-label">4</label></div>
-                        <div class="radio-option"><input type="radio" name="q5" value="5" id="q5_5"><label for="q5_5" class="radio-label">5</label></div>
-                    </div>
-                </div>
-
-                <!-- PREGUNTA 6 -->
-                <div class="form-group">
-                    <div class="form-group-header">
-                        <div class="question-number">6</div>
-                        <div class="question-text">¿Cuántas veces ha tenido que hacer fuerza para comenzar a orinar?</div>
-                    </div>
-                    <div class="mobile-select-wrapper">
-                        <select id="q6_select" name="q6_select" onchange="syncSelect(this, 'q6')">
-                            <option value="">Selecciona una opción</option>
-                            <option value="0">0 - Ninguna</option>
-                            <option value="1">1 - Casi nunca</option>
-                            <option value="2">2 - A veces</option>
-                            <option value="3">3 - Bastante</option>
-                            <option value="4">4 - Casi siempre</option>
-                            <option value="5">5 - Siempre</option>
-                        </select>
-                    </div>
-                    <div class="options-header">
-                        <div class="option-label">Ninguna</div>
-                        <div class="option-label">Casi nunca</div>
-                        <div class="option-label">A veces</div>
-                        <div class="option-label">Bastante</div>
-                        <div class="option-label">Casi siempre</div>
-                        <div class="option-label">Siempre</div>
-                    </div>
-                    <div class="options-container">
-                        <div class="radio-option"><input type="radio" name="q6" value="0" id="q6_0"><label for="q6_0" class="radio-label">0</label></div>
-                        <div class="radio-option"><input type="radio" name="q6" value="1" id="q6_1"><label for="q6_1" class="radio-label">1</label></div>
-                        <div class="radio-option"><input type="radio" name="q6" value="2" id="q6_2"><label for="q6_2" class="radio-label">2</label></div>
-                        <div class="radio-option"><input type="radio" name="q6" value="3" id="q6_3"><label for="q6_3" class="radio-label">3</label></div>
-                        <div class="radio-option"><input type="radio" name="q6" value="4" id="q6_4"><label for="q6_4" class="radio-label">4</label></div>
-                        <div class="radio-option"><input type="radio" name="q6" value="5" id="q6_5"><label for="q6_5" class="radio-label">5</label></div>
-                    </div>
-                </div>
-
-                <!-- PREGUNTA 7 -->
-                <div class="form-group quality-section">
-                    <div class="form-group-header">
-                        <div class="question-number">7</div>
-                        <div class="question-text">¿Cuántas veces se levanta por la noche a orinar?</div>
-                    </div>
-                    <div class="mobile-select-wrapper">
-                        <select id="q7_select" name="q7_select" onchange="syncSelect(this, 'q7')">
-                            <option value="">Selecciona una opción</option>
-                            <option value="0">0 - Ninguna</option>
-                            <option value="1">1 - 1 vez</option>
-                            <option value="2">2 - 2 veces</option>
-                            <option value="3">3 - 3 veces</option>
-                            <option value="4">4 - 4 veces</option>
-                            <option value="5">5 - 5+ veces</option>
-                        </select>
-                    </div>
-                    <div class="options-header">
-                        <div class="option-label">Ninguna</div>
-                        <div class="option-label">1 vez</div>
-                        <div class="option-label">2 veces</div>
-                        <div class="option-label">3 veces</div>
-                        <div class="option-label">4 veces</div>
-                        <div class="option-label">5+ veces</div>
-                    </div>
-                    <div class="options-container">
-                        <div class="radio-option"><input type="radio" name="q7" value="0" id="q7_0"><label for="q7_0" class="radio-label">0</label></div>
-                        <div class="radio-option"><input type="radio" name="q7" value="1" id="q7_1"><label for="q7_1" class="radio-label">1</label></div>
-                        <div class="radio-option"><input type="radio" name="q7" value="2" id="q7_2"><label for="q7_2" class="radio-label">2</label></div>
-                        <div class="radio-option"><input type="radio" name="q7" value="3" id="q7_3"><label for="q7_3" class="radio-label">3</label></div>
-                        <div class="radio-option"><input type="radio" name="q7" value="4" id="q7_4"><label for="q7_4" class="radio-label">4</label></div>
-                        <div class="radio-option"><input type="radio" name="q7" value="5" id="q7_5"><label for="q7_5" class="radio-label">5</label></div>
-                    </div>
-                </div>
-
-                <!-- PREGUNTA 8 -->
-                <div class="form-group quality-section">
-                    <div class="form-group-header">
-                        <div class="question-number">8</div>
-                        <div class="question-text">¿Cómo se sentiría si tuviera que vivir con estos síntomas?</div>
-                    </div>
-                    <div class="mobile-select-wrapper">
-                        <select id="q8_select" name="q8_select" onchange="syncSelect(this, 'q8')">
-                            <option value="">Selecciona una opción</option>
-                            <option value="0">0 - Encantado</option>
-                            <option value="1">1 - Muy bien</option>
-                            <option value="2">2 - Bien</option>
-                            <option value="3">3 - Indiferente</option>
-                            <option value="4">4 - Mal</option>
-                            <option value="5">5 - Muy mal</option>
-                            <option value="6">6 - Fatal</option>
-                        </select>
-                    </div>
-                    <div class="options-header">
-                        <div class="option-label">Encantado</div>
-                        <div class="option-label">Muy bien</div>
-                        <div class="option-label">Bien</div>
-                        <div class="option-label">Indiferente</div>
-                        <div class="option-label">Mal</div>
-                        <div class="option-label">Muy mal</div>
-                        <div class="option-label">Fatal</div>
-                    </div>
-                    <div class="options-container">
-                        <div class="radio-option"><input type="radio" name="q8" value="0" id="q8_0"><label for="q8_0" class="radio-label">0</label></div>
-                        <div class="radio-option"><input type="radio" name="q8" value="1" id="q8_1"><label for="q8_1" class="radio-label">1</label></div>
-                        <div class="radio-option"><input type="radio" name="q8" value="2" id="q8_2"><label for="q8_2" class="radio-label">2</label></div>
-                        <div class="radio-option"><input type="radio" name="q8" value="3" id="q8_3"><label for="q8_3" class="radio-label">3</label></div>
-                        <div class="radio-option"><input type="radio" name="q8" value="4" id="q8_4"><label for="q8_4" class="radio-label">4</label></div>
-                        <div class="radio-option"><input type="radio" name="q8" value="5" id="q8_5"><label for="q8_5" class="radio-label">5</label></div>
-                        <div class="radio-option"><input type="radio" name="q8" value="6" id="q8_6"><label for="q8_6" class="radio-label">6</label></div>
-                    </div>
-                </div>
-
-                <div class="form-footer">
-                    <div class="disclaimer">
-                        Este cuestionario es una herramienta de orientación. Los resultados no son un diagnóstico. Consulte con un especialista en urología para una evaluación completa.
-                    </div>
-
-                    <div class="button-group">
-                        <button type="button" class="btn btn-secondary" onclick="resetForm()">Limpiar</button>
-                        <button type="button" class="btn btn-primary" id="calculateBtn" onclick="calculateScore()" disabled>Ver Resultados</button>
-                    </div>
-                </div>
-            </form>
-
-            <div class="stats-section">
-                <div class="stat-item">
-                    <div class="stat-number">+30</div>
-                    <div class="stat-label">Años de Experiencia</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Experiencia Cualificada</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">33</div>
-                    <div class="stat-label">Compañías Colaboradoras</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">+700</div>
-                    <div class="stat-label">Pacientes Satisfechos</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- RESULTADOS -->
-    <div class="results-section" id="resultsSection">
-        <div class="results-hero">
-            <div class="results-logo">GR</div>
-            <h2 class="results-title">Resultado de Índice Internacional de Síntomas Prostáticos</h2>
-
-            <div class="score-display">
-                <div class="score-label">Tu Puntuación</div>
-                <div class="score-main" id="scoreNumber">0</div>
-                <div class="score-reference">de 35 puntos</div>
-                <div class="grade-badge" id="gradeBadge">Leve</div>
-            </div>
+    <div class="app-container">
+        <div class="header">
+            <h1>🏍️ VIASCOOTER GRUPO VÍA</h1>
         </div>
 
-        <div class="results-content">
-            <div class="content-wrapper">
-                <div class="symptoms-recommendations">
-                    <div class="symptom-card symptom-mild" id="symptomCard">
-                        <div class="card-title">Situación Clínica</div>
-                        <div class="card-text" id="symptomText">Sus síntomas son mínimos y no requieren intervención inmediata.</div>
-                    </div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('clientes')">👥 Clientes</button>
+            <button class="nav-tab" onclick="switchTab('citas')">📅 Citas</button>
+            <button class="nav-tab" onclick="switchTab('ordenes')">📦 Órdenes de Pedido</button>
+            <button class="nav-tab" onclick="switchTab('informes')">📊 Informes</button>
+        </div>
 
-                    <div class="symptom-card symptom-mild" id="recommendationCard">
-                        <div class="card-title">Recomendación</div>
-                        <div class="card-text" id="recommendationText">
-                            <ul>
-                                <li>Mantener estilo de vida saludable</li>
-                                <li>Reducir líquidos por la noche</li>
-                                <li>Revisión médica anual</li>
-                            </ul>
+        <div class="content">
+            <!-- CLIENTES -->
+            <div id="view-clientes" class="view active">
+                <div class="clientes-container">
+                    <div class="filters-panel">
+                        <button class="btn-new-client" onclick="newCliente()">+ Nuevo Cliente</button>
+                        <div class="filter-group">
+                            <label class="filter-label">🔍 Buscar</label>
+                            <input type="text" class="filter-input" id="searchInput" placeholder="Nombre, teléfono, matrícula..." onkeyup="filterClientes()">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">📅 Filtrar por Entrega</label>
+                            <input type="date" class="filter-input" id="filterEntrega" onchange="filterClientes()">
                         </div>
                     </div>
+                    <div class="clients-list" id="clientsList"></div>
                 </div>
+            </div>
 
-                <div class="cta-section">
-                    <h3 class="cta-title">Próximo Paso</h3>
-                    <p class="cta-text">Completa el formulario a continuación para agendar una consulta con nuestros especialistas</p>
-                    <button class="cta-button" onclick="scrollToForm()">Agendar Consulta</button>
-                </div>
-
-                <div class="contact-section">
-                    <h3 class="contact-title">Agendar Cita Médica</h3>
-                    <p class="contact-subtitle">Completa tus datos para que nos pongamos en contacto</p>
-
-                    <div class="success-message" id="successMessage">
-                        Gracias. Tu solicitud ha sido enviada. Nos contactaremos pronto.
-                    </div>
-
-                    <form id="contactForm" onsubmit="handleSubmit(event)">
-                        <div class="form-row">
-                            <div class="form-group-contact">
-                                <label for="nombre">Nombre Completo</label>
-                                <input type="text" id="nombre" name="nombre" required>
-                            </div>
-                            <div class="form-group-contact">
-                                <label for="email">Correo Electrónico</label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group-contact">
-                                <label for="telefono">Teléfono</label>
-                                <input type="tel" id="telefono" name="telefono" required>
-                            </div>
-                            <div class="form-group-contact">
-                                <label for="horario">Preferencia de Horario</label>
-                                <select id="horario" name="horario" required>
-                                    <option value="">Selecciona un horario</option>
-                                    <option value="manana">Mañana (9:00 - 13:00)</option>
-                                    <option value="tarde">Tarde (16:00 - 20:00)</option>
-                                    <option value="flexible">Sin preferencia</option>
+            <!-- CITAS -->
+            <div id="view-citas" class="view">
+                <div class="citas-container">
+                    <div>
+                        <div id="citasFormContainer" class="citas-form"></div>
+                        
+                        <!-- FILTROS DE CITAS -->
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5; margin-top: 16px;">
+                            <div style="font-weight: 600; margin-bottom: 12px;">🔍 Filtrar Citas</div>
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                                <input type="date" id="filtroFecha" class="form-input" onchange="filtrarCitas()" placeholder="Fecha">
+                                <select id="filtroServicio" class="form-select" onchange="filtrarCitas()">
+                                    <option value="">Todos los servicios</option>
+                                    <option value="Revisión periodica">Revisión periodica</option>
+                                    <option value="Siniestro">Siniestro</option>
+                                    <option value="Reparación moto">Reparación moto</option>
+                                    <option value="Revisión ITV">Revisión ITV</option>
                                 </select>
+                                <button class="btn" onclick="limpiarFiltros()" style="background: #fff; border: 1px solid #ddd;">Limpiar filtros</button>
                             </div>
                         </div>
-
-                        <div class="form-group-contact">
-                            <label for="mensaje">Comentarios</label>
-                            <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos si tienes alguna pregunta..."></textarea>
+                        
+                        <!-- LISTA DE CITAS -->
+                        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5; margin-top: 16px; max-height: 400px; overflow-y: auto;">
+                            <div style="font-weight: 600; margin-bottom: 12px;">📅 Citas Agendadas</div>
+                            <div class="citas-list" id="citasList"></div>
                         </div>
-
-                        <div class="form-buttons">
-                            <button type="submit" class="btn-submit">Agendar Cita</button>
-                            <button type="button" class="btn-back" onclick="backToForm()">Volver</button>
+                    </div>
+                    <div>
+                        <div class="calendar-container">
+                            <div class="calendar-info">📧 Calendario: pablogarciaverdu1@gmail.com</div>
+                            <iframe class="calendar-iframe" src="https://calendar.google.com/calendar/embed?src=pablogarciaverdu1@gmail.com&ctz=Europe/Madrid" frameborder="0" scrolling="no"></iframe>
                         </div>
-                    </form>
+                    </div>
                 </div>
+            </div>
 
-                <div class="clinic-info">
-                    <h3>GARCIA REBOLL</h3>
-                    <div class="clinic-detail">Teléfono: +34 638 896 575</div>
-                    <div class="clinic-detail">Email: info@clinicagarciareboll.com</div>
-                    <div class="clinic-detail">Ubicación: Valencia, España</div>
-                    <div class="clinic-detail">Horario: Lunes a Viernes 9:00 - 20:00</div>
-                </div>
+            <!-- ÓRDENES -->
+            <div id="view-ordenes" class="view">
+                <div class="pipeline-container" id="pipelineContainer"></div>
+            </div>
+
+            <!-- INFORMES -->
+            <div id="view-informes" class="view">
+                <div class="stats-grid" id="statsGrid"></div>
+                <div class="informes-grid" id="informesGrid"></div>
             </div>
         </div>
     </div>
+
+    <!-- MODAL CLIENTE -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Cliente</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- CREAR ACCIÓN -->
+    <div class="accion-editor-modal" id="accionEditorModal">
+        <div class="accion-header">
+            <h3>➕ Nueva Acción</h3>
+            <button class="close-btn" onclick="closeAccionEditor()">×</button>
+        </div>
+        <div class="accion-body" id="accionBody"></div>
+    </div>
+
+    <!-- DETALLES CITA -->
+    <div class="cita-detalles-modal" id="citaDetallesModal">
+        <div class="cita-detalles-header">
+            <h3>📅 Detalles de la Cita</h3>
+            <button class="close-btn" onclick="closeCitaDetalles()">×</button>
+        </div>
+        <div class="cita-detalles-body" id="citaDetallesBody"></div>
+    </div>
+
+    <!-- CREAR CITA RÁPIDA -->
+    <div class="cita-rapida-modal" id="citaRapidaModal">
+        <div class="cita-header">
+            <h3>📅 Crear Cita Rápida</h3>
+            <button class="close-btn" onclick="closeCitaRapida()">×</button>
+        </div>
+        <div class="cita-body" id="citaRapidaBody"></div>
+    </div>
+
+    <div id="saveStatus"></div>
 
     <script>
-        const form = document.getElementById('ipssForm');
-        const calculateBtn = document.getElementById('calculateBtn');
-        const formSection = document.getElementById('formSection');
-        const resultsSection = document.getElementById('resultsSection');
-        const progressFill = document.getElementById('progressFill');
-        const answeredCount = document.getElementById('answered');
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.googleapis.com/macros/s/AKfycbyQ-zgoa0y0Ba5mmvRw6-51Wz5HUi7m6dJKixa-OM8TXyQkAzbNZx0m944V1vebj6-CJg/exec';
 
-        function syncSelect(selectElement, questionName) {
-            const value = selectElement.value;
-            if (value !== '') {
-                const radioButton = form.querySelector(`input[name="${questionName}"][value="${value}"]`);
-                if (radioButton) {
-                    radioButton.checked = true;
+        async function crearEventoEnGoogle(titulo, fecha, descripcion) {
+            try {
+                console.log('📡 Enviando cita a Google Calendar...');
+                console.log('URL:', GOOGLE_APPS_SCRIPT_URL);
+                console.log('Datos:', { titulo, fecha, descripcion });
+
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        titulo: titulo,
+                        datetime: fecha,
+                        descripcion: descripcion || ''
+                    })
+                });
+
+                console.log('✓ Respuesta recibida:', response.status);
+                const result = await response.json();
+                console.log('✓ JSON parseado:', result);
+
+                if (result.success) {
+                    console.log('✅ ÉXITO: Evento creado en Google Calendar');
+                    return true;
+                } else {
+                    console.log('❌ ERROR del script:', result.error);
+                    return false;
                 }
-            } else {
-                form.querySelectorAll(`input[name="${questionName}"]`).forEach(radio => radio.checked = false);
+            } catch (error) {
+                console.log('❌ ERROR en fetch:', error);
+                return false;
             }
-            updateProgress();
+        }
+        // MARCAS DE MOTOS (A-Z)
+        const marcasMotos = [
+            'Aprilia', 'Benelli', 'BMW', 'Cyclone', 'Derbi', 'Gas Gas', 'Hanway', 'Honda', 
+            'Husqvarna', 'Kayo', 'Kymco', 'KTM', 'Moto Guzzi', 'Piaggio', 'Rieju', 'Sherco', 
+            'SYM', 'Voge', 'Yamaha', 'Zontes', 'Suzuki'
+        ].sort();
+
+        // DATOS
+        let clients = [
+            {
+                id: 1,
+                nombre: 'Juan',
+                apellido: 'García López',
+                email: 'juan.garcia@email.com',
+                telefono: '+34 666 123 456',
+                dni: '12345678A',
+                fechaCreacion: '2026-06-01',
+                fechaEntrega: '2026-06-28T10:00',
+                recambios: [],
+                moto: {
+                    modelo: 'Zontes ZT125-U',
+                    matricula: '8542JKL',
+                    bastidor: 'LV4DX5C124900847',
+                    kilometraje: 4200
+                },
+                acciones: [
+                    {
+                        id: 1,
+                        mecanico: 'Miguel Ángel',
+                        estadoMoto: 'Operativa',
+                        descripcion: 'Revisión 4000km - TODO OK',
+                        servicio: ['Revisión periodica'],
+                        notas: ''
+                    }
+                ]
+            },
+            {
+                id: 2,
+                nombre: 'María',
+                apellido: 'Rodríguez Martínez',
+                email: 'maria.r@email.com',
+                telefono: '+34 677 234 567',
+                dni: '87654321B',
+                fechaCreacion: '2026-05-15',
+                fechaEntrega: '',
+                recambios: [],
+                moto: {
+                    modelo: 'Voge ER 10',
+                    matricula: '7634MNÑ',
+                    bastidor: 'LV4DX5C124901023',
+                    kilometraje: 2100
+                },
+                acciones: []
+            },
+            {
+                id: 3,
+                nombre: 'Carlos',
+                apellido: 'Fernández Silva',
+                email: 'carlos.f@email.com',
+                telefono: '+34 688 345 678',
+                dni: '45678901C',
+                fechaCreacion: '2026-04-20',
+                fechaEntrega: '2026-06-19T14:00',
+                recambios: [],
+                moto: {
+                    modelo: 'Cyclone RX200',
+                    matricula: '9821PQR',
+                    bastidor: 'LV4DX5C124901156',
+                    kilometraje: 8500
+                },
+                acciones: []
+            }
+        ];
+
+        const recambiosDisponibles = [
+            { id: 'aceite', nombre: 'Aceite de Motor', precio: 45 },
+            { id: 'filtro', nombre: 'Filtro de Aire', precio: 35 },
+            { id: 'bujia', nombre: 'Bujía', precio: 25 },
+            { id: 'pastillas', nombre: 'Pastillas de Freno', precio: 55 },
+            { id: 'correa', nombre: 'Correa de Transmisión', precio: 85 },
+            { id: 'bateria', nombre: 'Batería', precio: 120 },
+            { id: 'silenciador', nombre: 'Silenciador', precio: 95 },
+            { id: 'neumatico', nombre: 'Neumático Delantero', precio: 150 },
+            { id: 'neumatico2', nombre: 'Neumático Trasero', precio: 160 },
+            { id: 'disco', nombre: 'Disco de Freno', precio: 75 }
+        ];
+
+        let orders = [
+            { id: 1, clienteId: 1, numero: 'ORD-045', estado: 'en-progreso', mecanico: 'Miguel Ángel', servicio: 'Revisión periodica', importe: 0 }
+        ];
+
+        let citas = [];
+        let currentClientId = null;
+        let citaType = null;
+
+        // FUNCIONES
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('view-' + tab).classList.add('active');
+            
+            if (tab === 'clientes') renderClientes();
+            else if (tab === 'citas') renderCitasSelector();
+            else if (tab === 'ordenes') renderOrdenes();
+            else if (tab === 'informes') renderInformes();
         }
 
-        form.querySelectorAll('input[type="radio"]').forEach(input => {
-            input.addEventListener('change', function() {
-                const questionName = this.name;
-                const selectElement = document.getElementById(`${questionName}_select`);
-                if (selectElement) {
-                    selectElement.value = this.value;
-                }
-                updateProgress();
+        function filterClientes() {
+            renderClientes();
+        }
+
+        function renderClientes() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filterFecha = document.getElementById('filterEntrega').value;
+            
+            let filtered = clients.filter(c => {
+                const matchSearch = (c.nombre + ' ' + c.apellido).toLowerCase().includes(search) ||
+                                  c.telefono.toLowerCase().includes(search) ||
+                                  c.moto.matricula.toLowerCase().includes(search);
+                
+                const matchFecha = !filterFecha || c.fechaEntrega.split('T')[0] === filterFecha;
+                
+                return matchSearch && matchFecha;
             });
-        });
 
-        function updateProgress() {
-            const answered = form.querySelectorAll('input[type="radio"]:checked').length;
-            const percentage = (answered / 8) * 100;
-            answeredCount.textContent = answered;
-            progressFill.style.width = percentage + '%';
-            calculateBtn.disabled = answered !== 8;
+            const list = document.getElementById('clientsList');
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay clientes</div>';
+                return;
+            }
+            
+            list.innerHTML = filtered.map(c => {
+                const diasEntrega = c.fechaEntrega ? calcularDiasEntrega(c.fechaEntrega.split('T')[0]) : null;
+                
+                let diasHtml = '';
+                if (diasEntrega === null) {
+                    diasHtml = `<div class="days-indicator days-none">⚠️ Sin fecha de entrega</div>`;
+                } else if (diasEntrega < 0) {
+                    diasHtml = `<div class="days-indicator days-error">⏰ ${diasEntrega} días</div>`;
+                } else if (diasEntrega < 5) {
+                    diasHtml = `<div class="days-indicator days-warning">⏰ ${diasEntrega} días</div>`;
+                } else {
+                    diasHtml = `<div class="days-indicator days-ok">⏰ ${diasEntrega} días</div>`;
+                }
+
+                return `
+                    <div class="client-item" onclick="openClient(${c.id})">
+                        <div class="client-name">👤 ${c.nombre} ${c.apellido}</div>
+                        <div class="client-info">
+                            <div class="client-info-item">📞 ${c.telefono}</div>
+                            <div class="client-info-item">🏍️ ${c.moto.matricula}</div>
+                            ${diasHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function calculateScore() {
-            let score = 0;
-            let qualityScore = 0;
+        function newCliente() {
+            currentClientId = null;
+            const newId = Math.max(...clients.map(c => c.id), 0) + 1;
+            
+            document.getElementById('modalTitle').textContent = '👤 Nuevo Cliente';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="section">
+                    <div class="section-title">📋 Datos Cliente</div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label required">Nombre</label>
+                            <input type="text" class="form-input" id="newNombre" placeholder="Nombre">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label required">Apellido</label>
+                            <input type="text" class="form-input" id="newApellido" placeholder="Apellido">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="newEmail" placeholder="ejemplo@correo.com">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label required">Teléfono</label>
+                            <input type="tel" class="form-input" id="newTelefono" placeholder="+34">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">DNI/CIF</label>
+                            <input type="text" class="form-input" id="newDni">
+                        </div>
+                    </div>
+                </div>
 
-            for (let i = 1; i <= 7; i++) {
-                const selected = form.querySelector(`input[name="q${i}"]:checked`);
-                if (selected) score += parseInt(selected.value);
+                <div class="section">
+                    <div class="section-title">🏍️ Características Moto</div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label required">Marca y Modelo</label>
+                            <select class="form-select" id="newModelo">
+                                <option value="">Selecciona marca y modelo</option>
+                                ${marcasMotos.map(m => `<option value="${m}">${m}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Matrícula</label>
+                            <input type="text" class="form-input" id="newMatricula">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="saveNewCliente(${newId})">✓ Crear Cliente</button>
+                        <button class="btn" onclick="closeModal()">Cancelar</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function saveNewCliente(id) {
+            const nombre = document.getElementById('newNombre').value.trim();
+            const apellido = document.getElementById('newApellido').value.trim();
+            const telefono = document.getElementById('newTelefono').value.trim();
+            const email = document.getElementById('newEmail').value.trim();
+            const modelo = document.getElementById('newModelo').value.trim();
+
+            if (!nombre || !apellido || !telefono || !modelo) {
+                alert('Nombre, Apellido, Teléfono y Marca/Modelo son obligatorios');
+                return;
             }
 
-            const q8 = form.querySelector('input[name="q8"]:checked');
-            if (q8) qualityScore = parseInt(q8.value);
+            if (email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                alert('Email inválido');
+                return;
+            }
 
-            showResults(score, qualityScore);
+            clients.push({
+                id: id,
+                nombre: nombre,
+                apellido: apellido,
+                email: email,
+                telefono: telefono,
+                dni: document.getElementById('newDni').value,
+                fechaCreacion: new Date().toISOString().split('T')[0],
+                fechaEntrega: '',
+                recambios: [],
+                moto: {
+                    modelo: modelo,
+                    matricula: document.getElementById('newMatricula').value,
+                    bastidor: '',
+                    kilometraje: 0
+                },
+                acciones: []
+            });
+
+            showSaveStatus();
+            closeModal();
+            renderClientes();
         }
 
-        function showResults(score, quality) {
-            document.getElementById('scoreNumber').textContent = score;
+        function getEstadoFunel(clientId) {
+            const order = orders.find(o => o.clienteId === clientId);
+            if (!order) return null;
+            
+            const estados = {
+                'pendiente': 'Pendiente',
+                'en-progreso': 'En Progreso',
+                'listo-entrega': 'Listo para Entrega',
+                'entregado-pagado': 'Entregado y Pagado'
+            };
+            
+            return {
+                numero: order.numero,
+                estado: estados[order.estado],
+                estadoRaw: order.estado
+            };
+        }
 
-            const badge = document.getElementById('gradeBadge');
-            const symptomCard = document.getElementById('symptomCard');
-            const recommendationCard = document.getElementById('recommendationCard');
-            const symptomText = document.getElementById('symptomText');
-            const recommendationText = document.getElementById('recommendationText');
+        function openClient(clientId) {
+            currentClientId = clientId;
+            const client = clients.find(c => c.id === clientId);
+            
+            document.getElementById('modalTitle').textContent = '👤 ' + client.nombre + ' ' + client.apellido;
+            
+            const estadoFunel = getEstadoFunel(clientId);
+            const estadoFunelHtml = estadoFunel ? `
+                <div class="estado-funel">
+                    <div class="estado-funel-label">📦 Estado en el Funel de Órdenes:</div>
+                    <div class="estado-funel-valor">${estadoFunel.numero} - ${estadoFunel.estado}</div>
+                </div>
+            ` : '';
+            
+            const citasClienteHtml = citas
+                .filter(c => c.clienteId === clientId)
+                .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
+                .map(c => {
+                    const fecha = new Date(c.datetime);
+                    return `
+                        <div class="cita-card" onclick="abrirDetallesCita(${c.id})">
+                            <div class="cita-card-fecha">${fecha.toLocaleDateString()}</div>
+                            <div class="cita-card-servicio">${c.servicio}</div>
+                        </div>
+                    `;
+                }).join('');
 
-            let grade = '';
-            let color = '';
+            const totalRecambios = client.recambios.reduce((sum, id) => {
+                const recambio = recambiosDisponibles.find(r => r.id === id);
+                return sum + (recambio ? recambio.precio : 0);
+            }, 0);
 
-            if (score <= 7) {
-                grade = 'Síntomas Leves';
-                color = 'mild';
-                symptomText.textContent = 'Sus síntomas son mínimos. No requiere tratamiento inmediato en la mayoría de casos.';
-                recommendationText.innerHTML = '<ul><li>Mantener estilo de vida saludable</li><li>Reducir líquidos por la noche</li><li>Ejercicio regular</li><li>Revisión médica anual</li></ul>';
-            } else if (score <= 19) {
-                grade = 'Síntomas Moderados';
-                color = 'moderate';
-                symptomText.textContent = 'Sus síntomas son moderados y afectan su calidad de vida. Requiere evaluación y posible tratamiento.';
-                recommendationText.innerHTML = '<ul><li>Consulta con especialista recomendada</li><li>Evaluación diagnóstica completa</li><li>Opciones farmacológicas disponibles</li><li>Seguimiento cada 3-6 meses</li></ul>';
+            const accionesHtml = client.acciones.map((a, idx) => {
+                return `
+                    <div class="action-item">
+                        <div class="action-header">
+                            <span>Acción #${client.acciones.length - idx}</span>
+                        </div>
+                        <div class="action-view">
+                            <div><strong>Mecánico:</strong> ${a.mecanico}</div>
+                            <div><strong>Estado Moto:</strong> ${a.estadoMoto}</div>
+                            <div><strong>Servicios:</strong> ${a.servicio.join(', ')}</div>
+                            <div class="action-description-block" style="margin-top: 8px;"><strong>Descripción:</strong>\n${a.descripcion}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('modalBody').innerHTML = `
+                ${estadoFunelHtml}
+                
+                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                    <button class="btn btn-success" onclick="abrirCitaRapida()">📅 Crear Cita Rápida</button>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📋 Datos Cliente</div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-input" value="${client.nombre}" onchange="updateClient('nombre', this.value)">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Apellido</label>
+                            <input type="text" class="form-input" value="${client.apellido}" onchange="updateClient('apellido', this.value)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" value="${client.email}" onchange="updateClient('email', this.value)">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-input" value="${client.telefono}" onchange="updateClient('telefono', this.value)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">DNI/CIF</label>
+                            <input type="text" class="form-input" value="${client.dni}" onchange="updateClient('dni', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🏍️ Características Moto</div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Marca y Modelo</label>
+                            <select class="form-select" onchange="updateMoto('modelo', this.value)">
+                                <option value="">Selecciona marca y modelo</option>
+                                ${marcasMotos.map(m => `<option value="${m}" ${client.moto.modelo === m ? 'selected' : ''}>${m}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Matrícula</label>
+                            <input type="text" class="form-input" value="${client.moto.matricula}" onchange="updateMoto('matricula', this.value)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Bastidor (VIN) - Opcional</label>
+                            <input type="text" class="form-input" value="${client.moto.bastidor}" onchange="updateMoto('bastidor', this.value)">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Kilometraje - Opcional</label>
+                            <input type="number" class="form-input" value="${client.moto.kilometraje}" onchange="updateMoto('kilometraje', parseInt(this.value))">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📅 Fechas</div>
+                    <div class="form-group full">
+                        <div class="form-field">
+                            <label class="form-label">Fecha de Creación</label>
+                            <input type="date" class="form-input" value="${client.fechaCreacion}" disabled style="background: #f9f9f9;">
+                        </div>
+                    </div>
+                    <div class="form-group full">
+                        <div class="form-field">
+                            <label class="form-label">Fecha y Hora de Entrega</label>
+                            <input type="datetime-local" class="form-input" value="${client.fechaEntrega}" onchange="updateClient('fechaEntrega', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                ${citasClienteHtml ? `
+                    <div class="section">
+                        <div class="section-title">📅 Citas de Este Cliente</div>
+                        <div class="citas-cliente-container">
+                            ${citasClienteHtml}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="section">
+                    <div class="section-title">🔧 Recambios</div>
+                    <div class="recambios-grid">
+                        ${recambiosDisponibles.map(r => `
+                            <div class="recambio-item">
+                                <input type="checkbox" id="recambio_${r.id}" ${client.recambios.includes(r.id) ? 'checked' : ''} onchange="actualizarRecambios()">
+                                <div class="recambio-info">
+                                    <div class="recambio-nombre">${r.nombre}</div>
+                                    <div class="recambio-precio">€${r.precio}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${totalRecambios > 0 ? `
+                        <div class="recambios-total">
+                            <div class="recambios-total-label">Total Recambios:</div>
+                            <div class="recambios-total-valor">€${totalRecambios}</div>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🔧 Acciones
+                        <button class="btn btn-primary btn-small" onclick="crearAccion()">+ Nueva</button>
+                    </div>
+                    ${client.acciones.length === 0 ? '<div class="empty-state">Sin acciones</div>' : accionesHtml}
+                </div>
+            `;
+            
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function actualizarRecambios() {
+            const client = clients.find(c => c.id === currentClientId);
+            client.recambios = recambiosDisponibles
+                .filter(r => document.getElementById(`recambio_${r.id}`).checked)
+                .map(r => r.id);
+            showSaveStatus();
+            openClient(currentClientId);
+        }
+
+        function crearAccion() {
+            const client = clients.find(c => c.id === currentClientId);
+            const newId = Math.max(...client.acciones.map(a => a.id || 0), 0) + 1;
+
+            const formHtml = `
+                <div class="form-group">
+                    <div class="form-field">
+                        <label class="form-label">Mecánico</label>
+                        <select class="form-select" id="newMecanico">
+                            <option>Miguel Ángel</option>
+                            <option>Roberto</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Estado Moto</label>
+                        <input type="text" class="form-input" id="newEstadoMoto" placeholder="Ej: Operativa">
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Descripción Avería/Síntomas</label>
+                        <textarea class="form-textarea" id="newDescripcion" placeholder="Describe los síntomas..."></textarea>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Servicio Solicitado</label>
+                        <div class="multi-select-group">
+                            <label class="checkbox-item"><input type="checkbox" value="Revisión periodica"> Revisión periodica</label>
+                            <label class="checkbox-item"><input type="checkbox" value="Siniestro"> Siniestro</label>
+                            <label class="checkbox-item"><input type="checkbox" value="Reparación moto"> Reparación moto</label>
+                            <label class="checkbox-item"><input type="checkbox" value="Revisión ITV"> Revisión ITV</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="guardarAccion(${newId})">✓ Crear Acción</button>
+                    <button class="btn" onclick="closeAccionEditor()">Cancelar</button>
+                </div>
+            `;
+
+            document.getElementById('accionBody').innerHTML = formHtml;
+            document.getElementById('accionEditorModal').classList.add('active');
+        }
+
+        function guardarAccion(newId) {
+            const descripcion = document.getElementById('newDescripcion').value;
+            const servicios = Array.from(document.querySelectorAll('#accionBody input[type="checkbox"]:checked')).map(c => c.value);
+
+            if (!descripcion || servicios.length === 0) {
+                alert('Descripción y Servicio son obligatorios');
+                return;
+            }
+
+            const client = clients.find(c => c.id === currentClientId);
+            
+            client.acciones.push({
+                id: newId,
+                mecanico: document.getElementById('newMecanico').value,
+                estadoMoto: document.getElementById('newEstadoMoto').value,
+                descripcion: descripcion,
+                servicio: servicios,
+                notas: ''
+            });
+
+            showSaveStatus();
+            closeAccionEditor();
+            openClient(currentClientId);
+        }
+
+        function closeAccionEditor() {
+            document.getElementById('accionEditorModal').classList.remove('active');
+        }
+
+        function abrirDetallesCita(citaId) {
+            const cita = citas.find(c => c.id === citaId);
+            const fecha = new Date(cita.datetime);
+
+            const html = `
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label">Cliente</label>
+                        <input type="text" class="form-input" value="${cita.cliente}" disabled style="background: #f9f9f9;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-field">
+                        <label class="form-label">Fecha y Hora</label>
+                        <input type="datetime-local" class="form-input" value="${cita.datetime}" disabled style="background: #f9f9f9;">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Servicio</label>
+                        <input type="text" class="form-input" value="${cita.servicio}" disabled style="background: #f9f9f9;">
+                    </div>
+                </div>
+                ${cita.descripcion ? `
+                    <div class="form-group full">
+                        <div class="form-field">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-textarea" disabled style="background: #f9f9f9;">${cita.descripcion}</textarea>
+                        </div>
+                    </div>
+                ` : ''}
+                <div class="action-buttons">
+                    <button class="btn" onclick="closeCitaDetalles()">Cerrar</button>
+                </div>
+            `;
+
+            document.getElementById('citaDetallesBody').innerHTML = html;
+            document.getElementById('citaDetallesModal').classList.add('active');
+        }
+
+        function closeCitaDetalles() {
+            document.getElementById('citaDetallesModal').classList.remove('active');
+        }
+
+        function abrirCitaRapida() {
+            const client = clients.find(c => c.id === currentClientId);
+            
+            const formHtml = `
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Tipo de Servicio</label>
+                        <select class="form-select" id="rapServicio">
+                            <option value="">Selecciona un servicio</option>
+                            <option value="Revisión periodica">Revisión periodica</option>
+                            <option value="Siniestro">Siniestro</option>
+                            <option value="Reparación moto">Reparación moto</option>
+                            <option value="Revisión ITV">Revisión ITV</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Fecha y Hora</label>
+                        <input type="datetime-local" class="form-input" id="rapDateTime">
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label">Notas</label>
+                        <textarea class="form-textarea" id="rapNotas" placeholder="Descripción adicional..."></textarea>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="crearCitaRapida()">✓ Agendar</button>
+                    <button class="btn" onclick="closeCitaRapida()">Cancelar</button>
+                </div>
+            `;
+
+            document.getElementById('citaRapidaBody').innerHTML = formHtml;
+            document.getElementById('citaRapidaModal').classList.add('active');
+        }
+
+        function crearCitaRapida() {
+            const servicio = document.getElementById('rapServicio').value;
+            const datetime = document.getElementById('rapDateTime').value;
+            const notas = document.getElementById('rapNotas').value;
+
+            if (!servicio || !datetime) {
+                alert('Servicio y Fecha/Hora son obligatorios');
+                return;
+            }
+
+            const client = clients.find(c => c.id === currentClientId);
+            const titulo = servicio + ' - ' + client.nombre + ' ' + client.apellido;
+            
+            citas.push({
+                id: Math.max(...citas.map(c => c.id || 0), 0) + 1,
+                clienteId: client.id,
+                cliente: client.nombre + ' ' + client.apellido,
+                servicio: servicio,
+                datetime: datetime,
+                descripcion: notas
+            });
+
+            // Crear en Google Calendar
+            crearEventoEnGoogle(titulo, datetime, notas).then(success => {
+                if (success) {
+                    showSaveStatus('✓ Cita en Google Calendar');
+                } else {
+                    showSaveStatus('✓ Cita guardada');
+                }
+            });
+
+            closeCitaRapida();
+            renderCitasList();
+            openClient(currentClientId);
+        }
+
+        function closeCitaRapida() {
+            document.getElementById('citaRapidaModal').classList.remove('active');
+        }
+
+        function updateClient(field, value) {
+            const client = clients.find(c => c.id === currentClientId);
+            if (client) {
+                client[field] = value;
+                showSaveStatus();
+            }
+        }
+
+        function updateMoto(field, value) {
+            const client = clients.find(c => c.id === currentClientId);
+            if (client) {
+                client.moto[field] = value;
+                showSaveStatus();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            currentClientId = null;
+        }
+
+        // CITAS
+        function renderCitasSelector() {
+            const form = document.getElementById('citasFormContainer');
+            
+            form.innerHTML = `
+                <h3 style="margin-bottom: 16px;">📅 Tipo de Cita</h3>
+                <div class="citas-selector-buttons">
+                    <button class="btn-toggle" id="btnNuevo" onclick="seleccionarTipoCita('nuevo')">
+                        ➕ Cliente Nuevo
+                    </button>
+                    <button class="btn-toggle" id="btnExistente" onclick="seleccionarTipoCita('existente')">
+                        👥 Cliente Existente
+                    </button>
+                </div>
+                <div id="formularioCita"></div>
+            `;
+
+            renderCitasList();
+        }
+
+        function seleccionarTipoCita(tipo) {
+            citaType = tipo;
+            document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+            
+            if (tipo === 'nuevo') {
+                document.getElementById('btnNuevo').classList.add('active');
+                renderFormularioCitaNueva();
             } else {
-                grade = 'Síntomas Graves';
-                color = 'severe';
-                symptomText.textContent = 'Sus síntomas son significativos y afectan su calidad de vida. Evaluación urgente por especialista necesaria.';
-                recommendationText.innerHTML = '<ul><li>Consulta urgente con especialista</li><li>Evaluación diagnóstica completa</li><li>Análisis de orina y pruebas complementarias</li><li>Opciones terapéuticas especializadas</li></ul>';
+                document.getElementById('btnExistente').classList.add('active');
+                renderFormularioCitaExistente();
+            }
+        }
+
+        function renderFormularioCitaNueva() {
+            const form = document.getElementById('formularioCita');
+            form.innerHTML = `
+                <h4 style="margin-bottom: 12px;">Datos del Cliente</h4>
+                <div class="form-group">
+                    <div class="form-field">
+                        <label class="form-label required">Nombre</label>
+                        <input type="text" class="form-input" id="citaNombre" placeholder="Nombre">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label required">Apellido</label>
+                        <input type="text" class="form-input" id="citaApellido" placeholder="Apellido">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-field">
+                        <label class="form-label required">Teléfono</label>
+                        <input type="tel" class="form-input" id="citaTelefono" placeholder="+34">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="citaEmail" placeholder="ejemplo@correo.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-field">
+                        <label class="form-label">DNI/CIF</label>
+                        <input type="text" class="form-input" id="citaDni" placeholder="12345678A">
+                    </div>
+                </div>
+                <h4 style="margin-bottom: 12px; margin-top: 16px;">Datos de la Cita</h4>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Marca y Modelo de Moto</label>
+                        <select class="form-select" id="citaModelo">
+                            <option value="">Selecciona marca y modelo</option>
+                            ${marcasMotos.map(m => `<option value="${m}">${m}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-field">
+                        <label class="form-label">Matrícula</label>
+                        <input type="text" class="form-input" id="citaMatricula" placeholder="Ej: 8542JKL">
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Tipo de Servicio</label>
+                        <select class="form-select" id="citaServicio">
+                            <option value="">Selecciona un servicio</option>
+                            <option value="Revisión periodica">Revisión periodica</option>
+                            <option value="Siniestro">Siniestro</option>
+                            <option value="Reparación moto">Reparación moto</option>
+                            <option value="Revisión ITV">Revisión ITV</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Fecha y Hora</label>
+                        <input type="datetime-local" class="form-input" id="citaDateTime">
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-textarea" id="citaDescripcion" placeholder="¿Qué necesita?"></textarea>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="crearCitaNueva()" style="width: 100%; margin-top: 16px;">✓ Agendar Cita</button>
+            `;
+        }
+
+        function renderFormularioCitaExistente() {
+            const form = document.getElementById('formularioCita');
+            form.innerHTML = `
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Buscar Cliente</label>
+                        <div class="search-input-wrapper">
+                            <input type="text" class="form-input" id="buscarClienteInput" placeholder="Nombre, teléfono o matrícula..." onkeyup="buscarClientesExistentes()">
+                            <div class="search-suggestions" id="searchSuggestions"></div>
+                        </div>
+                        <div style="margin-top: 12px; padding: 8px; background: #f0f7ff; border-radius: 4px; display: none;" id="clienteSeleccionado"></div>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Tipo de Servicio</label>
+                        <select class="form-select" id="citaServicioExistente">
+                            <option value="">Selecciona un servicio</option>
+                            <option value="Revisión periodica">Revisión periodica</option>
+                            <option value="Siniestro">Siniestro</option>
+                            <option value="Reparación moto">Reparación moto</option>
+                            <option value="Revisión ITV">Revisión ITV</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Fecha y Hora</label>
+                        <input type="datetime-local" class="form-input" id="citaDateTimeExistente">
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-textarea" id="citaDescripcionExistente" placeholder="¿Qué necesita?"></textarea>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="crearCitaExistente()" style="width: 100%; margin-top: 16px;">✓ Agendar Cita</button>
+            `;
+        }
+
+        let clienteSeleccionadoId = null;
+
+        function buscarClientesExistentes() {
+            const search = document.getElementById('buscarClienteInput').value.toLowerCase();
+            const suggestions = document.getElementById('searchSuggestions');
+
+            if (search.length < 1) {
+                suggestions.classList.remove('active');
+                return;
             }
 
-            badge.textContent = grade;
-            badge.className = `grade-badge grade-${color}`;
-            symptomCard.className = `symptom-card symptom-${color}`;
-            recommendationCard.className = `symptom-card symptom-${color}`;
+            const filtered = clients.filter(c =>
+                (c.nombre + ' ' + c.apellido).toLowerCase().includes(search) ||
+                c.telefono.toLowerCase().includes(search) ||
+                c.moto.matricula.toLowerCase().includes(search)
+            );
 
-            formSection.style.display = 'none';
-            resultsSection.classList.add('show');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (filtered.length === 0) {
+                suggestions.classList.remove('active');
+                return;
+            }
+
+            suggestions.innerHTML = filtered.map(c => `
+                <div class="suggestion-item" onclick="seleccionarCliente(${c.id}, '${c.nombre} ${c.apellido}', '${c.telefono}', '${c.moto.matricula}')">
+                    👤 ${c.nombre} ${c.apellido}<br/>
+                    <small>📞 ${c.telefono} | 🏍️ ${c.moto.matricula}</small>
+                </div>
+            `).join('');
+
+            suggestions.classList.add('active');
         }
 
-        function scrollToForm() {
-            document.querySelector('.contact-section').scrollIntoView({ behavior: 'smooth' });
+        function seleccionarCliente(id, nombre, telefono, matricula) {
+            clienteSeleccionadoId = id;
+            document.getElementById('buscarClienteInput').value = nombre;
+            document.getElementById('searchSuggestions').classList.remove('active');
+            
+            const seleccionado = document.getElementById('clienteSeleccionado');
+            seleccionado.style.display = 'block';
+            seleccionado.innerHTML = `✓ ${nombre} seleccionado`;
         }
 
-        function backToForm() {
-            formSection.style.display = 'block';
-            resultsSection.classList.remove('show');
-            form.reset();
-            document.querySelectorAll('select').forEach(s => s.value = '');
-            updateProgress();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        function crearCitaNueva() {
+            const nombre = document.getElementById('citaNombre').value.trim();
+            const apellido = document.getElementById('citaApellido').value.trim();
+            const telefono = document.getElementById('citaTelefono').value.trim();
+            const email = document.getElementById('citaEmail').value.trim();
+            const dni = document.getElementById('citaDni').value.trim();
+            const modelo = document.getElementById('citaModelo').value.trim();
+            const servicio = document.getElementById('citaServicio').value;
+            const datetime = document.getElementById('citaDateTime').value;
+
+            if (!nombre || !apellido || !telefono || !modelo || !servicio || !datetime) {
+                alert('Nombre, Apellido, Teléfono, Marca/Modelo, Tipo de Servicio y Fecha/Hora son obligatorios');
+                return;
+            }
+
+            if (email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                alert('Email inválido');
+                return;
+            }
+
+            const newClientId = Math.max(...clients.map(c => c.id), 0) + 1;
+            clients.push({
+                id: newClientId,
+                nombre: nombre,
+                apellido: apellido,
+                email: email,
+                telefono: telefono,
+                dni: dni,
+                fechaCreacion: new Date().toISOString().split('T')[0],
+                fechaEntrega: '',
+                recambios: [],
+                moto: {
+                    modelo: modelo,
+                    matricula: document.getElementById('citaMatricula').value,
+                    bastidor: '',
+                    kilometraje: 0
+                },
+                acciones: []
+            });
+
+            citas.push({
+                id: Math.max(...citas.map(c => c.id || 0), 0) + 1,
+                clienteId: newClientId,
+                cliente: nombre + ' ' + apellido,
+                servicio: servicio,
+                datetime: datetime,
+                descripcion: document.getElementById('citaDescripcion').value
+            });
+
+            // Crear en Google Calendar
+            const titulo = servicio + ' - ' + nombre + ' ' + apellido;
+            const descripcion = document.getElementById('citaDescripcion').value;
+            crearEventoEnGoogle(titulo, datetime, descripcion).then(success => {
+                if (success) {
+                    showSaveStatus('✓ Cita en Google Calendar');
+                } else {
+                    showSaveStatus('✓ Cita guardada');
+                }
+            });
+
+            renderCitasSelector();
         }
 
-        function handleSubmit(event) {
-            event.preventDefault();
-            document.getElementById('successMessage').classList.add('show');
-            document.getElementById('contactForm').reset();
-            setTimeout(() => {
-                document.getElementById('successMessage').classList.remove('show');
-            }, 5000);
+        function crearCitaExistente() {
+            if (!clienteSeleccionadoId) {
+                alert('Selecciona un cliente');
+                return;
+            }
+
+            const servicio = document.getElementById('citaServicioExistente').value;
+            const datetime = document.getElementById('citaDateTimeExistente').value;
+
+            if (!servicio || !datetime) {
+                alert('Servicio y Fecha/Hora son obligatorios');
+                return;
+            }
+
+            const cliente = clients.find(c => c.id === clienteSeleccionadoId);
+
+            citas.push({
+                id: Math.max(...citas.map(c => c.id || 0), 0) + 1,
+                clienteId: clienteSeleccionadoId,
+                cliente: cliente.nombre + ' ' + cliente.apellido,
+                servicio: servicio,
+                datetime: datetime,
+                descripcion: document.getElementById('citaDescripcionExistente').value
+            });
+
+            // Crear en Google Calendar
+            const titulo = servicio + ' - ' + cliente.nombre + ' ' + cliente.apellido;
+            const descripcion = document.getElementById('citaDescripcionExistente').value;
+            crearEventoEnGoogle(titulo, datetime, descripcion).then(success => {
+                if (success) {
+                    showSaveStatus('✓ Cita en Google Calendar');
+                } else {
+                    showSaveStatus('✓ Cita guardada');
+                }
+            });
+
+            renderCitasSelector();
         }
 
-        function resetForm() {
-            form.reset();
-            document.querySelectorAll('select').forEach(s => s.value = '');
-            updateProgress();
+        function renderCitasList() {
+            const list = document.getElementById('citasList');
+
+            if (citas.length === 0) {
+                list.innerHTML = '<div class="empty-state">Sin citas agendadas</div>';
+                return;
+            }
+
+            list.innerHTML = citas.sort((a, b) => new Date(a.datetime) - new Date(b.datetime)).map(c => {
+                const fecha = new Date(c.datetime);
+                return `
+                    <div class="cita-item">
+                        <div class="cita-tiempo">📅 ${fecha.toLocaleDateString()} - ${fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        <div class="cita-cliente">${c.cliente}</div>
+                        <div class="cita-detalles">🔧 ${c.servicio}</div>
+                        ${c.descripcion ? `<div class="cita-detalles" style="margin-top: 8px; color: #333;">${c.descripcion}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
         }
 
-        updateProgress();
+        function filtrarCitas() {
+            const fecha = document.getElementById('filtroFecha').value;
+            const servicio = document.getElementById('filtroServicio').value;
+            const list = document.getElementById('citasList');
+
+            let citasFiltradas = citas;
+
+            if (fecha) {
+                citasFiltradas = citasFiltradas.filter(c => c.datetime.startsWith(fecha));
+            }
+
+            if (servicio) {
+                citasFiltradas = citasFiltradas.filter(c => c.servicio === servicio);
+            }
+
+            if (citasFiltradas.length === 0) {
+                list.innerHTML = '<div class="empty-state">Sin citas que coincidan los filtros</div>';
+                return;
+            }
+
+            list.innerHTML = citasFiltradas.sort((a, b) => new Date(a.datetime) - new Date(b.datetime)).map(c => {
+                const fecha = new Date(c.datetime);
+                return `
+                    <div class="cita-item">
+                        <div class="cita-tiempo">📅 ${fecha.toLocaleDateString()} - ${fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        <div class="cita-cliente">${c.cliente}</div>
+                        <div class="cita-detalles">🔧 ${c.servicio}</div>
+                        ${c.descripcion ? `<div class="cita-detalles" style="margin-top: 8px; color: #333;">${c.descripcion}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtroFecha').value = '';
+            document.getElementById('filtroServicio').value = '';
+            renderCitasList();
+        }
+
+        // ÓRDENES
+        function renderOrdenes() {
+            const statuses = ['pendiente', 'en-progreso', 'listo-entrega', 'entregado-pagado'];
+            const statusLabels = {
+                'pendiente': 'Pendiente',
+                'en-progreso': 'En Progreso',
+                'listo-entrega': 'Listo para Entrega',
+                'entregado-pagado': 'Entregado y Pagado'
+            };
+
+            const container = document.getElementById('pipelineContainer');
+            
+            container.innerHTML = statuses.map(status => {
+                const ordersInStatus = orders.filter(o => o.estado === status);
+                return `
+                    <div class="pipeline-column">
+                        <div class="column-title">
+                            ${statusLabels[status]}
+                            <span class="column-count">${ordersInStatus.length}</span>
+                        </div>
+                        <div class="dropzone" ondragover="event.preventDefault(); this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropOrder(event, '${status}')">
+                            ${ordersInStatus.map(o => {
+                                const client = clients.find(c => c.id === o.clienteId);
+                                const fechaEntrega = client.fechaEntrega ? new Date(client.fechaEntrega) : null;
+                                const fechaFormato = fechaEntrega ? fechaEntrega.toLocaleDateString() : '-';
+                                
+                                return `
+                                    <div class="order-card" draggable="true" ondragstart="event.dataTransfer.setData('orderId', ${o.id})">
+                                        <div class="order-numero">${o.numero}</div>
+                                        <div class="order-client" onclick="event.stopPropagation(); openClient(${o.clienteId})">👤 ${client.nombre} ${client.apellido}</div>
+                                        <div class="order-info">🏍️ ${client.moto.modelo}</div>
+                                        <div class="order-info">Matrícula: ${client.moto.matricula}</div>
+                                        <div class="order-info">📅 ${fechaFormato}</div>
+                                        <div class="order-service">🔧 ${o.servicio}</div>
+                                        ${o.importe > 0 ? `<div style="margin-top: 8px; font-weight: 600; color: #4caf50;">€ ${o.importe}</div>` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function dropOrder(e, status) {
+            e.target.classList.remove('drag-over');
+            const orderId = parseInt(e.dataTransfer.getData('orderId'));
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                if (status === 'entregado-pagado') {
+                    const importe = prompt('Introduce el importe de la factura:');
+                    if (!importe || isNaN(importe) || parseFloat(importe) <= 0) {
+                        alert('Debes introducir un importe válido');
+                        return;
+                    }
+                    order.importe = parseFloat(importe);
+                    launchConfetti();
+                }
+                order.estado = status;
+                renderOrdenes();
+            }
+        }
+
+        // INFORMES
+        function renderInformes() {
+            const container = document.getElementById('statsGrid');
+            const ordersEntregados = orders.filter(o => o.estado === 'entregado-pagado');
+            const totalFacturado = ordersEntregados.reduce((sum, o) => sum + (o.importe || 0), 0);
+            const ordersActivas = orders.filter(o => o.estado !== 'entregado-pagado').length;
+
+            container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${clients.length}</div>
+                    <div class="stat-label">Total Clientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${citas.length}</div>
+                    <div class="stat-label">Citas Agendadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${ordersActivas}</div>
+                    <div class="stat-label">Órdenes Activas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${ordersEntregados.length}</div>
+                    <div class="stat-label">Completadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">€${totalFacturado}</div>
+                    <div class="stat-label">Facturación</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${(totalFacturado / (ordersEntregados.length || 1)).toFixed(0)}</div>
+                    <div class="stat-label">Ticket Medio</div>
+                </div>
+            `;
+
+            const informesContainer = document.getElementById('informesGrid');
+            informesContainer.innerHTML = `
+                <div class="chart-container">
+                    <div class="chart-title">Servicios Más Solicitados</div>
+                    <canvas id="chartServicios"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Modelos de Motos en Taller</div>
+                    <canvas id="chartModelos"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Estado del Funel de Órdenes</div>
+                    <canvas id="chartFunel"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Facturación por Servicio</div>
+                    <canvas id="chartFacturacionServicio"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Citas por Servicio</div>
+                    <canvas id="chartCitasServicio"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Mecánicos - Carga de Trabajo</div>
+                    <canvas id="chartMecanicos"></canvas>
+                </div>
+            `;
+
+            setTimeout(() => renderChartsInformes(), 100);
+        }
+
+        function renderChartsInformes() {
+            // Servicios
+            const servicios = {};
+            clients.forEach(c => {
+                c.acciones.forEach(a => {
+                    a.servicio.forEach(s => {
+                        servicios[s] = (servicios[s] || 0) + 1;
+                    });
+                });
+            });
+
+            if (document.getElementById('chartServicios')) {
+                new Chart(document.getElementById('chartServicios'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(servicios),
+                        datasets: [{ data: Object.values(servicios), backgroundColor: ['#0066cc', '#ff9800', '#4caf50', '#f44336'] }]
+                    }
+                });
+            }
+
+            // Modelos
+            const modelos = {};
+            clients.forEach(c => { modelos[c.moto.modelo || 'Sin modelo'] = (modelos[c.moto.modelo || 'Sin modelo'] || 0) + 1; });
+
+            if (document.getElementById('chartModelos')) {
+                new Chart(document.getElementById('chartModelos'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(modelos),
+                        datasets: [{ label: 'Cantidad', data: Object.values(modelos), backgroundColor: '#0066cc' }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            // Funel
+            const funel = {
+                'Pendiente': orders.filter(o => o.estado === 'pendiente').length,
+                'En Progreso': orders.filter(o => o.estado === 'en-progreso').length,
+                'Listo Entrega': orders.filter(o => o.estado === 'listo-entrega').length,
+                'Entregado': orders.filter(o => o.estado === 'entregado-pagado').length
+            };
+
+            if (document.getElementById('chartFunel')) {
+                new Chart(document.getElementById('chartFunel'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(funel),
+                        datasets: [{ label: 'Órdenes', data: Object.values(funel), backgroundColor: ['#ff9800', '#0066cc', '#4caf50', '#2e7d32'] }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            // Facturación
+            const facturacionServicio = {};
+            orders.filter(o => o.estado === 'entregado-pagado').forEach(o => {
+                facturacionServicio[o.servicio] = (facturacionServicio[o.servicio] || 0) + o.importe;
+            });
+
+            if (document.getElementById('chartFacturacionServicio')) {
+                new Chart(document.getElementById('chartFacturacionServicio'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(facturacionServicio),
+                        datasets: [{ label: '€', data: Object.values(facturacionServicio), backgroundColor: '#4caf50' }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            // Citas por servicio
+            const citasServicio = {};
+            citas.forEach(c => {
+                citasServicio[c.servicio] = (citasServicio[c.servicio] || 0) + 1;
+            });
+
+            if (document.getElementById('chartCitasServicio')) {
+                new Chart(document.getElementById('chartCitasServicio'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(citasServicio),
+                        datasets: [{ data: Object.values(citasServicio), backgroundColor: ['#0066cc', '#ff9800', '#4caf50', '#f44336'] }]
+                    }
+                });
+            }
+
+            // Mecánicos
+            const mecanicos = {};
+            orders.forEach(o => { mecanicos[o.mecanico] = (mecanicos[o.mecanico] || 0) + 1; });
+
+            if (document.getElementById('chartMecanicos')) {
+                new Chart(document.getElementById('chartMecanicos'), {
+                    type: 'radar',
+                    data: {
+                        labels: Object.keys(mecanicos),
+                        datasets: [{ label: 'Órdenes', data: Object.values(mecanicos), backgroundColor: 'rgba(0, 102, 204, 0.2)', borderColor: '#0066cc' }]
+                    },
+                    options: { responsive: true, scales: { r: { beginAtZero: true } } }
+                });
+            }
+        }
+
+        function calcularDiasEntrega(fecha) {
+            const hoy = new Date();
+            const entrega = new Date(fecha);
+            const diff = entrega - hoy;
+            return Math.ceil(diff / (1000 * 60 * 60 * 24));
+        }
+
+        function showSaveStatus() {
+            const status = document.getElementById('saveStatus');
+            status.innerHTML = '<div class="save-status">✓ Cambios guardados</div>';
+            setTimeout(() => { status.innerHTML = ''; }, 2000);
+        }
+
+        function launchConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * window.innerWidth + 'px';
+                confetti.style.top = '-10px';
+                confetti.style.background = ['#0066cc', '#ff9800', '#4caf50', '#f44336'][Math.floor(Math.random() * 4)];
+                confetti.style.animation = `confettiFall ${2 + Math.random() * 1}s linear forwards`;
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        // INIT
+        renderClientes();
     </script>
 </body>
 </html>
