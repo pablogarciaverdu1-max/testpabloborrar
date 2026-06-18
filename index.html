@@ -1037,8 +1037,8 @@
                     </div>
                     <div>
                         <div class="calendar-container">
-                            <div class="calendar-info">📧 Calendario: pablogarciaverdu1@gmail.com</div>
-                            <iframe class="calendar-iframe" src="https://calendar.google.com/calendar/embed?src=pablogarciaverdu1@gmail.com&ctz=Europe/Madrid" frameborder="0" scrolling="no"></iframe>
+                            <div class="calendar-info">📅 Calendario Interno</div>
+                            <div id="calendarioInterno" style="background: white; padding: 20px; border-radius: 6px; border: 1px solid #e5e5e5; font-size: 13px;"></div>
                         </div>
                     </div>
                 </div>
@@ -1098,39 +1098,6 @@
     <div id="saveStatus"></div>
 
     <script>
-        const GOOGLE_APPS_SCRIPT_URL = 'https://script.googleapis.com/macros/s/AKfycbyQ-zgoa0y0Ba5mmvRw6-51Wz5HUi7m6dJKixa-OM8TXyQkAzbNZx0m944V1vebj6-CJg/exec';
-
-        async function crearEventoEnGoogle(titulo, fecha, descripcion) {
-            try {
-                console.log('📡 Enviando cita a Google Calendar...');
-                console.log('URL:', GOOGLE_APPS_SCRIPT_URL);
-                console.log('Datos:', { titulo, fecha, descripcion });
-
-                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        titulo: titulo,
-                        datetime: fecha,
-                        descripcion: descripcion || ''
-                    })
-                });
-
-                console.log('✓ Respuesta recibida:', response.status);
-                const result = await response.json();
-                console.log('✓ JSON parseado:', result);
-
-                if (result.success) {
-                    console.log('✅ ÉXITO: Evento creado en Google Calendar');
-                    return true;
-                } else {
-                    console.log('❌ ERROR del script:', result.error);
-                    return false;
-                }
-            } catch (error) {
-                console.log('❌ ERROR en fetch:', error);
-                return false;
-            }
-        }
         // MARCAS DE MOTOS (A-Z)
         const marcasMotos = [
             'Aprilia', 'Benelli', 'BMW', 'Cyclone', 'Derbi', 'Gas Gas', 'Hanway', 'Honda', 
@@ -1757,8 +1724,6 @@
             }
 
             const client = clients.find(c => c.id === currentClientId);
-            const titulo = servicio + ' - ' + client.nombre + ' ' + client.apellido;
-            
             citas.push({
                 id: Math.max(...citas.map(c => c.id || 0), 0) + 1,
                 clienteId: client.id,
@@ -1768,15 +1733,7 @@
                 descripcion: notas
             });
 
-            // Crear en Google Calendar
-            crearEventoEnGoogle(titulo, datetime, notas).then(success => {
-                if (success) {
-                    showSaveStatus('✓ Cita en Google Calendar');
-                } else {
-                    showSaveStatus('✓ Cita guardada');
-                }
-            });
-
+            showSaveStatus();
             closeCitaRapida();
             renderCitasList();
             openClient(currentClientId);
@@ -2046,17 +2003,7 @@
                 descripcion: document.getElementById('citaDescripcion').value
             });
 
-            // Crear en Google Calendar
-            const titulo = servicio + ' - ' + nombre + ' ' + apellido;
-            const descripcion = document.getElementById('citaDescripcion').value;
-            crearEventoEnGoogle(titulo, datetime, descripcion).then(success => {
-                if (success) {
-                    showSaveStatus('✓ Cita en Google Calendar');
-                } else {
-                    showSaveStatus('✓ Cita guardada');
-                }
-            });
-
+            showSaveStatus();
             renderCitasSelector();
         }
 
@@ -2085,17 +2032,7 @@
                 descripcion: document.getElementById('citaDescripcionExistente').value
             });
 
-            // Crear en Google Calendar
-            const titulo = servicio + ' - ' + cliente.nombre + ' ' + cliente.apellido;
-            const descripcion = document.getElementById('citaDescripcionExistente').value;
-            crearEventoEnGoogle(titulo, datetime, descripcion).then(success => {
-                if (success) {
-                    showSaveStatus('✓ Cita en Google Calendar');
-                } else {
-                    showSaveStatus('✓ Cita guardada');
-                }
-            });
-
+            showSaveStatus();
             renderCitasSelector();
         }
 
@@ -2104,6 +2041,7 @@
 
             if (citas.length === 0) {
                 list.innerHTML = '<div class="empty-state">Sin citas agendadas</div>';
+                renderCalendarioInterno();
                 return;
             }
 
@@ -2118,6 +2056,56 @@
                     </div>
                 `;
             }).join('');
+            
+            renderCalendarioInterno();
+        }
+
+        function renderCalendarioInterno() {
+            const calendario = document.getElementById('calendarioInterno');
+            const hoy = new Date();
+            const mes = hoy.getMonth();
+            const año = hoy.getFullYear();
+            
+            const primerDia = new Date(año, mes, 1);
+            const ultimoDia = new Date(año, mes + 1, 0);
+            const diasMes = ultimoDia.getDate();
+            const diaInicio = primerDia.getDay();
+            
+            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            
+            let html = `<div style="text-align: center; margin-bottom: 16px;">
+                <div style="font-weight: 700; font-size: 16px; margin-bottom: 12px;">${meses[mes]} ${año}</div>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">`;
+            
+            // Días de la semana
+            diasSemana.forEach(d => {
+                html += `<div style="font-weight: 600; padding: 8px; background: #f0f0f0; border-radius: 4px;">${d}</div>`;
+            });
+            
+            // Espacios vacíos antes del primer día
+            for (let i = 0; i < diaInicio; i++) {
+                html += `<div></div>`;
+            }
+            
+            // Días del mes
+            for (let dia = 1; dia <= diasMes; dia++) {
+                const fecha = new Date(año, mes, dia);
+                const fechaStr = fecha.toISOString().split('T')[0];
+                const citasDelDia = citas.filter(c => c.datetime.startsWith(fechaStr));
+                const esHoy = fecha.toDateString() === hoy.toDateString();
+                
+                const estiloFondo = esHoy ? 'background: #0066cc; color: white;' : citasDelDia.length > 0 ? 'background: #e3f2fd; border: 2px solid #0066cc;' : '';
+                const titulo = citasDelDia.length > 0 ? `${citasDelDia.length} cita${citasDelDia.length > 1 ? 's' : ''}` : '';
+                
+                html += `<div style="padding: 8px; border-radius: 4px; text-align: center; ${estiloFondo} cursor: pointer;" title="${titulo}">
+                    <div style="font-weight: ${citasDelDia.length > 0 ? 700 : 500};">${dia}</div>
+                    ${citasDelDia.length > 0 ? `<div style="font-size: 11px; margin-top: 4px;">● ${citasDelDia.length}</div>` : ''}
+                </div>`;
+            }
+            
+            html += `</div></div>`;
+            calendario.innerHTML = html;
         }
 
         function filtrarCitas() {
