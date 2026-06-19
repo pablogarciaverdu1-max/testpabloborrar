@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏍️ VIASCOOTER GRUPO VÍA - CRM Pro</title>
+    <title>VIASCOOTER GRUPO VÍA - CRM Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script async defer src="https://accounts.google.com/gsi/client"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -15,58 +16,65 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
         }
 
         .app-container {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background: #fff;
+            background: #ffffff;
         }
 
         .header {
-            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
-            color: white;
-            padding: 20px 32px;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 28px 40px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .nav-tabs {
             display: flex;
-            gap: 8px;
-            padding: 0 32px;
-            border-bottom: 1px solid #e5e5e5;
-            background: white;
+            gap: 0;
+            padding: 0 40px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #ffffff;
             overflow-x: auto;
         }
 
         .nav-tab {
-            padding: 16px 20px;
+            padding: 18px 24px;
             cursor: pointer;
             border: none;
             background: none;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
-            color: #666;
+            color: #666666;
             border-bottom: 3px solid transparent;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             white-space: nowrap;
         }
 
+        .nav-tab:hover {
+            color: #1a1a1a;
+            background: #f8f8f8;
+        }
+
         .nav-tab.active {
-            color: #0066cc;
-            border-bottom-color: #0066cc;
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
+            background: #ffffff;
         }
 
         .content {
@@ -74,13 +82,14 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            background: #ffffff;
         }
 
         .view {
             display: none;
             flex: 1;
             overflow-y: auto;
-            padding: 24px 32px;
+            padding: 32px 40px;
         }
 
         .view.active {
@@ -108,20 +117,28 @@
         }
 
         .filter-label {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 600;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 8px;
+            color: #1a1a1a;
+            text-transform: none;
+            margin-bottom: 10px;
             display: block;
         }
 
         .filter-input, .filter-select {
             width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
+            padding: 12px 14px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
         }
 
         .clients-list {
@@ -141,7 +158,7 @@
 
         .client-item:hover {
             background: #f9f9f9;
-            border-color: #0066cc;
+            border-color: #333333;
             box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
         }
 
@@ -195,7 +212,7 @@
         .btn-new-client {
             width: 100%;
             padding: 12px;
-            background: #0066cc;
+            background: #333333;
             color: white;
             border: none;
             border-radius: 4px;
@@ -211,7 +228,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.4);
             display: none;
             align-items: flex-start;
             justify-content: center;
@@ -225,38 +242,44 @@
         }
 
         .modal {
-            background: white;
+            background: #ffffff;
             border-radius: 8px;
             width: 90%;
             max-width: 950px;
             margin-bottom: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
         }
 
         .modal-header {
-            padding: 24px;
-            border-bottom: 1px solid #e5e5e5;
+            padding: 28px 32px;
+            border-bottom: 1px solid #e0e0e0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #f9f9f9;
+            background: #ffffff;
         }
 
         .modal-title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
+            color: #1a1a1a;
         }
 
         .close-btn {
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
-            color: #666;
+            color: #999;
+            transition: color 0.2s ease;
+        }
+
+        .close-btn:hover {
+            color: #1a1a1a;
         }
 
         .modal-body {
-            padding: 24px;
+            padding: 32px;
             max-height: 70vh;
             overflow-y: auto;
         }
@@ -304,16 +327,28 @@
         }
 
         .form-input, .form-select, .form-textarea {
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
+            padding: 12px 16px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 15px;
             font-family: inherit;
+            background: #ffffff;
+            color: #1a1a1a;
+            min-height: 44px;
+            display: block;
+            width: 100%;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
         }
 
         .form-textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 120px;
+            padding: 12px 16px;
         }
 
         .action-item {
@@ -345,55 +380,65 @@
             margin-bottom: 12px;
             font-size: 13px;
             line-height: 1.5;
-            border-left: 3px solid #0066cc;
+            border-left: 3px solid #333333;
             white-space: pre-wrap;
         }
 
         .btn {
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: white;
+            padding: 12px 24px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            background: #ffffff;
+            color: #1a1a1a;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 500;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn:hover {
-            background: #f9f9f9;
-            border-color: #999;
+            background: #f5f5f5;
+            border-color: #1a1a1a;
         }
 
         .btn-primary {
-            background: #0066cc;
-            color: white;
-            border-color: #0066cc;
+            background: #1a1a1a;
+            color: #ffffff;
+            border-color: #1a1a1a;
+            font-weight: 600;
         }
 
         .btn-primary:hover {
-            background: #0052a3;
+            background: #000000;
+            border-color: #000000;
         }
 
         .btn-success {
-            background: #4caf50;
-            color: white;
-            border-color: #4caf50;
+            background: #1a1a1a;
+            color: #ffffff;
+            border-color: #1a1a1a;
+            font-weight: 600;
         }
 
         .btn-success:hover {
-            background: #388e3c;
+            background: #000000;
+            border-color: #000000;
         }
 
         .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            min-height: 40px;
         }
 
         .action-buttons {
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 12px;
+            margin-top: 16px;
         }
 
         /* ESTADO FUNEL */
@@ -401,13 +446,13 @@
             background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
             padding: 16px;
             border-radius: 6px;
-            border-left: 4px solid #0066cc;
+            border-left: 4px solid #333333;
             margin-bottom: 24px;
         }
 
         .estado-funel-label {
             font-size: 12px;
-            color: #0066cc;
+            color: #333333;
             font-weight: 600;
             margin-bottom: 8px;
         }
@@ -415,7 +460,7 @@
         .estado-funel-valor {
             font-size: 16px;
             font-weight: 700;
-            color: #0066cc;
+            color: #333333;
         }
 
         /* CITAS CLIENTE */
@@ -428,7 +473,7 @@
 
         .cita-card {
             background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border: 2px solid #0066cc;
+            border: 2px solid #333333;
             border-radius: 6px;
             padding: 12px;
             text-align: center;
@@ -444,7 +489,7 @@
 
         .cita-card-fecha {
             font-weight: 700;
-            color: #0066cc;
+            color: #333333;
             margin-bottom: 8px;
         }
 
@@ -490,28 +535,31 @@
 
         .recambio-precio {
             font-size: 12px;
-            color: #0066cc;
+            color: #333333;
             font-weight: 700;
         }
 
         .recambios-total {
-            background: #e3f2fd;
-            padding: 12px 16px;
-            border-radius: 6px;
-            border-left: 4px solid #0066cc;
-            margin-top: 16px;
+            background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
         }
 
         .recambios-total-label {
             font-size: 12px;
-            color: #666;
-            margin-bottom: 4px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         .recambios-total-valor {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
-            color: #0066cc;
+            color: #ffc107;
         }
 
         /* CREAR ACCIÓN MODAL */
@@ -530,7 +578,7 @@
             display: none;
             flex-direction: column;
             z-index: 2000;
-            border-top: 4px solid #0066cc;
+            border-top: 4px solid #333333;
         }
 
         .accion-editor-modal.active {
@@ -569,7 +617,7 @@
             display: none;
             flex-direction: column;
             z-index: 2000;
-            border-top: 4px solid #0066cc;
+            border-top: 4px solid #333333;
         }
 
         .cita-detalles-modal.active {
@@ -608,7 +656,7 @@
             display: none;
             flex-direction: column;
             z-index: 2000;
-            border: 3px solid #0066cc;
+            border: 3px solid #333333;
         }
 
         .cita-rapida-modal.active {
@@ -617,7 +665,7 @@
 
         .cita-header {
             padding: 16px 24px;
-            border-bottom: 3px solid #0066cc;
+            border-bottom: 3px solid #333333;
             background: #bbdefb;
             display: flex;
             justify-content: space-between;
@@ -686,9 +734,9 @@
         }
 
         .btn-toggle.active {
-            border-color: #0066cc;
+            border-color: #333333;
             background: #e3f2fd;
-            color: #0066cc;
+            color: #333333;
         }
 
         /* CITAS */
@@ -717,12 +765,12 @@
             padding: 16px;
             border: 1px solid #e5e5e5;
             border-radius: 6px;
-            border-left: 4px solid #0066cc;
+            border-left: 4px solid #333333;
         }
 
         .cita-tiempo {
             font-weight: 600;
-            color: #0066cc;
+            color: #333333;
             margin-bottom: 8px;
         }
 
@@ -755,10 +803,10 @@
             background: #e3f2fd;
             padding: 12px;
             border-radius: 6px;
-            border-left: 4px solid #0066cc;
+            border-left: 4px solid #333333;
             margin-bottom: 16px;
             font-size: 13px;
-            color: #0066cc;
+            color: #333333;
             font-weight: 600;
         }
 
@@ -768,6 +816,7 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 16px;
             flex: 1;
+            overflow: hidden;
         }
 
         .pipeline-column {
@@ -802,11 +851,14 @@
             border-radius: 6px;
             padding: 12px;
             overflow-y: auto;
+            max-height: 600px;
+            scroll-behavior: smooth;
+            overscroll-behavior: contain;
         }
 
         .dropzone.drag-over {
             background: #e3f2fd;
-            border-color: #0066cc;
+            border-color: #333333;
         }
 
         .order-card {
@@ -821,34 +873,32 @@
 
         .order-card:hover {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-color: #0066cc;
+            border-color: #333333;
         }
 
-        .order-numero {
+        .order-id {
             font-weight: 700;
             font-size: 12px;
-            color: #999;
-            margin-bottom: 8px;
+            color: #333333;
+            margin-bottom: 6px;
         }
 
         .order-client {
             font-weight: 600;
             font-size: 13px;
             margin-bottom: 4px;
-            color: #0066cc;
-            cursor: pointer;
-            text-decoration: underline;
         }
 
-        .order-client:hover {
-            color: #0052a3;
+        .order-service {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
         }
 
         .order-info {
-            font-size: 12px;
-            color: #666;
+            font-size: 11px;
+            color: #999;
             line-height: 1.4;
-            margin-bottom: 8px;
         }
 
         /* INFORMES */
@@ -870,7 +920,7 @@
         .stat-value {
             font-size: 24px;
             font-weight: 700;
-            color: #0066cc;
+            color: #333333;
         }
 
         .stat-label {
@@ -973,19 +1023,147 @@
             content: " *";
             color: #f44336;
         }
+
+        /* LOGIN SCREEN */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .login-box {
+            background: white;
+            padding: 48px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .login-logo {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333333;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 32px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .login-form input {
+            padding: 14px 18px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+            min-height: 44px;
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
+        }
+
+        .login-btn {
+            padding: 14px;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 48px;
+        }
+
+        .login-btn:hover {
+            background: #000000;
+        }
+
+        .login-error {
+            color: #f44336;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .app-container.hidden {
+            display: none;
+        }
+
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            background: #4caf50;
+            color: white;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .sync-status.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <div class="app-container">
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <div class="login-logo">VIASCOOTER</div>
+            <div class="login-subtitle">Grupo VÍA Motos - CRM Profesional</div>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <input type="text" id="loginUser" placeholder="Usuario" required autofocus>
+                <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                <button type="submit" class="login-btn">Acceder</button>
+                <div id="loginError" class="login-error"></div>
+            </form>
+            <div style="text-align: center; margin-top: 24px; font-size: 12px; color: #999;">
+                Sistema de Gestión Integral
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container hidden" id="appContainer">
         <div class="header">
-            <h1>🏍️ VIASCOOTER GRUPO VÍA</h1>
+            <h1>VIASCOOTER GRUPO VÍA</h1>
+            <button onclick="logout()" style="background: #1a1a1a; border: 1px solid #1a1a1a; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; min-height: 40px; transition: all 0.2s ease;" onmouseover="this.style.background='#000000'" onmouseout="this.style.background='#1a1a1a'">Salir</button>
         </div>
 
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="switchTab('clientes')">👥 Clientes</button>
-            <button class="nav-tab" onclick="switchTab('citas')">📅 Citas</button>
-            <button class="nav-tab" onclick="switchTab('ordenes')">📦 Órdenes de Pedido</button>
-            <button class="nav-tab" onclick="switchTab('informes')">📊 Informes</button>
+            <button class="nav-tab" onclick="switchTab('citas')">Citas</button>
+            <button class="nav-tab active" onclick="switchTab('clientes')">Clientes</button>
+            <button class="nav-tab" onclick="switchTab('ordenes')">Órdenes</button>
+            <button class="nav-tab" onclick="switchTab('informes')">Informes</button>
+            <button class="nav-tab" onclick="switchTab('admin')" style="margin-left: auto;">Administración</button>
         </div>
 
         <div class="content">
@@ -995,12 +1173,15 @@
                     <div class="filters-panel">
                         <button class="btn-new-client" onclick="newCliente()">+ Nuevo Cliente</button>
                         <div class="filter-group">
-                            <label class="filter-label">🔍 Buscar</label>
+                            <label class="filter-label">Buscar cliente</label>
                             <input type="text" class="filter-input" id="searchInput" placeholder="Nombre, teléfono, matrícula..." onkeyup="filterClientes()">
                         </div>
                         <div class="filter-group">
                             <label class="filter-label">📅 Filtrar por Entrega</label>
-                            <input type="date" class="filter-input" id="filterEntrega" onchange="filterClientes()">
+                            <div style="position: relative;">
+                                <input type="text" id="filterEntrega" class="filter-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('filterEntrega')" readonly style="cursor: pointer;">
+                                <div id="calendarioMini_filterEntrega" class="calendario-mini" style="display: none;"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="clients-list" id="clientsList"></div>
@@ -1013,20 +1194,28 @@
                     <div>
                         <div id="citasFormContainer" class="citas-form"></div>
                         
-                        <!-- FILTROS DE CITAS -->
-                        <div style="background: #f9f9f9; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5; margin-top: 16px;">
-                            <div style="font-weight: 600; margin-bottom: 12px;">🔍 Filtrar Citas</div>
-                            <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-                                <input type="date" id="filtroFecha" class="form-input" onchange="filtrarCitas()" placeholder="Fecha">
-                                <select id="filtroServicio" class="form-select" onchange="filtrarCitas()">
-                                    <option value="">Todos los servicios</option>
-                                    <option value="Revisión periodica">Revisión periodica</option>
-                                    <option value="Siniestro">Siniestro</option>
-                                    <option value="Reparación moto">Reparación moto</option>
-                                    <option value="Revisión ITV">Revisión ITV</option>
-                                </select>
-                                <button class="btn" onclick="limpiarFiltros()" style="background: #fff; border: 1px solid #ddd;">Limpiar filtros</button>
+                        <!-- FILTROS ARRIBA -->
+                        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5; margin-top: 16px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div>
+                                    <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Fecha</label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="filtroFecha" class="form-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('filtroFecha')" readonly style="cursor: pointer; background: white;">
+                                        <div id="calendarioMini_filtroFecha" class="calendario-mini" style="display: none;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Tipo de Servicio</label>
+                                    <select id="filtroServicio" class="form-select" onchange="filtrarCitas()">
+                                        <option value="">Todos los servicios</option>
+                                        <option value="Revisión periodica">Revisión periodica</option>
+                                        <option value="Siniestro">Siniestro</option>
+                                        <option value="Reparación moto">Reparación moto</option>
+                                        <option value="Revisión ITV">Revisión ITV</option>
+                                    </select>
+                                </div>
                             </div>
+                            <button class="btn" onclick="limpiarFiltros()" style="width: 100%; margin-top: 12px; background: #fff; border: 1px solid #ddd;">Limpiar filtros</button>
                         </div>
                         
                         <!-- LISTA DE CITAS -->
@@ -1037,8 +1226,29 @@
                     </div>
                     <div>
                         <div class="calendar-container">
-                            <div class="calendar-info">📅 Calendario Interno</div>
-                            <div id="calendarioInterno" style="background: white; padding: 20px; border-radius: 6px; border: 1px solid #e5e5e5; font-size: 13px;"></div>
+                            <div class="calendar-info"></div>
+                            <div style="padding: 16px; background: white; border-radius: 6px; border: 1px solid #e5e5e5;">
+                                <!-- BOTONES DE VISTA -->
+                                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                                    <button class="btn" onclick="cambiarVistaCalendario('dia')" id="btnDia" style="background: #f0f0f0; color: #333;">📆 Día</button>
+                                    <button class="btn" onclick="cambiarVistaCalendario('semana')" id="btnSemana" style="background: #f0f0f0; color: #333;">📅 Semana</button>
+                                    <button class="btn" onclick="cambiarVistaCalendario('mes')" id="btnMes" style="background: #333333; color: white;">📊 Mes</button>
+                                </div>
+
+                                <!-- LEYENDA -->
+                                <div style="background: #f9f9f9; padding: 12px; border-radius: 4px; margin-bottom: 16px; font-size: 12px;">
+                                    <div style="font-weight: 600; margin-bottom: 8px;">Leyenda de Servicios:</div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #ff6b6b; border-radius: 2px;"></div> <span>Revisión periodica</span></div>
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #ffa94d; border-radius: 2px;"></div> <span>Siniestro</span></div>
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #4ecdc4; border-radius: 2px;"></div> <span>Reparación moto</span></div>
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #95e1d3; border-radius: 2px;"></div> <span>Revisión ITV</span></div>
+                                    </div>
+                                </div>
+
+                                <!-- CALENDARIO -->
+                                <div id="calendarioInterno" style="font-size: 13px;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1054,6 +1264,29 @@
                 <div class="stats-grid" id="statsGrid"></div>
                 <div class="informes-grid" id="informesGrid"></div>
             </div>
+
+            <!-- ADMINISTRACIÓN -->
+            <div id="view-admin" class="view">
+                <div style="padding: 20px;">
+                    <h2 style="margin-top: 0; color: #333;">⚙️ Administración</h2>
+                    
+                    <div style="max-width: 800px;">
+                        <div style="background: white; border: 1px solid #e1e4e8; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                            <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">Gestionar Mecánicos</h3>
+                            
+                            <div id="mecanicosListAdmin" style="margin-bottom: 20px;"></div>
+                            
+                            <div style="border-top: 1px solid #e1e4e8; padding-top: 15px;">
+                                <h4 style="margin-top: 0; color: #555;">Agregar Nuevo Mecánico</h4>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" id="nuevoMecanicoInput" placeholder="Nombre del mecánico" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                                    <button class="btn btn-primary" onclick="agregarMecanico()" style="padding: 10px 20px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">+ Agregar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1061,7 +1294,6 @@
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
         <div class="modal" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Cliente</h2>
                 <button class="close-btn" onclick="closeModal()">×</button>
             </div>
             <div class="modal-body" id="modalBody"></div>
@@ -1086,6 +1318,15 @@
         <div class="cita-detalles-body" id="citaDetallesBody"></div>
     </div>
 
+    <!-- EDITAR ORDEN -->
+    <div class="cita-detalles-modal" id="editarOrdenModal">
+        <div class="cita-detalles-header">
+            <h3>📦 Cambiar Estado de Orden</h3>
+            <button class="close-btn" onclick="cerrarEditarOrden()">×</button>
+        </div>
+        <div class="cita-detalles-body" id="editarOrdenBody"></div>
+    </div>
+
     <!-- CREAR CITA RÁPIDA -->
     <div class="cita-rapida-modal" id="citaRapidaModal">
         <div class="cita-header">
@@ -1095,17 +1336,349 @@
         <div class="cita-body" id="citaRapidaBody"></div>
     </div>
 
+    <!-- CREAR ORDEN -->
+    <div class="cita-rapida-modal" id="crearOrdenModal">
+        <div class="cita-header">
+            <h3>📦 Crear Orden</h3>
+            <button class="close-btn" onclick="cerrarCrearOrden()">×</button>
+        </div>
+        <div class="cita-body" id="crearOrdenBody"></div>
+    </div>
+
+    <!-- EDITAR CITA -->
+    <div class="cita-rapida-modal" id="editarCitaModal">
+        <div class="cita-header">
+            <h3>📝 Editar Cita</h3>
+            <button class="close-btn" onclick="cerrarEditarCita()">×</button>
+        </div>
+        <div class="cita-body">
+            <div class="form-group full">
+                <div class="form-field">
+                    <label class="form-label">Etapa</label>
+                    <select class="form-select" id="editar-cita-estado">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en-progreso">En Progreso</option>
+                        <option value="listo-entrega">Listo para Entrega</option>
+                        <option value="entregado-pagado">Entregado y Pagado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group full">
+                <div class="form-field">
+                    <label class="form-label">Nota / Seguimiento</label>
+                    <textarea class="form-input" id="editar-cita-nota" rows="4" placeholder="Agrega una nota sobre esta cita..."></textarea>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="btn btn-primary" onclick="guardarEditarCita()">Guardar Cambios</button>
+                <button class="btn" onclick="cerrarEditarCita()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="saveStatus"></div>
 
     <script>
-        // MARCAS DE MOTOS (A-Z)
-        const marcasMotos = [
-            'Aprilia', 'Benelli', 'BMW', 'Cyclone', 'Derbi', 'Gas Gas', 'Hanway', 'Honda', 
-            'Husqvarna', 'Kayo', 'Kymco', 'KTM', 'Moto Guzzi', 'Piaggio', 'Rieju', 'Sherco', 
-            'SYM', 'Voge', 'Yamaha', 'Zontes', 'Suzuki'
-        ].sort();
+        // SUPABASE CONFIG
+        const SUPABASE_URL = 'https://kgwxkwprnhpfahetxkjt.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtnd3hrd3BybmhwZmFoZXR4a2p0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NzA5MzUsImV4cCI6MjA5NzM0NjkzNX0.sqVY4b76YeZj8GVBwpieUhDcRdE3IeF2ZEECftF4oJY';
+        const { createClient } = window.supabase;
+        window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = null;
+        let syncInProgress = false;
+
+        // ============================================
+        // 🔐 SEGURIDAD: ENCRIPTACIÓN
+        // ============================================
+        
+        function getEncryptionKey() {
+            let key = sessionStorage.getItem('_ek');
+            if (!key) {
+                key = nacl.util.encodeBase64(nacl.randomBytes(32));
+                sessionStorage.setItem('_ek', key);
+            }
+            return nacl.util.decodeBase64(key);
+        }
+
+        function encryptData(texto) {
+            try {
+                const key = getEncryptionKey();
+                const nonce = nacl.randomBytes(24);
+                const msgU8 = nacl.util.decodeUTF8(texto);
+                const encrypted = nacl.secretbox(msgU8, nonce, key);
+                return nacl.util.encodeBase64(nonce) + ':' + nacl.util.encodeBase64(encrypted);
+            } catch (e) {
+                console.warn('Encriptación no disponible:', e);
+                return texto;
+            }
+        }
+
+        function decryptData(encryptedText) {
+            try {
+                if (!encryptedText || !encryptedText.includes(':')) return encryptedText;
+                const [nonceB64, encB64] = encryptedText.split(':');
+                const key = getEncryptionKey();
+                const nonce = nacl.util.decodeBase64(nonceB64);
+                const encrypted = nacl.util.decodeBase64(encB64);
+                const decrypted = nacl.secretbox.open(encrypted, nonce, key);
+                return nacl.util.encodeUTF8(decrypted);
+            } catch (e) {
+                return encryptedText;
+            }
+        }
+
+        // ============================================
+        // 🔐 SEGURIDAD: AUDITORÍA
+        // ============================================
+
+        async function registrarAuditoria(tabla, accion, id, antes, despues) {
+            try {
+                await window.supabaseClient.from('auditoria').insert({
+                    usuario: currentUser?.name || 'DESCONOCIDO',
+                    tabla: tabla,
+                    accion: accion,
+                    registro_id: id,
+                    datos_antes: antes,
+                    datos_despues: despues,
+                    ip_address: 'LOCAL',
+                    user_agent: navigator.userAgent.substring(0, 200)
+                });
+                console.log(`✓ Auditoría: ${tabla} ${accion}`);
+            } catch (e) {
+                console.warn('Auditoría no disponible');
+            }
+        }
+
+        // ============================================
+        // 🔐 SEGURIDAD: RATE LIMITING
+        // ============================================
+
+        let intentosFallidos = 0;
+        let bloqueadoHasta = null;
+
+        async function verificarBloqueo() {
+            if (bloqueadoHasta && new Date() < bloqueadoHasta) {
+                const minutos = Math.ceil((bloqueadoHasta - new Date()) / 60000);
+                throw new Error(`Bloqueado ${minutos} minutos por múltiples intentos fallidos`);
+            }
+            if (bloqueadoHasta && new Date() >= bloqueadoHasta) {
+                bloqueadoHasta = null;
+                intentosFallidos = 0;
+            }
+        }
+
+        // LOGIN CON SEGURIDAD
+        async function handleLogin(event) {
+            event.preventDefault();
+            const user = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            try {
+                // 🔐 Verificar bloqueo por rate limiting
+                await verificarBloqueo();
+
+                console.log('🔐 Intento de login');
+
+                // ✅ Validar credenciales (en producción usar bcrypt en servidor)
+                const credValidas = user === 'GRUPO VIA' && password === 'VIA12';
+
+                if (!credValidas) {
+                    intentosFallidos++;
+                    console.warn(`⚠️ Login fallido (intento ${intentosFallidos}/5)`);
+                    
+                    if (intentosFallidos >= 5) {
+                        bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000);
+                        errorDiv.textContent = '❌ Bloqueado 15 minutos por múltiples intentos fallidos';
+                    } else {
+                        errorDiv.textContent = `❌ Credenciales incorrectas (${intentosFallidos}/5)`;
+                    }
+                    
+                    errorDiv.classList.add('show');
+                    setTimeout(() => errorDiv.classList.remove('show'), 5000);
+                    return;
+                }
+
+                // ✅ Login exitoso
+                intentosFallidos = 0;
+                currentUser = { name: user, loginTime: new Date().toISOString() };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // 🔐 Crear sesión segura
+                sessionStorage.setItem('_st', 'TOKEN_' + Math.random().toString(36).substring(2, 15));
+                sessionStorage.setItem('_se', new Date(Date.now() + 60 * 60 * 1000).toISOString());
+
+                // 🔐 Registrar login en auditoría
+                await registrarAuditoria('sesiones', 'LOGIN', null, null, { usuario: user });
+
+                console.log('✅ Login exitoso - Sesión iniciada');
+                
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContainer').classList.remove('hidden');
+                errorDiv.classList.remove('show');
+                
+                renderClientes();
+                syncFromSupabase();
+
+                // 🔐 Auto-logout después de 60 minutos
+                setTimeout(() => {
+                    console.warn('⏱️ Sesión expirada por timeout');
+                    logout();
+                }, 60 * 60 * 1000);
+
+            } catch (error) {
+                console.error('❌ Error al login:', error.message);
+                errorDiv.textContent = error.message || 'Error al iniciar sesión';
+                errorDiv.classList.add('show');
+                setTimeout(() => errorDiv.classList.remove('show'), 5000);
+            }
+        }
+
+        // CHECK LOGIN CON VALIDACIÓN DE SESIÓN
+        function checkLogin() {
+            const user = localStorage.getItem('currentUser');
+            const sessionToken = sessionStorage.getItem('_st');
+            const sessionExpiry = sessionStorage.getItem('_se');
+
+            if (user && sessionToken && sessionExpiry) {
+                // Verificar que la sesión no haya expirado
+                if (new Date(sessionExpiry) > new Date()) {
+                    currentUser = JSON.parse(user);
+                    console.log('✅ Sesión válida restaurada');
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appContainer').classList.remove('hidden');
+                    
+                    // Renovar timeout
+                    setTimeout(() => {
+                        console.warn('⏱️ Sesión expirada por timeout');
+                        logout();
+                    }, 60 * 60 * 1000);
+                } else {
+                    console.warn('❌ Sesión expirada');
+                    logout();
+                }
+            } else {
+                document.getElementById('appContainer').classList.add('hidden');
+            }
+        }
+
+        // LOGOUT SEGURO
+        async function logout() {
+            try {
+                // 🔐 Registrar logout en auditoría
+                if (currentUser) {
+                    await registrarAuditoria('sesiones', 'LOGOUT', null, null, { usuario: currentUser.name });
+                }
+                
+                // 🔐 Limpiar datos de sesión
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                sessionStorage.clear();
+                
+                // 🔐 Limpiar clave de encriptación
+                console.log('🔐 Sesión cerrada - Datos de sesión eliminados');
+                
+                // Volver a login
+                location.reload();
+            } catch (error) {
+                console.error('Error al logout:', error);
+                location.reload();
+            }
+        }
+
+        // SYNC STATUS
+        function showSyncStatus(msg) {
+            const status = document.createElement('div');
+            status.className = 'sync-status show';
+            status.textContent = msg;
+            document.body.appendChild(status);
+            setTimeout(() => status.remove(), 2000);
+        }
+
+        // SYNC DESDE SUPABASE → LOCALSTORAGE
+        // SYNC DESDE SUPABASE → LOCALSTORAGE (CON DESENCRIPTACIÓN)
+        async function syncFromSupabase() {
+            try {
+                const [clientesRes, citasRes, ordenesRes, mecanicosRes] = await Promise.all([
+                    window.supabaseClient.from('clientes').select('*'),
+                    window.supabaseClient.from('citas').select('*'),
+                    window.supabaseClient.from('ordenes').select('*'),
+                    window.supabaseClient.from('mecanicos').select('*')
+                ]);
+
+                if (clientesRes.data) {
+                    clients = clientesRes.data.map(c => ({
+                        ...c,
+                        // 🔐 Desencriptar datos sensibles
+                        dni: c.dni && c.dni.includes(':') ? decryptData(c.dni) : c.dni,
+                        telefono: c.telefono && c.telefono.includes(':') ? decryptData(c.telefono) : c.telefono
+                    }));
+                }
+                if (citasRes.data) citas = citasRes.data;
+                if (ordenesRes.data) orders = ordenesRes.data;
+                if (mecanicosRes.data) mecanicos = mecanicosRes.data;
+
+                localStorage.setItem('clients', JSON.stringify(clients));
+                localStorage.setItem('citas', JSON.stringify(citas));
+                localStorage.setItem('orders', JSON.stringify(orders));
+                localStorage.setItem('mecanicos', JSON.stringify(mecanicos));
+
+                console.log('✓ Sincronización completada desde nube');
+                showSyncStatus('✓ Sincronizado desde nube');
+            } catch (error) {
+                console.warn('Sin conexión a Supabase, usando datos locales:', error);
+                showSyncStatus('⚠️ Usando datos locales (sin conexión)');
+            }
+        }
+
+        // SYNC A SUPABASE (auto-sync con encriptación y auditoría)
+        async function syncToSupabase(tabla, datos) {
+            if (!navigator.onLine) {
+                console.warn('Sin conexión, se sincronizará cuando haya conexión');
+                return;
+            }
+
+            try {
+                // 🔐 Encriptar datos sensibles antes de guardar
+                const datosSeguro = JSON.parse(JSON.stringify(datos));
+                
+                if (tabla === 'clientes') {
+                    if (datosSeguro.dni) datosSeguro.dni = encryptData(datosSeguro.dni);
+                    if (datosSeguro.telefono) datosSeguro.telefono = encryptData(datosSeguro.telefono);
+                    
+                    await window.supabaseClient.from('clientes').upsert(datosSeguro);
+                    await registrarAuditoria('clientes', datosSeguro.id ? 'UPDATE' : 'INSERT', datosSeguro.id, null, datosSeguro);
+                    
+                } else if (tabla === 'citas') {
+                    await window.supabaseClient.from('citas').upsert(datosSeguro);
+                    await registrarAuditoria('citas', datosSeguro.id ? 'UPDATE' : 'INSERT', datosSeguro.id, null, datosSeguro);
+                    
+                } else if (tabla === 'ordenes') {
+                    await window.supabaseClient.from('ordenes').upsert(datosSeguro);
+                    await registrarAuditoria('ordenes', datosSeguro.id ? 'UPDATE' : 'INSERT', datosSeguro.id, null, datosSeguro);
+                    
+                } else if (tabla === 'mecanicos') {
+                    await window.supabaseClient.from('mecanicos').upsert(datosSeguro);
+                    await registrarAuditoria('mecanicos', datosSeguro.id ? 'UPDATE' : 'INSERT', datosSeguro.id, null, datosSeguro);
+                }
+                
+                console.log(`✓ ${tabla} sincronizado con auditoría`);
+                showSyncStatus(`✓ ${tabla} sincronizado`);
+            } catch (error) {
+                console.error('Error sync:', error);
+                showSyncStatus(`❌ Error sincronizando ${tabla}`);
+            }
+        }
 
         // DATOS
+        let mecanicos = [
+            { id: 1, nombre: 'Miguel Ángel' },
+            { id: 2, nombre: 'Roberto' },
+            { id: 3, nombre: 'Carlos Martínez' },
+            { id: 4, nombre: 'Juan López' }
+        ];
+
         let clients = [
             {
                 id: 1,
@@ -1118,7 +1691,9 @@
                 fechaEntrega: '2026-06-28T10:00',
                 recambios: [],
                 moto: {
-                    modelo: 'Zontes ZT125-U',
+                    marca: 'Zontes',
+                    modelo: 'ZT125-U',
+                    cilindrada: '125cc',
                     matricula: '8542JKL',
                     bastidor: 'LV4DX5C124900847',
                     kilometraje: 4200
@@ -1145,7 +1720,9 @@
                 fechaEntrega: '',
                 recambios: [],
                 moto: {
-                    modelo: 'Voge ER 10',
+                    marca: 'Voge',
+                    modelo: 'ER 10',
+                    cilindrada: '125cc',
                     matricula: '7634MNÑ',
                     bastidor: 'LV4DX5C124901023',
                     kilometraje: 2100
@@ -1163,7 +1740,9 @@
                 fechaEntrega: '2026-06-19T14:00',
                 recambios: [],
                 moto: {
-                    modelo: 'Cyclone RX200',
+                    marca: 'Cyclone',
+                    modelo: 'RX200',
+                    cilindrada: '200cc',
                     matricula: '9821PQR',
                     bastidor: 'LV4DX5C124901156',
                     kilometraje: 8500
@@ -1186,7 +1765,11 @@
         ];
 
         let orders = [
-            { id: 1, clienteId: 1, numero: 'ORD-045', estado: 'en-progreso', mecanico: 'Miguel Ángel', servicio: 'Revisión periodica', importe: 0 }
+            { id: 1, clienteId: 1, numero: 'ORD-045', estado: 'en-progreso', mecanico: 'Miguel Ángel', servicio: 'Revisión periodica', importe: 0 },
+            { id: 2, clienteId: 2, numero: 'ORD-046', estado: 'pendiente', mecanico: 'Roberto', servicio: 'Mantenimiento', importe: 0 },
+            { id: 3, clienteId: 1, numero: 'ORD-047', estado: 'pendiente', mecanico: 'Carlos Martínez', servicio: 'Revisión ITV', importe: 0 },
+            { id: 4, clienteId: 3, numero: 'ORD-048', estado: 'listo-entrega', mecanico: 'Miguel Ángel', servicio: 'Reparación moto', importe: 0 },
+            { id: 5, clienteId: 2, numero: 'ORD-049', estado: 'entregado-pagado', mecanico: 'Juan López', servicio: 'Mantenimiento', importe: 150 }
         ];
 
         let citas = [];
@@ -1202,9 +1785,12 @@
             document.getElementById('view-' + tab).classList.add('active');
             
             if (tab === 'clientes') renderClientes();
-            else if (tab === 'citas') renderCitasSelector();
+            else if (tab === 'citas') {
+                renderCitasSelector();
+            }
             else if (tab === 'ordenes') renderOrdenes();
             else if (tab === 'informes') renderInformes();
+            else if (tab === 'admin') renderAdmin();
         }
 
         function filterClientes() {
@@ -1213,7 +1799,7 @@
 
         function renderClientes() {
             const search = document.getElementById('searchInput').value.toLowerCase();
-            const filterFecha = document.getElementById('filterEntrega').value;
+            const filterFecha = document.getElementById('filterEntrega').dataset.value || '';
             
             let filtered = clients.filter(c => {
                 const matchSearch = (c.nombre + ' ' + c.apellido).toLowerCase().includes(search) ||
@@ -1238,19 +1824,19 @@
                 if (diasEntrega === null) {
                     diasHtml = `<div class="days-indicator days-none">⚠️ Sin fecha de entrega</div>`;
                 } else if (diasEntrega < 0) {
-                    diasHtml = `<div class="days-indicator days-error">⏰ ${diasEntrega} días</div>`;
+                    diasHtml = `<div class="days-indicator days-error">⏰ Entrega: ${diasEntrega} días</div>`;
                 } else if (diasEntrega < 5) {
-                    diasHtml = `<div class="days-indicator days-warning">⏰ ${diasEntrega} días</div>`;
+                    diasHtml = `<div class="days-indicator days-warning">⏰ Entrega: ${diasEntrega} días</div>`;
                 } else {
-                    diasHtml = `<div class="days-indicator days-ok">⏰ ${diasEntrega} días</div>`;
+                    diasHtml = `<div class="days-indicator days-ok">⏰ Entrega: ${diasEntrega} días</div>`;
                 }
 
                 return `
-                    <div class="client-item" onclick="openClient(${c.id})">
+                    <div class="client-item" onclick="openClient(${c.id})" style="${diasEntrega !== null && diasEntrega <= 2 && diasEntrega >= 0 ? 'background: #fff3cd; border-left: 4px solid #ff9800;' : ''}">
                         <div class="client-name">👤 ${c.nombre} ${c.apellido}</div>
                         <div class="client-info">
                             <div class="client-info-item">📞 ${c.telefono}</div>
-                            <div class="client-info-item">🏍️ ${c.moto.matricula}</div>
+                            <div class="client-info-item">🏍️ ${c.moto.marca} ${c.moto.modelo} ${c.moto.cilindrada ? '(' + c.moto.cilindrada + ')' : ''} - Matrícula: ${c.moto.matricula}</div>
                             ${diasHtml}
                         </div>
                     </div>
@@ -1262,10 +1848,9 @@
             currentClientId = null;
             const newId = Math.max(...clients.map(c => c.id), 0) + 1;
             
-            document.getElementById('modalTitle').textContent = '👤 Nuevo Cliente';
             document.getElementById('modalBody').innerHTML = `
                 <div class="section">
-                    <div class="section-title">📋 Datos Cliente</div>
+                    <div class="section-title">Datos del Cliente</div>
                     <div class="form-group">
                         <div class="form-field">
                             <label class="form-label required">Nombre</label>
@@ -1298,11 +1883,8 @@
                     <div class="section-title">🏍️ Características Moto</div>
                     <div class="form-group">
                         <div class="form-field">
-                            <label class="form-label required">Marca y Modelo</label>
-                            <select class="form-select" id="newModelo">
-                                <option value="">Selecciona marca y modelo</option>
-                                ${marcasMotos.map(m => `<option value="${m}">${m}</option>`).join('')}
-                            </select>
+                            <label class="form-label">Modelo</label>
+                            <input type="text" class="form-input" id="newModelo">
                         </div>
                         <div class="form-field">
                             <label class="form-label">Matrícula</label>
@@ -1313,7 +1895,7 @@
 
                 <div class="section">
                     <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="saveNewCliente(${newId})">✓ Crear Cliente</button>
+                        <button class="btn btn-primary" onclick="saveNewCliente(${newId})">Crear Cliente</button>
                         <button class="btn" onclick="closeModal()">Cancelar</button>
                     </div>
                 </div>
@@ -1327,10 +1909,9 @@
             const apellido = document.getElementById('newApellido').value.trim();
             const telefono = document.getElementById('newTelefono').value.trim();
             const email = document.getElementById('newEmail').value.trim();
-            const modelo = document.getElementById('newModelo').value.trim();
 
-            if (!nombre || !apellido || !telefono || !modelo) {
-                alert('Nombre, Apellido, Teléfono y Marca/Modelo son obligatorios');
+            if (!nombre || !apellido || !telefono) {
+                alert('Nombre, Apellido y Teléfono son obligatorios');
                 return;
             }
 
@@ -1339,7 +1920,7 @@
                 return;
             }
 
-            clients.push({
+            const nuevoCliente = {
                 id: id,
                 nombre: nombre,
                 apellido: apellido,
@@ -1350,13 +1931,18 @@
                 fechaEntrega: '',
                 recambios: [],
                 moto: {
-                    modelo: modelo,
+                    modelo: document.getElementById('newModelo').value,
                     matricula: document.getElementById('newMatricula').value,
                     bastidor: '',
                     kilometraje: 0
                 },
                 acciones: []
-            });
+            };
+
+            clients.push(nuevoCliente);
+
+            // 🔐 Registrar auditoría
+            registrarAuditoria('clientes', 'INSERT', id, null, { nombre, apellido, email });
 
             showSaveStatus();
             closeModal();
@@ -1385,7 +1971,25 @@
             currentClientId = clientId;
             const client = clients.find(c => c.id === clientId);
             
-            document.getElementById('modalTitle').textContent = '👤 ' + client.nombre + ' ' + client.apellido;
+            // Obtener cita más cercana a hoy
+            const citasDelCliente = citas.filter(c => c.clienteId === clientId);
+            const hoy = new Date();
+            let citaMasCercana = null;
+            let diferenciaMenor = Infinity;
+            
+            citasDelCliente.forEach(cita => {
+                const fechaCita = new Date(cita.datetime);
+                const diferencia = Math.abs(fechaCita - hoy);
+                if (diferencia < diferenciaMenor) {
+                    diferenciaMenor = diferencia;
+                    citaMasCercana = cita;
+                }
+            });
+            
+            // Si existe cita más cercana, establecer como fecha de entrega
+            if (citaMasCercana) {
+                client.fechaEntrega = citaMasCercana.datetime;
+            }
             
             const estadoFunel = getEstadoFunel(clientId);
             const estadoFunelHtml = estadoFunel ? `
@@ -1400,10 +2004,47 @@
                 .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
                 .map(c => {
                     const fecha = new Date(c.datetime);
+                    const estadoLabels = {
+                        'pendiente': 'Pendiente',
+                        'en-progreso': 'En Progreso',
+                        'listo-entrega': 'Listo',
+                        'entregado-pagado': 'Entregado'
+                    };
                     return `
-                        <div class="cita-card" onclick="abrirDetallesCita(${c.id})">
-                            <div class="cita-card-fecha">${fecha.toLocaleDateString()}</div>
-                            <div class="cita-card-servicio">${c.servicio}</div>
+                        <div class="cita-card" style="cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start;" onclick="abrirEditarCita(${c.id})">
+                            <div>
+                                <div class="cita-card-fecha" style="color: #0066cc; font-size: 13px;">📅 ${fecha.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                                <div class="cita-card-servicio">${c.servicio}</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px;">📊 ${estadoLabels[c.estado] || c.estado}</div>
+                            </div>
+                            <button class="btn" onclick="event.stopPropagation(); if(confirm('¿Eliminar esta cita?')) { citas = citas.filter(c => c.id !== ${c.id}); orders = orders.filter(o => !(o.clienteId === ${clientId} && o.servicio === '${c.servicio}')); openClient(${clientId}); }" style="background: #dc3545; color: white; padding: 4px 8px; font-size: 12px; border-radius: 3px;">🗑️</button>
+                        </div>
+                    `;
+                }).join('');
+
+            const estadoLabels = {
+                'pendiente': 'Pendiente',
+                'en-progreso': 'En Progreso',
+                'listo-entrega': 'Listo',
+                'entregado-pagado': 'Entregado'
+            };
+
+            const ordnesClienteHtml = orders
+                .filter(o => o.clienteId === clientId)
+                .sort((a, b) => b.id - a.id)
+                .map(o => {
+                    const fechaEntrega = client.fechaEntrega ? new Date(client.fechaEntrega).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }) : '-';
+                    return `
+                        <div class="cita-card" style="background: #fff3cd; border-left: 4px solid #ff9800; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start;" onclick="abrirEditarOrden(${o.id})">
+                            <div>
+                                <div class="cita-card-fecha" style="font-weight: 700; color: #ff9800;">${o.numero}</div>
+                                <div class="cita-card-servicio" style="margin-top: 6px; font-size: 12px; color: #333;">${o.servicio}</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 8px; display: flex; justify-content: space-between;">
+                                    <span>📅 ${fechaEntrega}</span>
+                                    <span style="font-weight: 600; color: #ff9800;">📊 ${estadoLabels[o.estado] || o.estado}</span>
+                                </div>
+                            </div>
+                            <button class="btn" onclick="event.stopPropagation(); if(confirm('¿Eliminar esta orden?')) { orders = orders.filter(o => o.id !== ${o.id}); openClient(${clientId}); }" style="background: #dc3545; color: white; padding: 4px 8px; font-size: 12px; border-radius: 3px;">🗑️</button>
                         </div>
                     `;
                 }).join('');
@@ -1430,124 +2071,286 @@
             }).join('');
 
             document.getElementById('modalBody').innerHTML = `
-                ${estadoFunelHtml}
-                
                 <div style="display: flex; gap: 12px; margin-bottom: 24px;">
                     <button class="btn btn-success" onclick="abrirCitaRapida()">📅 Crear Cita Rápida</button>
+                    <button class="btn" onclick="abrirCrearOrden()" style="background: #ff9800; color: white;">📦 Crear Orden</button>
                 </div>
 
-                <div class="section">
-                    <div class="section-title">📋 Datos Cliente</div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label">Nombre</label>
-                            <input type="text" class="form-input" value="${client.nombre}" onchange="updateClient('nombre', this.value)">
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label">Apellido</label>
-                            <input type="text" class="form-input" value="${client.apellido}" onchange="updateClient('apellido', this.value)">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-input" value="${client.email}" onchange="updateClient('email', this.value)">
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label">Teléfono</label>
-                            <input type="tel" class="form-input" value="${client.telefono}" onchange="updateClient('telefono', this.value)">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label">DNI/CIF</label>
-                            <input type="text" class="form-input" value="${client.dni}" onchange="updateClient('dni', this.value)">
-                        </div>
-                    </div>
+                <!-- PESTAÑAS -->
+                <div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 2px solid #e5e5e5; flex-wrap: wrap;">
+                    <button class="tab-btn active" onclick="cambiarVistaCilente('contacto')" id="tab-contacto" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #333333; border-bottom: 3px solid #333333; margin-bottom: -2px;">👤 Contacto</button>
+                    <button class="tab-btn" onclick="cambiarVistaCilente('vehiculo')" id="tab-vehiculo" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">🏍️ Vehículo</button>
+                    <button class="tab-btn" onclick="cambiarVistaCilente('citas')" id="tab-citas" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Citas</button>
+                    <button class="tab-btn" onclick="cambiarVistaCilente('ordenes')" id="tab-ordenes" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Órdenes</button>
+                    <button class="tab-btn" onclick="cambiarVistaCilente('recambios')" id="tab-recambios" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Recambios</button>
+                    <button class="tab-btn" onclick="cambiarVistaCilente('seguimiento')" id="tab-seguimiento" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Seguimiento</button>
+                    <button class="tab-btn" onclick="cambiarVistaCilente('informe')" id="tab-informe" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Informe</button>
                 </div>
 
-                <div class="section">
-                    <div class="section-title">🏍️ Características Moto</div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label">Marca y Modelo</label>
-                            <select class="form-select" onchange="updateMoto('modelo', this.value)">
-                                <option value="">Selecciona marca y modelo</option>
-                                ${marcasMotos.map(m => `<option value="${m}" ${client.moto.modelo === m ? 'selected' : ''}>${m}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label">Matrícula</label>
-                            <input type="text" class="form-input" value="${client.moto.matricula}" onchange="updateMoto('matricula', this.value)">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label">Bastidor (VIN) - Opcional</label>
-                            <input type="text" class="form-input" value="${client.moto.bastidor}" onchange="updateMoto('bastidor', this.value)">
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label">Kilometraje - Opcional</label>
-                            <input type="number" class="form-input" value="${client.moto.kilometraje}" onchange="updateMoto('kilometraje', parseInt(this.value))">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">📅 Fechas</div>
-                    <div class="form-group full">
-                        <div class="form-field">
-                            <label class="form-label">Fecha de Creación</label>
-                            <input type="date" class="form-input" value="${client.fechaCreacion}" disabled style="background: #f9f9f9;">
-                        </div>
-                    </div>
-                    <div class="form-group full">
-                        <div class="form-field">
-                            <label class="form-label">Fecha y Hora de Entrega</label>
-                            <input type="datetime-local" class="form-input" value="${client.fechaEntrega}" onchange="updateClient('fechaEntrega', this.value)">
-                        </div>
-                    </div>
-                </div>
-
-                ${citasClienteHtml ? `
+                <!-- CONTACTO -->
+                <div id="vista-contacto" class="vista-cliente" style="display: block;">
                     <div class="section">
-                        <div class="section-title">📅 Citas de Este Cliente</div>
-                        <div class="citas-cliente-container">
-                            ${citasClienteHtml}
+                        <div class="section-title">Datos del Cliente</div>
+                        <div class="form-group">
+                            <div class="form-field">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-input" value="${client.nombre}" onchange="updateClient('nombre', this.value)">
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Apellido</label>
+                                <input type="text" class="form-input" value="${client.apellido}" onchange="updateClient('apellido', this.value)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-field">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-input" value="${client.email}" onchange="updateClient('email', this.value)">
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Teléfono</label>
+                                <input type="tel" class="form-input" value="${client.telefono}" onchange="updateClient('telefono', this.value)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-field">
+                                <label class="form-label">DNI/CIF</label>
+                                <input type="text" class="form-input" value="${client.dni}" onchange="updateClient('dni', this.value)">
+                            </div>
                         </div>
                     </div>
-                ` : ''}
 
-                <div class="section">
-                    <div class="section-title">🔧 Recambios</div>
-                    <div class="recambios-grid">
-                        ${recambiosDisponibles.map(r => `
-                            <div class="recambio-item">
-                                <input type="checkbox" id="recambio_${r.id}" ${client.recambios.includes(r.id) ? 'checked' : ''} onchange="actualizarRecambios()">
-                                <div class="recambio-info">
-                                    <div class="recambio-nombre">${r.nombre}</div>
-                                    <div class="recambio-precio">€${r.precio}</div>
+                    <div class="section">
+                        <div class="section-title">📅 FECHA ENTREGA</div>
+                        <div class="form-group full">
+                            <div class="form-field">
+                                <label class="form-label">Fecha de Creación</label>
+                                <input type="date" class="form-input" value="${client.fechaCreacion}" disabled style="background: #f9f9f9;">
+                            </div>
+                        </div>
+                        <div class="form-group" style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+                            <div class="form-field">
+                                <label class="form-label">Fecha de Entrega</label>
+                                <div style="position: relative;">
+                                    <input type="text" id="fechaEntregaInput" class="form-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('fechaEntregaInput')" readonly style="cursor: pointer;">
+                                    <div id="calendarioMini_fechaEntregaInput" class="calendario-mini" style="display: none;"></div>
                                 </div>
                             </div>
-                        `).join('')}
-                    </div>
-                    ${totalRecambios > 0 ? `
-                        <div class="recambios-total">
-                            <div class="recambios-total-label">Total Recambios:</div>
-                            <div class="recambios-total-valor">€${totalRecambios}</div>
+                            <div class="form-field">
+                                <label class="form-label">Hora</label>
+                                <input type="time" id="horaEntregaInput" class="form-input" onchange="guardarFechaHoraEntrega()">
+                            </div>
                         </div>
-                    ` : ''}
+                    </div>
                 </div>
 
-                <div class="section">
-                    <div class="section-title">🔧 Acciones
-                        <button class="btn btn-primary btn-small" onclick="crearAccion()">+ Nueva</button>
+                <!-- VEHÍCULO -->
+                <div id="vista-vehiculo" class="vista-cliente" style="display: none;">
+                    <div class="section">
+                        <div class="section-title">🏍️ Características Moto</div>
+                        <div class="form-group">
+                            <div class="form-field">
+                                <label class="form-label">Marca</label>
+                                <select class="form-select" value="${client.moto.marca || ''}" onchange="updateMoto('marca', this.value)">
+                                    <option value="">Selecciona marca</option>
+                                    <option value="Aprilia" ${client.moto.marca === 'Aprilia' ? 'selected' : ''}>Aprilia</option>
+                                    <option value="Benelli" ${client.moto.marca === 'Benelli' ? 'selected' : ''}>Benelli</option>
+                                    <option value="BMW" ${client.moto.marca === 'BMW' ? 'selected' : ''}>BMW</option>
+                                    <option value="Cyclone" ${client.moto.marca === 'Cyclone' ? 'selected' : ''}>Cyclone</option>
+                                    <option value="Derbi" ${client.moto.marca === 'Derbi' ? 'selected' : ''}>Derbi</option>
+                                    <option value="Gas Gas" ${client.moto.marca === 'Gas Gas' ? 'selected' : ''}>Gas Gas</option>
+                                    <option value="Hanway" ${client.moto.marca === 'Hanway' ? 'selected' : ''}>Hanway</option>
+                                    <option value="Honda" ${client.moto.marca === 'Honda' ? 'selected' : ''}>Honda</option>
+                                    <option value="Husqvarna" ${client.moto.marca === 'Husqvarna' ? 'selected' : ''}>Husqvarna</option>
+                                    <option value="Kayo" ${client.moto.marca === 'Kayo' ? 'selected' : ''}>Kayo</option>
+                                    <option value="Kymco" ${client.moto.marca === 'Kymco' ? 'selected' : ''}>Kymco</option>
+                                    <option value="KTM" ${client.moto.marca === 'KTM' ? 'selected' : ''}>KTM</option>
+                                    <option value="Moto Guzzi" ${client.moto.marca === 'Moto Guzzi' ? 'selected' : ''}>Moto Guzzi</option>
+                                    <option value="Piaggio" ${client.moto.marca === 'Piaggio' ? 'selected' : ''}>Piaggio</option>
+                                    <option value="Rieju" ${client.moto.marca === 'Rieju' ? 'selected' : ''}>Rieju</option>
+                                    <option value="Sherco" ${client.moto.marca === 'Sherco' ? 'selected' : ''}>Sherco</option>
+                                    <option value="SYM" ${client.moto.marca === 'SYM' ? 'selected' : ''}>SYM</option>
+                                    <option value="Voge" ${client.moto.marca === 'Voge' ? 'selected' : ''}>Voge</option>
+                                    <option value="Yamaha" ${client.moto.marca === 'Yamaha' ? 'selected' : ''}>Yamaha</option>
+                                    <option value="Zontes" ${client.moto.marca === 'Zontes' ? 'selected' : ''}>Zontes</option>
+                                    <option value="Suzuki" ${client.moto.marca === 'Suzuki' ? 'selected' : ''}>Suzuki</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Modelo</label>
+                                <input type="text" class="form-input" value="${client.moto.modelo}" onchange="updateMoto('modelo', this.value)">
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Cilindrada</label>
+                                <select class="form-select" value="${client.moto.cilindrada || ''}" onchange="updateMoto('cilindrada', this.value)">
+                                    <option value="">Selecciona cilindrada</option>
+                                    <option value="50cc" ${client.moto.cilindrada === '50cc' ? 'selected' : ''}>50cc</option>
+                                    <option value="125cc" ${client.moto.cilindrada === '125cc' ? 'selected' : ''}>125cc</option>
+                                    <option value="250cc" ${client.moto.cilindrada === '250cc' ? 'selected' : ''}>250cc</option>
+                                    <option value="400cc" ${client.moto.cilindrada === '400cc' ? 'selected' : ''}>400cc</option>
+                                    <option value="500cc" ${client.moto.cilindrada === '500cc' ? 'selected' : ''}>500cc</option>
+                                    <option value="600cc" ${client.moto.cilindrada === '600cc' ? 'selected' : ''}>600cc</option>
+                                    <option value="750cc" ${client.moto.cilindrada === '750cc' ? 'selected' : ''}>750cc</option>
+                                    <option value="850cc" ${client.moto.cilindrada === '850cc' ? 'selected' : ''}>850cc</option>
+                                    <option value="1000cc" ${client.moto.cilindrada === '1000cc' ? 'selected' : ''}>1000cc</option>
+                                    <option value="1200cc" ${client.moto.cilindrada === '1200cc' ? 'selected' : ''}>1200cc</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-field">
+                                <label class="form-label">Bastidor (VIN)</label>
+                                <input type="text" class="form-input" value="${client.moto.bastidor}" onchange="updateMoto('bastidor', this.value)">
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Kilometraje</label>
+                                <input type="number" class="form-input" value="${client.moto.kilometraje}" onchange="updateMoto('kilometraje', parseInt(this.value))">
+                            </div>
+                        </div>
                     </div>
-                    ${client.acciones.length === 0 ? '<div class="empty-state">Sin acciones</div>' : accionesHtml}
+                </div>
+
+                <!-- CITAS -->
+                <div id="vista-citas" class="vista-cliente" style="display: none;">
+                    ${citasClienteHtml ? `
+                        <div class="section">
+                            <div class="section-title">📅 Citas de Este Cliente</div>
+                            <div class="citas-cliente-container">
+                                ${citasClienteHtml}
+                            </div>
+                        </div>
+                    ` : '<div class="empty-state" style="padding: 40px; text-align: center;">Sin citas agendadas</div>'}
+                </div>
+
+                <!-- ÓRDENES -->
+                <div id="vista-ordenes" class="vista-cliente" style="display: none;">
+                    ${ordnesClienteHtml ? `
+                        <div class="section">
+                            <div class="section-title">📦 Órdenes de Este Cliente</div>
+                            <div class="citas-cliente-container">
+                                ${ordnesClienteHtml}
+                            </div>
+                        </div>
+                    ` : '<div class="empty-state" style="padding: 40px; text-align: center;">Sin órdenes</div>'}
+                </div>
+
+                <!-- RECAMBIOS -->
+                <div id="vista-recambios" class="vista-cliente" style="display: none;">
+                    <div class="section">
+                        <div class="section-title">Recambios</div>
+                        <div class="recambios-grid" onclick="event.stopPropagation()">
+                            ${recambiosDisponibles.map(r => `
+                                <div class="recambio-item">
+                                    <input type="checkbox" id="recambio_${r.id}" ${client.recambios.includes(r.id) ? 'checked' : ''} onchange="event.stopPropagation(); actualizarRecambios()">
+                                    <div class="recambio-info">
+                                        <div class="recambio-nombre">${r.nombre}</div>
+                                        <div class="recambio-precio">€${r.precio}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="recambios-total">
+                            <div class="recambios-total-label">💰 Total Recambios</div>
+                            <div class="recambios-total-valor">€${totalRecambios}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEGUIMIENTO -->
+                <div id="vista-seguimiento" class="vista-cliente" style="display: none;">
+                    <div class="section">
+                        <div class="section-title">🔧 Acciones
+                            <button class="btn btn-primary btn-small" onclick="crearAccion()">+ Nueva</button>
+                        </div>
+                        ${client.acciones.length === 0 ? '<div class="empty-state">Sin acciones</div>' : accionesHtml}
+                    </div>
+                </div>
+
+                <!-- INFORME -->
+                <div id="vista-informe" class="vista-cliente" style="display: none;">
+                    <div class="section">
+                        <div class="section-title">📊 Informe de Servicios</div>
+                        ${(() => {
+                            const servicios = {};
+                            orders.filter(o => o.clienteId === clientId).forEach(o => {
+                                servicios[o.servicio] = (servicios[o.servicio] || 0) + 1;
+                            });
+                            
+                            if (Object.keys(servicios).length === 0) {
+                                return '<div class="empty-state">Sin órdenes registradas</div>';
+                            }
+                            
+                            return `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                ${Object.entries(servicios).map(([servicio, count]) => {
+                                    const colores = {
+                                        'Revisión periodica': '#ff6b6b',
+                                        'Siniestro': '#ffa94d',
+                                        'Reparación moto': '#4ecdc4',
+                                        'Revisión ITV': '#95e1d3',
+                                        'Mantenimiento': '#74b9ff'
+                                    };
+                                    return `<div style="background: ${colores[servicio] || '#e0e0e0'}; color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 24px; font-weight: 700;">${count}</div>
+                                        <div style="font-size: 13px; margin-top: 8px;">${servicio}</div>
+                                    </div>`;
+                                }).join('')}
+                            </div>`;
+                        })()}
+                    </div>
+                </div>
+
+                <!-- OPCIONES -->
+                <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #ddd;">
+                    <button class="btn" onclick="eliminarCliente(currentClientId)" style="background: #dc3545; color: white; opacity: 0.7; padding: 8px 16px; font-size: 13px;">🗑️ Eliminar Cliente</button>
                 </div>
             `;
             
             document.getElementById('modalOverlay').classList.add('active');
+            setTimeout(() => cargarFechaHoraEntrega(), 100);
+        }
+
+        function cambiarVistaCilente(vista) {
+            // Ocultar todas las vistas
+            document.querySelectorAll('.vista-cliente').forEach(v => v.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.style.color = '#666';
+                b.style.borderBottom = 'none';
+                b.style.marginBottom = '0';
+            });
+            
+            // Mostrar vista seleccionada
+            document.getElementById('vista-' + vista).style.display = 'block';
+            const btn = document.getElementById('tab-' + vista);
+            if (btn) {
+                btn.style.color = '#333333';
+                btn.style.borderBottom = '3px solid #333333';
+                btn.style.marginBottom = '-2px';
+            }
+        }
+
+        function irAOrden(ordenId) {
+            // Cambiar a vista de órdenes en el pipeline
+            cambiarVistaCilente('ordenes');
+            
+            // Después de un pequeño delay, hacer scroll y highlight a la orden
+            setTimeout(() => {
+                const orden = orders.find(o => o.id === ordenId);
+                if (orden) {
+                    // Cambiar a pestaña de órdenes del CRM
+                    clickTab('ordenes');
+                    
+                    // Hacer scroll a la orden en su columna
+                    setTimeout(() => {
+                        const tarjeta = document.querySelector(`[data-order-id="${ordenId}"]`);
+                        if (tarjeta) {
+                            tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            tarjeta.style.boxShadow = '0 0 10px rgba(255, 200, 0, 0.8)';
+                            setTimeout(() => {
+                                tarjeta.style.boxShadow = '';
+                            }, 2000);
+                        }
+                    }, 100);
+                }
+            }, 100);
         }
 
         function actualizarRecambios() {
@@ -1555,8 +2358,19 @@
             client.recambios = recambiosDisponibles
                 .filter(r => document.getElementById(`recambio_${r.id}`).checked)
                 .map(r => r.id);
+            
+            // Actualizar total sin re-renderizar la ficha
+            const totalRecambios = client.recambios.reduce((sum, id) => {
+                const recambio = recambiosDisponibles.find(r => r.id === id);
+                return sum + (recambio ? recambio.precio : 0);
+            }, 0);
+            
+            const totalDiv = document.querySelector('.recambios-total-valor');
+            if (totalDiv) {
+                totalDiv.textContent = '€' + totalRecambios;
+            }
+            
             showSaveStatus();
-            openClient(currentClientId);
         }
 
         function crearAccion() {
@@ -1635,44 +2449,12 @@
 
         function abrirDetallesCita(citaId) {
             const cita = citas.find(c => c.id === citaId);
-            const fecha = new Date(cita.datetime);
-
-            const html = `
-                <div class="form-group full">
-                    <div class="form-field">
-                        <label class="form-label">Cliente</label>
-                        <input type="text" class="form-input" value="${cita.cliente}" disabled style="background: #f9f9f9;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="form-field">
-                        <label class="form-label">Fecha y Hora</label>
-                        <input type="datetime-local" class="form-input" value="${cita.datetime}" disabled style="background: #f9f9f9;">
-                    </div>
-                    <div class="form-field">
-                        <label class="form-label">Servicio</label>
-                        <input type="text" class="form-input" value="${cita.servicio}" disabled style="background: #f9f9f9;">
-                    </div>
-                </div>
-                ${cita.descripcion ? `
-                    <div class="form-group full">
-                        <div class="form-field">
-                            <label class="form-label">Descripción</label>
-                            <textarea class="form-textarea" disabled style="background: #f9f9f9;">${cita.descripcion}</textarea>
-                        </div>
-                    </div>
-                ` : ''}
-                <div class="action-buttons">
-                    <button class="btn" onclick="closeCitaDetalles()">Cerrar</button>
-                </div>
-            `;
-
-            document.getElementById('citaDetallesBody').innerHTML = html;
-            document.getElementById('citaDetallesModal').classList.add('active');
-        }
-
-        function closeCitaDetalles() {
-            document.getElementById('citaDetallesModal').classList.remove('active');
+            if (cita) {
+                // Guardar la cita activa para acceso desde la ficha
+                window.citaActivaActual = cita;
+                // Abrir la ficha del cliente
+                openClient(cita.clienteId);
+            }
         }
 
         function abrirCitaRapida() {
@@ -1730,17 +2512,113 @@
                 cliente: client.nombre + ' ' + client.apellido,
                 servicio: servicio,
                 datetime: datetime,
-                descripcion: notas
+                descripcion: notas,
+                estado: 'pendiente',
+                seguimientos: []
+            });
+
+            // Crear orden automáticamente en Pendiente
+            const nuevoIdOrden = Math.max(...orders.map(o => o.id || 0), 0) + 1;
+            const nuevoNumeroOrden = 'ORD-' + String(nuevoIdOrden).padStart(3, '0');
+            orders.push({
+                id: nuevoIdOrden,
+                numero: nuevoNumeroOrden,
+                clienteId: client.id,
+                servicio: servicio,
+                estado: 'pendiente',
+                descripcion: notas,
+                importe: 0
             });
 
             showSaveStatus();
             closeCitaRapida();
             renderCitasList();
+            renderOrdenes();
             openClient(currentClientId);
         }
 
         function closeCitaRapida() {
             document.getElementById('citaRapidaModal').classList.remove('active');
+        }
+
+        function abrirCrearOrden() {
+            const etapas = ['pendiente', 'en-progreso', 'listo-entrega', 'entregado-pagado'];
+            const etapasLabels = {
+                'pendiente': 'Pendiente',
+                'en-progreso': 'En Progreso',
+                'listo-entrega': 'Listo para Entrega',
+                'entregado-pagado': 'Entregado y Pagado'
+            };
+
+            const formHtml = `
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Tipo de Servicio</label>
+                        <select class="form-select" id="ordServicio">
+                            <option value="">Selecciona un servicio</option>
+                            <option value="Revisión periodica">Revisión periodica</option>
+                            <option value="Siniestro">Siniestro</option>
+                            <option value="Reparación moto">Reparación moto</option>
+                            <option value="Revisión ITV">Revisión ITV</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label required">Etapa Inicial</label>
+                        <select class="form-select" id="ordEtapa">
+                            <option value="">Selecciona una etapa</option>
+                            ${etapas.map(e => `<option value="${e}">${etapasLabels[e]}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <div class="form-field">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-textarea" id="ordDescripcion" placeholder="Descripción de la orden..."></textarea>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="guardarOrdenNueva()">✓ Crear Orden</button>
+                    <button class="btn" onclick="cerrarCrearOrden()">Cancelar</button>
+                </div>
+            `;
+
+            document.getElementById('crearOrdenBody').innerHTML = formHtml;
+            document.getElementById('crearOrdenModal').classList.add('active');
+        }
+
+        function guardarOrdenNueva() {
+            const servicio = document.getElementById('ordServicio').value;
+            const etapa = document.getElementById('ordEtapa').value;
+            const descripcion = document.getElementById('ordDescripcion').value;
+
+            if (!servicio || !etapa) {
+                alert('Servicio y Etapa son obligatorios');
+                return;
+            }
+
+            const nuevoId = Math.max(...orders.map(o => o.id || 0), 0) + 1;
+            const nuevoNumero = 'ORD-' + String(nuevoId).padStart(3, '0');
+
+            orders.push({
+                id: nuevoId,
+                numero: nuevoNumero,
+                clienteId: currentClientId,
+                servicio: servicio,
+                estado: etapa,
+                descripcion: descripcion,
+                importe: 0
+            });
+
+            showSaveStatus();
+            cerrarCrearOrden();
+            renderOrdenes();
+            openClient(currentClientId);
+        }
+
+        function cerrarCrearOrden() {
+            document.getElementById('crearOrdenModal').classList.remove('active');
         }
 
         function updateClient(field, value) {
@@ -1759,6 +2637,38 @@
             }
         }
 
+        function guardarFechaHoraEntrega() {
+            const fechaInput = document.getElementById('fechaEntregaInput');
+            const horaInput = document.getElementById('horaEntregaInput');
+            const client = clients.find(c => c.id === currentClientId);
+            
+            if (client) {
+                if (fechaInput.dataset.value) {
+                    const hora = horaInput.value || '10:00';
+                    const datetimeValue = fechaInput.dataset.value + 'T' + hora;
+                    client.fechaEntrega = datetimeValue;
+                    showSaveStatus();
+                }
+            }
+        }
+
+        function cargarFechaHoraEntrega() {
+            const client = clients.find(c => c.id === currentClientId);
+            if (client && client.fechaEntrega) {
+                const [fecha, hora] = client.fechaEntrega.split('T');
+                const fechaInput = document.getElementById('fechaEntregaInput');
+                const horaInput = document.getElementById('horaEntregaInput');
+                
+                if (fechaInput && horaInput) {
+                    const partes = fecha.split('-');
+                    const fechaObj = new Date(partes[0], partes[1] - 1, partes[2]);
+                    fechaInput.value = fechaObj.toLocaleDateString('es-ES');
+                    fechaInput.dataset.value = fecha;
+                    horaInput.value = hora || '10:00';
+                }
+            }
+        }
+
         function closeModal() {
             document.getElementById('modalOverlay').classList.remove('active');
             currentClientId = null;
@@ -1769,7 +2679,7 @@
             const form = document.getElementById('citasFormContainer');
             
             form.innerHTML = `
-                <h3 style="margin-bottom: 16px;">📅 Tipo de Cita</h3>
+                <div style="margin-top: 16px;">
                 <div class="citas-selector-buttons">
                     <button class="btn-toggle" id="btnNuevo" onclick="seleccionarTipoCita('nuevo')">
                         ➕ Cliente Nuevo
@@ -1828,12 +2738,52 @@
                     </div>
                 </div>
                 <h4 style="margin-bottom: 12px; margin-top: 16px;">Datos de la Cita</h4>
-                <div class="form-group full">
+                <div class="form-group">
                     <div class="form-field">
-                        <label class="form-label required">Marca y Modelo de Moto</label>
-                        <select class="form-select" id="citaModelo">
-                            <option value="">Selecciona marca y modelo</option>
-                            ${marcasMotos.map(m => `<option value="${m}">${m}</option>`).join('')}
+                        <label class="form-label required">Marca</label>
+                        <select class="form-select" id="citaMarca">
+                            <option value="">Selecciona marca</option>
+                            <option value="Aprilia">Aprilia</option>
+                            <option value="Benelli">Benelli</option>
+                            <option value="BMW">BMW</option>
+                            <option value="Cyclone">Cyclone</option>
+                            <option value="Derbi">Derbi</option>
+                            <option value="Gas Gas">Gas Gas</option>
+                            <option value="Hanway">Hanway</option>
+                            <option value="Honda">Honda</option>
+                            <option value="Husqvarna">Husqvarna</option>
+                            <option value="Kayo">Kayo</option>
+                            <option value="Kymco">Kymco</option>
+                            <option value="KTM">KTM</option>
+                            <option value="Moto Guzzi">Moto Guzzi</option>
+                            <option value="Piaggio">Piaggio</option>
+                            <option value="Rieju">Rieju</option>
+                            <option value="Sherco">Sherco</option>
+                            <option value="SYM">SYM</option>
+                            <option value="Voge">Voge</option>
+                            <option value="Yamaha">Yamaha</option>
+                            <option value="Zontes">Zontes</option>
+                            <option value="Suzuki">Suzuki</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label required">Modelo</label>
+                        <input type="text" class="form-input" id="citaModelo" placeholder="Ej: ZT125-U">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label">Cilindrada</label>
+                        <select class="form-select" id="citaCilindrada">
+                            <option value="">Selecciona cilindrada</option>
+                            <option value="50cc">50cc</option>
+                            <option value="125cc">125cc</option>
+                            <option value="250cc">250cc</option>
+                            <option value="400cc">400cc</option>
+                            <option value="500cc">500cc</option>
+                            <option value="600cc">600cc</option>
+                            <option value="750cc">750cc</option>
+                            <option value="850cc">850cc</option>
+                            <option value="1000cc">1000cc</option>
+                            <option value="1200cc">1200cc</option>
                         </select>
                     </div>
                 </div>
@@ -1855,10 +2805,17 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group full">
+                <div class="form-group">
                     <div class="form-field">
-                        <label class="form-label required">Fecha y Hora</label>
-                        <input type="datetime-local" class="form-input" id="citaDateTime">
+                        <label class="form-label required">Día</label>
+                        <div style="position: relative;">
+                            <input type="text" id="citaDia" class="form-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('citaDia')" readonly style="cursor: pointer;">
+                            <div id="calendarioMini_citaDia" class="calendario-mini" style="display: none;"></div>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label required">Hora</label>
+                        <input type="time" class="form-input" id="citaHora">
                     </div>
                 </div>
                 <div class="form-group full">
@@ -1896,10 +2853,17 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group full">
+                <div class="form-group">
                     <div class="form-field">
-                        <label class="form-label required">Fecha y Hora</label>
-                        <input type="datetime-local" class="form-input" id="citaDateTimeExistente">
+                        <label class="form-label required">Día</label>
+                        <div style="position: relative;">
+                            <input type="text" id="citaDiaExistente" class="form-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('citaDiaExistente')" readonly style="cursor: pointer;">
+                            <div id="calendarioMini_citaDiaExistente" class="calendario-mini" style="display: none;"></div>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label required">Hora</label>
+                        <input type="time" class="form-input" id="citaHoraExistente">
                     </div>
                 </div>
                 <div class="form-group full">
@@ -1960,12 +2924,20 @@
             const telefono = document.getElementById('citaTelefono').value.trim();
             const email = document.getElementById('citaEmail').value.trim();
             const dni = document.getElementById('citaDni').value.trim();
+            const marca = document.getElementById('citaMarca').value;
             const modelo = document.getElementById('citaModelo').value.trim();
+            const cilindrada = document.getElementById('citaCilindrada').value;
+            const matricula = document.getElementById('citaMatricula').value.trim();
             const servicio = document.getElementById('citaServicio').value;
-            const datetime = document.getElementById('citaDateTime').value;
+            const diaInput = document.getElementById('citaDia');
+            const dia = diaInput.dataset.value || diaInput.value;
+            const hora = document.getElementById('citaHora').value;
+            
+            // Construir datetime combinando día y hora en formato ISO
+            const datetime = dia && hora ? `${dia}T${hora}` : '';
 
-            if (!nombre || !apellido || !telefono || !modelo || !servicio || !datetime) {
-                alert('Nombre, Apellido, Teléfono, Marca/Modelo, Tipo de Servicio y Fecha/Hora son obligatorios');
+            if (!nombre || !apellido || !telefono || !marca || !modelo || !servicio || !dia || !hora) {
+                alert('Nombre, Apellido, Teléfono, Marca, Modelo, Tipo de Servicio, Día y Hora son obligatorios');
                 return;
             }
 
@@ -1986,8 +2958,10 @@
                 fechaEntrega: '',
                 recambios: [],
                 moto: {
+                    marca: marca,
                     modelo: modelo,
-                    matricula: document.getElementById('citaMatricula').value,
+                    cilindrada: cilindrada,
+                    matricula: matricula,
                     bastidor: '',
                     kilometraje: 0
                 },
@@ -2000,10 +2974,35 @@
                 cliente: nombre + ' ' + apellido,
                 servicio: servicio,
                 datetime: datetime,
-                descripcion: document.getElementById('citaDescripcion').value
+                descripcion: document.getElementById('citaDescripcion').value,
+                estado: 'pendiente',
+                seguimientos: []
+            });
+
+            // Crear orden automáticamente en Pendiente
+            const nuevoIdOrden = Math.max(...orders.map(o => o.id || 0), 0) + 1;
+            const nuevoNumeroOrden = 'ORD-' + String(nuevoIdOrden).padStart(3, '0');
+            orders.push({
+                id: nuevoIdOrden,
+                numero: nuevoNumeroOrden,
+                clienteId: newClientId,
+                servicio: servicio,
+                estado: 'pendiente',
+                descripcion: document.getElementById('citaDescripcion').value,
+                importe: 0
             });
 
             showSaveStatus();
+            
+            // SYNC A SUPABASE
+            const newClient = clients.find(c => c.id === newClientId);
+            const newCita = citas.find(c => c.clienteId === newClientId);
+            const newOrden = orders.find(o => o.clienteId === newClientId);
+            
+            syncToSupabase('clientes', newClient);
+            syncToSupabase('citas', newCita);
+            syncToSupabase('ordenes', newOrden);
+            
             renderCitasSelector();
         }
 
@@ -2014,10 +3013,15 @@
             }
 
             const servicio = document.getElementById('citaServicioExistente').value;
-            const datetime = document.getElementById('citaDateTimeExistente').value;
+            const diaInput = document.getElementById('citaDiaExistente');
+            const dia = diaInput.dataset.value || diaInput.value;
+            const hora = document.getElementById('citaHoraExistente').value;
+            
+            // Construir datetime combinando día y hora en formato ISO
+            const datetime = dia && hora ? `${dia}T${hora}` : '';
 
-            if (!servicio || !datetime) {
-                alert('Servicio y Fecha/Hora son obligatorios');
+            if (!servicio || !dia || !hora) {
+                alert('Servicio, Día y Hora son obligatorios');
                 return;
             }
 
@@ -2029,43 +3033,284 @@
                 cliente: cliente.nombre + ' ' + cliente.apellido,
                 servicio: servicio,
                 datetime: datetime,
-                descripcion: document.getElementById('citaDescripcionExistente').value
+                descripcion: document.getElementById('citaDescripcionExistente').value,
+                estado: 'pendiente',
+                seguimientos: []
+            });
+
+            // Crear orden automáticamente en Pendiente
+            const nuevoIdOrden = Math.max(...orders.map(o => o.id || 0), 0) + 1;
+            const nuevoNumeroOrden = 'ORD-' + String(nuevoIdOrden).padStart(3, '0');
+            orders.push({
+                id: nuevoIdOrden,
+                numero: nuevoNumeroOrden,
+                clienteId: clienteSeleccionadoId,
+                servicio: servicio,
+                estado: 'pendiente',
+                descripcion: document.getElementById('citaDescripcionExistente').value,
+                importe: 0
             });
 
             showSaveStatus();
+            
+            // SYNC A SUPABASE
+            const newCita = citas.find(c => c.clienteId === clienteSeleccionadoId && c.id === Math.max(...citas.map(c => c.id)));
+            const newOrden = orders.find(o => o.clienteId === clienteSeleccionadoId && o.id === Math.max(...orders.map(o => o.id)));
+            
+            syncToSupabase('citas', newCita);
+            syncToSupabase('ordenes', newOrden);
+            
             renderCitasSelector();
         }
 
-        function renderCitasList() {
-            const list = document.getElementById('citasList');
+        // COLORES POR SERVICIO
+        const coloresServicio = {
+            'Revisión periodica': '#ff6b6b',
+            'Siniestro': '#ffa94d',
+            'Reparación moto': '#4ecdc4',
+            'Revisión ITV': '#95e1d3'
+        };
 
-            if (citas.length === 0) {
-                list.innerHTML = '<div class="empty-state">Sin citas agendadas</div>';
-                renderCalendarioInterno();
-                return;
+        // CALENDARIO MINI
+        function abrirCalendarioMini(inputId) {
+            const input = document.getElementById(inputId);
+            const container = document.getElementById('calendarioMini_' + inputId);
+            
+            let fecha = new Date();
+            if (input.value) {
+                const partes = input.value.split('-');
+                if (partes.length === 3) {
+                    fecha = new Date(partes[0], partes[1] - 1, partes[2]);
+                }
             }
+            
+            mostrarCalendarioMini(inputId, fecha.getFullYear(), fecha.getMonth());
+        }
 
-            list.innerHTML = citas.sort((a, b) => new Date(a.datetime) - new Date(b.datetime)).map(c => {
-                const fecha = new Date(c.datetime);
-                return `
-                    <div class="cita-item">
-                        <div class="cita-tiempo">📅 ${fecha.toLocaleDateString()} - ${fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                        <div class="cita-cliente">${c.cliente}</div>
-                        <div class="cita-detalles">🔧 ${c.servicio}</div>
-                        ${c.descripcion ? `<div class="cita-detalles" style="margin-top: 8px; color: #333;">${c.descripcion}</div>` : ''}
+        function mostrarCalendarioMini(inputId, año, mes) {
+            const container = document.getElementById('calendarioMini_' + inputId);
+            const primerDia = new Date(año, mes, 1);
+            const ultimoDia = new Date(año, mes + 1, 0);
+            const diasMes = ultimoDia.getDate();
+            const diaInicio = primerDia.getDay();
+            
+            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const diasSemana = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
+            
+            let html = `
+                <div style="position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 280px; margin-top: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <button onclick="cambiarMesCalendario('${inputId}', ${año}, ${mes - 1})" style="background: none; border: none; cursor: pointer; font-size: 18px; padding: 4px;">◀</button>
+                        <div style="font-weight: 700; font-size: 14px;">${meses[mes]} ${año}</div>
+                        <button onclick="cambiarMesCalendario('${inputId}', ${año}, ${mes + 1})" style="background: none; border: none; cursor: pointer; font-size: 18px; padding: 4px;">▶</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 12px;">
+            `;
+            
+            diasSemana.forEach(d => {
+                html += `<div style="text-align: center; font-weight: 600; padding: 6px; color: #666;">${d}</div>`;
+            });
+            
+            for (let i = 0; i < diaInicio; i++) {
+                html += `<div></div>`;
+            }
+            
+            for (let dia = 1; dia <= diasMes; dia++) {
+                const fecha = new Date(año, mes, dia);
+                const fechaStr = `${año}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+                const esHoy = fecha.toDateString() === new Date().toDateString();
+                const estiloHoy = esHoy ? 'background: #333333; color: white; font-weight: 700;' : 'hover: background: #f0f0f0;';
+                
+                html += `
+                    <div onclick="seleccionarFecha('${inputId}', '${fechaStr}'); cerrarCalendarioMini('${inputId}');" 
+                         style="text-align: center; padding: 8px; cursor: pointer; border-radius: 4px; ${estiloHoy}">
+                        ${dia}
                     </div>
                 `;
-            }).join('');
+            }
             
+            html += `
+                    </div>
+                    <button onclick="cerrarCalendarioMini('${inputId}')" style="width: 100%; margin-top: 12px; padding: 8px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-weight: 600;">Cerrar</button>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            container.style.display = 'block';
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#calendarioMini_' + inputId) && e.target.id !== inputId) {
+                    cerrarCalendarioMini(inputId);
+                }
+            });
+        }
+
+        function cambiarMesCalendario(inputId, año, mes) {
+            if (mes < 0) {
+                mes = 11;
+                año--;
+            } else if (mes > 11) {
+                mes = 0;
+                año++;
+            }
+            mostrarCalendarioMini(inputId, año, mes);
+        }
+
+        function seleccionarFecha(inputId, fechaStr) {
+            const input = document.getElementById(inputId);
+            const partes = fechaStr.split('-');
+            const fecha = new Date(partes[0], partes[1] - 1, partes[2]);
+            input.value = fecha.toLocaleDateString('es-ES');
+            input.dataset.value = fechaStr;
+            
+            // Llamar a la función correspondiente según el input
+            if (inputId === 'filtroFecha') {
+                filtrarCitas();
+            } else if (inputId === 'filterEntrega') {
+                filterClientes();
+            } else if (inputId === 'fechaEntregaInput') {
+                guardarFechaHoraEntrega();
+            }
+        }
+
+        function cerrarCalendarioMini(inputId) {
+            const container = document.getElementById('calendarioMini_' + inputId);
+            if (container) {
+                container.style.display = 'none';
+            }
+        }
+
+        function obtenerColorServicio(servicio) {
+            return coloresServicio[servicio] || '#333333';
+        }
+
+        function obtenerCitasFiltradas() {
+            const input = document.getElementById('filtroFecha');
+            let fecha = input.dataset.value || '';
+            
+            const servicio = document.getElementById('filtroServicio').value;
+            
+            let citasFiltradas = citas;
+            
+            if (fecha) {
+                citasFiltradas = citasFiltradas.filter(c => c.datetime.startsWith(fecha));
+            }
+            
+            if (servicio) {
+                citasFiltradas = citasFiltradas.filter(c => c.servicio === servicio);
+            }
+            
+            return citasFiltradas;
+        }
+
+
+        function filtrarCitas() {
+            renderCitasList();
+            renderCalendarioInterno();
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtroFecha').value = '';
+            document.getElementById('filtroFecha').dataset.value = '';
+            document.getElementById('filtroServicio').value = '';
+            renderCitasList();
+            renderCalendarioInterno();
+        }
+
+        let vistaCalendarioActual = 'mes';
+
+        function cambiarVistaCalendario(vista) {
+            vistaCalendarioActual = vista;
+            document.getElementById('btnDia').style.background = vista === 'dia' ? '#333333' : '#f0f0f0';
+            document.getElementById('btnDia').style.color = vista === 'dia' ? 'white' : '#333';
+            document.getElementById('btnSemana').style.background = vista === 'semana' ? '#333333' : '#f0f0f0';
+            document.getElementById('btnSemana').style.color = vista === 'semana' ? 'white' : '#333';
+            document.getElementById('btnMes').style.background = vista === 'mes' ? '#333333' : '#f0f0f0';
+            document.getElementById('btnMes').style.color = vista === 'mes' ? 'white' : '#333';
             renderCalendarioInterno();
         }
 
         function renderCalendarioInterno() {
+            if (vistaCalendarioActual === 'mes') renderCalendarioMes();
+            else if (vistaCalendarioActual === 'semana') renderCalendarioSemana();
+            else if (vistaCalendarioActual === 'dia') renderCalendarioDia();
+        }
+
+        function renderCalendarioDia() {
+            const calendario = document.getElementById('calendarioInterno');
+            const hoy = new Date();
+            const citasHoy = obtenerCitasFiltradas().filter(c => c.datetime.startsWith(hoy.toISOString().split('T')[0])).sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+            
+            let html = `<div style="text-align: center; margin-bottom: 16px;">
+                <div style="font-weight: 700; font-size: 16px; margin-bottom: 12px;">${hoy.toLocaleDateString('es-ES', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</div>`;
+            
+            if (citasHoy.length === 0) {
+                html += `<div style="color: #999; padding: 20px;">Sin citas para hoy</div>`;
+            } else {
+                html += `<div style="text-align: left;">`;
+                citasHoy.forEach(c => {
+                    const fecha = new Date(c.datetime);
+                    const color = obtenerColorServicio(c.servicio);
+                    html += `<div style="padding: 12px; background: ${color}20; border-left: 4px solid ${color}; margin-bottom: 8px; border-radius: 4px; cursor: pointer;" onclick="openClient(${c.clienteId})">
+                        <div style="font-weight: 600; color: ${color};">${fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        <div style="font-weight: 600; margin-top: 4px;">${c.cliente}</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 4px;">🔧 ${c.servicio}</div>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+            html += `</div>`;
+            calendario.innerHTML = html;
+        }
+
+        function renderCalendarioSemana() {
+            const calendario = document.getElementById('calendarioInterno');
+            const hoy = new Date();
+            const inicioSemana = new Date(hoy);
+            inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+            
+            const citasFiltradas = obtenerCitasFiltradas();
+            const horas = Array.from({length: 14}, (_, i) => 8 + i);
+            const diasSemana = Array.from({length: 7}, (_, i) => {
+                const d = new Date(inicioSemana);
+                d.setDate(d.getDate() + i);
+                return d;
+            });
+            
+            let html = `<div style="overflow: auto; max-height: 600px; border-radius: 6px; border: 1px solid #ddd;">
+                <div style="display: grid; grid-template-columns: 60px repeat(7, 1fr); gap: 1px; background: #ddd; padding: 1px; min-width: 900px;">
+                    <div style="background: white; padding: 8px; font-weight: 600; font-size: 12px; position: sticky; top: 0; z-index: 5;"></div>`;
+            
+            diasSemana.forEach(d => {
+                const nombreDia = d.toLocaleDateString('es-ES', {weekday: 'short'}).toUpperCase();
+                const numDia = d.getDate();
+                const esHoy = d.toDateString() === hoy.toDateString();
+                html += `<div style="background: ${esHoy ? '#333333' : 'white'}; color: ${esHoy ? 'white' : 'inherit'}; padding: 12px; font-weight: 600; font-size: 12px; text-align: center; position: sticky; top: 0; z-index: 5;">${nombreDia}<br>${numDia}</div>`;
+            });
+            
+            horas.forEach(hora => {
+                html += `<div style="background: white; padding: 8px; font-size: 11px; font-weight: 500; text-align: center; position: sticky; left: 0; z-index: 4; background: #f9f9f9;">${hora}:00</div>`;
+                diasSemana.forEach(d => {
+                    const fechaStr = d.toISOString().split('T')[0];
+                    const citasHora = citasFiltradas.filter(c => c.datetime.startsWith(fechaStr) && new Date(c.datetime).getHours() === hora);
+                    const contenido = citasHora.length > 0 ? citasHora.map(c => {
+                        const color = obtenerColorServicio(c.servicio);
+                        return `<div style="background: ${color}; color: white; padding: 4px; font-size: 10px; border-radius: 3px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" onclick="abrirDetallesCita(${c.id})" title="${c.servicio}">${new Date(c.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ${c.servicio}</div>`;
+                    }).join('') : '';
+                    html += `<div style="background: white; padding: 4px; min-height: 60px; border: 1px solid #eee;">${contenido}</div>`;
+                });
+            });
+            
+            html += `</div></div>`;
+            calendario.innerHTML = html;
+        }
+
+        function renderCalendarioMes() {
             const calendario = document.getElementById('calendarioInterno');
             const hoy = new Date();
             const mes = hoy.getMonth();
             const año = hoy.getFullYear();
             
+            const citasFiltradas = obtenerCitasFiltradas();
             const primerDia = new Date(año, mes, 1);
             const ultimoDia = new Date(año, mes + 1, 0);
             const diasMes = ultimoDia.getDate();
@@ -2078,29 +3323,26 @@
                 <div style="font-weight: 700; font-size: 16px; margin-bottom: 12px;">${meses[mes]} ${año}</div>
                 <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">`;
             
-            // Días de la semana
             diasSemana.forEach(d => {
                 html += `<div style="font-weight: 600; padding: 8px; background: #f0f0f0; border-radius: 4px;">${d}</div>`;
             });
             
-            // Espacios vacíos antes del primer día
             for (let i = 0; i < diaInicio; i++) {
                 html += `<div></div>`;
             }
             
-            // Días del mes
             for (let dia = 1; dia <= diasMes; dia++) {
                 const fecha = new Date(año, mes, dia);
                 const fechaStr = fecha.toISOString().split('T')[0];
-                const citasDelDia = citas.filter(c => c.datetime.startsWith(fechaStr));
+                const citasDelDia = citasFiltradas.filter(c => c.datetime.startsWith(fechaStr));
                 const esHoy = fecha.toDateString() === hoy.toDateString();
                 
-                const estiloFondo = esHoy ? 'background: #0066cc; color: white;' : citasDelDia.length > 0 ? 'background: #e3f2fd; border: 2px solid #0066cc;' : '';
+                const estiloFondo = esHoy ? 'background: #333333; color: white;' : citasDelDia.length > 0 ? 'background: #e3f2fd; border: 2px solid #333333;' : '';
                 const titulo = citasDelDia.length > 0 ? `${citasDelDia.length} cita${citasDelDia.length > 1 ? 's' : ''}` : '';
                 
-                html += `<div style="padding: 8px; border-radius: 4px; text-align: center; ${estiloFondo} cursor: pointer;" title="${titulo}">
+                html += `<div style="padding: 8px; border-radius: 4px; text-align: center; ${estiloFondo} cursor: pointer; min-height: 50px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;" title="${titulo}">
                     <div style="font-weight: ${citasDelDia.length > 0 ? 700 : 500};">${dia}</div>
-                    ${citasDelDia.length > 0 ? `<div style="font-size: 11px; margin-top: 4px;">● ${citasDelDia.length}</div>` : ''}
+                    ${citasDelDia.length > 0 ? `<div style="font-size: 16px; margin-top: 4px; color: #ff6b6b;">●</div>` : ''}
                 </div>`;
             }
             
@@ -2108,43 +3350,32 @@
             calendario.innerHTML = html;
         }
 
-        function filtrarCitas() {
-            const fecha = document.getElementById('filtroFecha').value;
-            const servicio = document.getElementById('filtroServicio').value;
+        function renderCitasList() {
             const list = document.getElementById('citasList');
-
-            let citasFiltradas = citas;
-
-            if (fecha) {
-                citasFiltradas = citasFiltradas.filter(c => c.datetime.startsWith(fecha));
-            }
-
-            if (servicio) {
-                citasFiltradas = citasFiltradas.filter(c => c.servicio === servicio);
-            }
+            const citasFiltradas = obtenerCitasFiltradas();
 
             if (citasFiltradas.length === 0) {
-                list.innerHTML = '<div class="empty-state">Sin citas que coincidan los filtros</div>';
+                list.innerHTML = '<div class="empty-state">Sin citas agendadas</div>';
+                renderCalendarioInterno();
                 return;
             }
 
             list.innerHTML = citasFiltradas.sort((a, b) => new Date(a.datetime) - new Date(b.datetime)).map(c => {
                 const fecha = new Date(c.datetime);
+                const color = obtenerColorServicio(c.servicio);
+                const fechaFormato = isNaN(fecha.getTime()) ? 'Fecha inválida' : fecha.toLocaleDateString('es-ES', {weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'});
+                const horaFormato = isNaN(fecha.getTime()) ? '' : fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 return `
-                    <div class="cita-item">
-                        <div class="cita-tiempo">📅 ${fecha.toLocaleDateString()} - ${fecha.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    <div class="cita-item" style="cursor: pointer; border-left: 4px solid ${color};" onclick="openClient(${c.clienteId})">
+                        <div class="cita-tiempo">📅 ${fechaFormato} - ${horaFormato}</div>
                         <div class="cita-cliente">${c.cliente}</div>
-                        <div class="cita-detalles">🔧 ${c.servicio}</div>
+                        <div class="cita-detalles" style="color: ${color}; font-weight: 600;">🔧 ${c.servicio}</div>
                         ${c.descripcion ? `<div class="cita-detalles" style="margin-top: 8px; color: #333;">${c.descripcion}</div>` : ''}
                     </div>
                 `;
             }).join('');
-        }
-
-        function limpiarFiltros() {
-            document.getElementById('filtroFecha').value = '';
-            document.getElementById('filtroServicio').value = '';
-            renderCitasList();
+            
+            renderCalendarioInterno();
         }
 
         // ÓRDENES
@@ -2159,36 +3390,101 @@
 
             const container = document.getElementById('pipelineContainer');
             
-            container.innerHTML = statuses.map(status => {
-                const ordersInStatus = orders.filter(o => o.estado === status);
-                return `
-                    <div class="pipeline-column">
-                        <div class="column-title">
-                            ${statusLabels[status]}
-                            <span class="column-count">${ordersInStatus.length}</span>
+            // Obtener valores de filtros ANTES de re-renderizar
+            const busquedaInput = document.getElementById('busquedaOrdenes');
+            const servicioFilter = document.getElementById('filtroServicio');
+            const mecanicoFilter = document.getElementById('filtroMecanico');
+            
+            const busqueda = busquedaInput ? busquedaInput.value.toLowerCase() : '';
+            const servicioSeleccionado = servicioFilter ? servicioFilter.value : '';
+            const mecanicoSeleccionado = mecanicoFilter ? mecanicoFilter.value : '';
+            
+            // Filtrar órdenes según búsqueda y filtros
+            const ordenesFiltradas = orders.filter(o => {
+                const client = clients.find(c => c.id === o.clienteId);
+                if (!client) return false;
+                
+                // Búsqueda de texto
+                const nombre = (client.nombre + ' ' + client.apellido).toLowerCase();
+                const email = client.email.toLowerCase();
+                const telefono = client.telefono.toLowerCase();
+                const matricula = client.moto.matricula.toLowerCase();
+                
+                const coincideBusqueda = !busqueda || 
+                    nombre.includes(busqueda) || 
+                    email.includes(busqueda) || 
+                    telefono.includes(busqueda) || 
+                    matricula.includes(busqueda);
+                
+                // Filtro servicio
+                const coincideServicio = !servicioSeleccionado || o.servicio === servicioSeleccionado;
+                
+                // Filtro mecánico
+                const coincideMecanico = !mecanicoSeleccionado || o.mecanico === mecanicoSeleccionado;
+                
+                return coincideBusqueda && coincideServicio && coincideMecanico;
+            });
+            
+            // Obtener servicios únicos
+            const servicios = [...new Set(orders.map(o => o.servicio))].sort();
+            
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1; display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+                    <input type="text" id="busquedaOrdenes" class="form-input" placeholder="🔍 Buscar..." 
+                           style="flex: 1; min-width: 200px; padding: 10px 12px; font-size: 13px;"
+                           value="${busqueda}"
+                           oninput="renderOrdenes()">
+                    
+                    <select id="filtroServicio" class="form-select" style="padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
+                        <option value="">📋 Todos los servicios</option>
+                        ${servicios.map(s => `<option value="${s}" ${s === servicioSeleccionado ? 'selected' : ''}>${s}</option>`).join('')}
+                    </select>
+                    
+                    <select id="filtroMecanico" class="form-select" style="padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
+                        <option value="">👨‍🔧 Todos los mecánicos</option>
+                        ${mecanicos.map(m => `<option value="${m.nombre}" ${m.nombre === mecanicoSeleccionado ? 'selected' : ''}>${m.nombre}</option>`).join('')}
+                    </select>
+                </div>
+                ${statuses.map(status => {
+                    const ordersInStatus = ordenesFiltradas.filter(o => o.estado === status);
+                    return `
+                        <div class="pipeline-column">
+                            <div class="column-title">
+                                ${statusLabels[status]}
+                                <span class="column-count">${ordersInStatus.length}</span>
+                            </div>
+                            <div class="dropzone" ondragover="event.preventDefault(); this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropOrder(event, '${status}')">
+                                ${ordersInStatus.map(o => {
+                                    const client = clients.find(c => c.id === o.clienteId);
+                                    return `
+                                        <div class="order-card" data-order-id="${o.id}" draggable="true" ondragstart="event.dataTransfer.setData('orderId', ${o.id})" onclick="openClient(${o.clienteId})" style="cursor: pointer; display: flex; justify-content: space-between;">
+                                            <div style="flex: 1;">
+                                                <div class="order-id">${o.numero}</div>
+                                                <div class="order-client">👤 ${client.nombre} ${client.apellido}</div>
+                                                <div class="order-info">📧 ${client.email}</div>
+                                                <div class="order-info">📞 ${client.telefono}</div>
+                                                <div class="order-info">🆔 ${client.dni || '-'}</div>
+                                                <div class="order-service" style="margin-top: 8px;">🔧 ${o.servicio}</div>
+                                                <div class="order-info">🏍️ ${client.moto.marca} ${client.moto.modelo}</div>
+                                                <div class="order-info">Matrícula: ${client.moto.matricula}</div>
+                                                ${o.importe > 0 ? `<div style="margin-top: 8px; font-weight: 600; color: #4caf50;">💰 €${o.importe}</div>` : ''}
+                                                ${client.recambios && client.recambios.length > 0 ? `<div style="margin-top: 4px; font-weight: 600; color: #555555;">🔧 Recambios: €${client.recambios.reduce((sum, id) => sum + (recambiosDisponibles.find(r => r.id === id)?.precio || 0), 0)}</div>` : ''}
+                                            </div>
+                                            <button class="btn" onclick="event.stopPropagation(); eliminarOrden(${o.id})" style="background: #dc3545; color: white; padding: 4px 8px; font-size: 12px; border-radius: 3px; height: fit-content; margin-top: 8px;">🗑️</button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
                         </div>
-                        <div class="dropzone" ondragover="event.preventDefault(); this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropOrder(event, '${status}')">
-                            ${ordersInStatus.map(o => {
-                                const client = clients.find(c => c.id === o.clienteId);
-                                const fechaEntrega = client.fechaEntrega ? new Date(client.fechaEntrega) : null;
-                                const fechaFormato = fechaEntrega ? fechaEntrega.toLocaleDateString() : '-';
-                                
-                                return `
-                                    <div class="order-card" draggable="true" ondragstart="event.dataTransfer.setData('orderId', ${o.id})">
-                                        <div class="order-numero">${o.numero}</div>
-                                        <div class="order-client" onclick="event.stopPropagation(); openClient(${o.clienteId})">👤 ${client.nombre} ${client.apellido}</div>
-                                        <div class="order-info">🏍️ ${client.moto.modelo}</div>
-                                        <div class="order-info">Matrícula: ${client.moto.matricula}</div>
-                                        <div class="order-info">📅 ${fechaFormato}</div>
-                                        <div class="order-service">🔧 ${o.servicio}</div>
-                                        ${o.importe > 0 ? `<div style="margin-top: 8px; font-weight: 600; color: #4caf50;">€ ${o.importe}</div>` : ''}
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('')}
+            `;
+            
+            // Re-enfocar el input después de renderizar
+            setTimeout(() => {
+                const input = document.getElementById('busquedaOrdenes');
+                if (input) input.focus();
+            }, 0);
         }
 
         function dropOrder(e, status) {
@@ -2207,6 +3503,290 @@
                 }
                 order.estado = status;
                 renderOrdenes();
+            }
+        }
+
+        // SEGUIMIENTO DE CITAS
+        let citaEditandoId = null;
+
+        function abrirEditarCita(citaId) {
+            citaEditandoId = citaId;
+            const cita = citas.find(c => c.id === citaId);
+            if (cita) {
+                document.getElementById('editarCitaModal').classList.add('active');
+                document.getElementById('editar-cita-estado').value = cita.estado;
+                document.getElementById('editar-cita-nota').value = '';
+                document.getElementById('editar-cita-nota').focus();
+            }
+        }
+
+        function cerrarEditarCita() {
+            document.getElementById('editarCitaModal').classList.remove('active');
+            citaEditandoId = null;
+        }
+
+        function guardarEditarCita() {
+            if (!citaEditandoId) return;
+            
+            const cita = citas.find(c => c.id === citaEditandoId);
+            if (!cita) return;
+            
+            const nuevoEstado = document.getElementById('editar-cita-estado').value;
+            const nota = document.getElementById('editar-cita-nota').value;
+            
+            // Actualizar estado de la cita
+            cita.estado = nuevoEstado;
+            
+            // Agregar nota al seguimiento si existe
+            if (nota.trim()) {
+                const nuevoSeguimiento = {
+                    id: (cita.seguimientos.length) + 1,
+                    fecha: new Date().toLocaleString('es-ES'),
+                    mecanico: 'Sistema',
+                    estado: nuevoEstado,
+                    descripcion: nota
+                };
+                cita.seguimientos.push(nuevoSeguimiento);
+            }
+            
+            // Actualizar orden asociada
+            const orden = orders.find(o => o.clienteId === cita.clienteId && o.servicio === cita.servicio);
+            if (orden) {
+                orden.estado = nuevoEstado;
+            }
+            
+            showSaveStatus();
+            cerrarEditarCita();
+            // Re-renderizar la ficha para actualizar
+            openClient(currentClientId);
+        }
+
+        // EDITAR ORDEN
+        let ordenEditandoId = null;
+
+        function abrirEditarOrden(ordenId) {
+            ordenEditandoId = ordenId;
+            const orden = orders.find(o => o.id === ordenId);
+            if (!orden) return;
+
+            const estados = [
+                { valor: 'pendiente', label: 'Pendiente' },
+                { valor: 'en-progreso', label: 'En Progreso' },
+                { valor: 'listo-entrega', label: 'Listo para Entrega' },
+                { valor: 'entregado-pagado', label: 'Entregado y Pagado' }
+            ];
+
+            document.getElementById('editarOrdenBody').innerHTML = `
+                <div style="padding: 20px;">
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 8px 0; color: #333;">Orden: ${orden.numero}</h4>
+                        <p style="margin: 0; color: #666; font-size: 13px;">Servicio: ${orden.servicio}</p>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Estado Actual:</label>
+                        <select id="editar-orden-estado" class="form-select" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                            ${estados.map(e => `
+                                <option value="${e.valor}" ${orden.estado === e.valor ? 'selected' : ''}>
+                                    ${e.label}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Nota (opcional):</label>
+                        <textarea id="editar-orden-nota" class="form-textarea" placeholder="Agregar nota..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: Arial; font-size: 13px; resize: vertical; min-height: 80px;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="guardarEditarOrden()" style="flex: 1; padding: 10px; background: #333333; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">✓ Guardar</button>
+                        <button class="btn" onclick="cerrarEditarOrden()" style="flex: 1; padding: 10px; background: #f0f0f0; color: #333; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Cancelar</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('editarOrdenModal').classList.add('active');
+        }
+
+        function cerrarEditarOrden() {
+            document.getElementById('editarOrdenModal').classList.remove('active');
+            ordenEditandoId = null;
+        }
+
+        function guardarEditarOrden() {
+            if (!ordenEditandoId) return;
+
+            const orden = orders.find(o => o.id === ordenEditandoId);
+            if (!orden) return;
+
+            const nuevoEstado = document.getElementById('editar-orden-estado').value;
+            const nota = document.getElementById('editar-orden-nota').value;
+
+            // Actualizar estado de la orden
+            orden.estado = nuevoEstado;
+
+            // Si hay nota, agregar al historial
+            if (nota.trim()) {
+                if (!orden.historial) {
+                    orden.historial = [];
+                }
+                orden.historial.push({
+                    fecha: new Date().toLocaleString('es-ES'),
+                    estado: nuevoEstado,
+                    nota: nota
+                });
+            }
+
+            // Actualizar cita asociada si existe
+            const cita = citas.find(c => c.clienteId === orden.clienteId && c.servicio === orden.servicio);
+            if (cita) {
+                cita.estado = nuevoEstado;
+            }
+
+            showSaveStatus('Orden actualizada');
+            cerrarEditarOrden();
+            renderOrdenes();
+            // Re-renderizar la ficha para actualizar
+            if (currentClientId) {
+                openClient(currentClientId);
+            }
+        }
+
+        // SEGUIMIENTO DE CITA ACTUAL (desde ficha del cliente)
+
+        // ELIMINAR CLIENTE
+        function eliminarCliente(clienteId) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este cliente? Se eliminarán todas sus citas y órdenes.')) {
+                return;
+            }
+            
+            // Eliminar citas del cliente
+            citas = citas.filter(c => c.clienteId !== clienteId);
+            
+            // Eliminar órdenes del cliente
+            orders = orders.filter(o => o.clienteId !== clienteId);
+            
+            // Eliminar cliente
+            clients = clients.filter(c => c.id !== clienteId);
+            
+            showSaveStatus('Cliente eliminado');
+            
+            // SYNC A SUPABASE
+            window.supabaseClient.from('clientes').delete().eq('id', clienteId);
+            window.supabaseClient.from('citas').delete().eq('clienteId', clienteId);
+            window.supabaseClient.from('ordenes').delete().eq('clienteId', clienteId);
+            
+            closeModal();
+            renderClientes();
+        }
+
+        // ELIMINAR CITA
+        function eliminarCita(citaId) {
+            if (!confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
+                return;
+            }
+            
+            const cita = citas.find(c => c.id === citaId);
+            if (cita) {
+                // Eliminar órdenes asociadas (opcional)
+                orders = orders.filter(o => !(o.clienteId === cita.clienteId && o.servicio === cita.servicio));
+            }
+            
+            citas = citas.filter(c => c.id !== citaId);
+            
+            showSaveStatus('Cita eliminada');
+            openClient(currentClientId);
+        }
+
+        // ELIMINAR ORDEN
+        function eliminarOrden(ordenId) {
+            if (!confirm('¿Estás seguro de que deseas eliminar esta orden?')) {
+                return;
+            }
+            
+            orders = orders.filter(o => o.id !== ordenId);
+            
+            showSaveStatus('Orden eliminada');
+            renderOrdenes();
+            
+            // Si está abierta la ficha, actualizar
+            if (currentClientId) {
+                openClient(currentClientId);
+            }
+        }
+
+        // ADMINISTRACIÓN
+        function renderAdmin() {
+            const container = document.getElementById('mecanicosListAdmin');
+            container.innerHTML = mecanicos.map(m => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 4px; margin-bottom: 8px; border: 1px solid #e1e4e8;">
+                    <div>
+                        <span style="font-weight: 600; color: #333;">${m.nombre}</span>
+                        <span style="color: #999; font-size: 12px; margin-left: 10px;">(${orders.filter(o => o.mecanico === m.nombre).length} órdenes)</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn" onclick="editarMecanico(${m.id})" style="padding: 6px 12px; background: #555; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">✏️ Editar</button>
+                        <button class="btn" onclick="eliminarMecanico(${m.id})" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function agregarMecanico() {
+            const nombre = document.getElementById('nuevoMecanicoInput').value.trim();
+            if (!nombre) {
+                alert('Ingresa un nombre de mecánico');
+                return;
+            }
+
+            const newId = Math.max(...mecanicos.map(m => m.id), 0) + 1;
+            mecanicos.push({ id: newId, nombre: nombre });
+            
+            document.getElementById('nuevoMecanicoInput').value = '';
+            showSaveStatus('Mecánico agregado');
+            renderAdmin();
+        }
+
+        let mecanicoDitandoId = null;
+
+        function editarMecanico(mecanicId) {
+            const mecanico = mecanicos.find(m => m.id === mecanicId);
+            if (!mecanico) return;
+
+            mecanicoDitandoId = mecanicId;
+            const nuevoNombre = prompt('Nuevo nombre del mecánico:', mecanico.nombre);
+            
+            if (nuevoNombre && nuevoNombre.trim()) {
+                mecanico.nombre = nuevoNombre.trim();
+                
+                // Actualizar nombre en órdenes
+                orders.forEach(o => {
+                    if (o.mecanico === mecanicos.find(m => m.id === mecanicoDitandoId)?.nombre) {
+                        // El nombre ya está actualizado en el array mecanicos
+                    }
+                });
+                
+                showSaveStatus('Mecánico actualizado');
+                renderAdmin();
+            }
+        }
+
+        function eliminarMecanico(mecanicId) {
+            const mecanico = mecanicos.find(m => m.id === mecanicId);
+            if (!mecanico) return;
+
+            const ordenesAsociadas = orders.filter(o => o.mecanico === mecanico.nombre).length;
+            
+            if (ordenesAsociadas > 0) {
+                alert(`No puedes eliminar "${mecanico.nombre}" porque tiene ${ordenesAsociadas} orden(es) asignada(s). Asigna esas órdenes a otro mecánico primero.`);
+                return;
+            }
+
+            if (confirm(`¿Estás seguro de que deseas eliminar a ${mecanico.nombre}?`)) {
+                mecanicos = mecanicos.filter(m => m.id !== mecanicId);
+                showSaveStatus('Mecánico eliminado');
+                renderAdmin();
             }
         }
 
@@ -2291,7 +3871,7 @@
                     type: 'doughnut',
                     data: {
                         labels: Object.keys(servicios),
-                        datasets: [{ data: Object.values(servicios), backgroundColor: ['#0066cc', '#ff9800', '#4caf50', '#f44336'] }]
+                        datasets: [{ data: Object.values(servicios), backgroundColor: ['#333333', '#ff9800', '#4caf50', '#f44336'] }]
                     }
                 });
             }
@@ -2305,7 +3885,7 @@
                     type: 'bar',
                     data: {
                         labels: Object.keys(modelos),
-                        datasets: [{ label: 'Cantidad', data: Object.values(modelos), backgroundColor: '#0066cc' }]
+                        datasets: [{ label: 'Cantidad', data: Object.values(modelos), backgroundColor: '#333333' }]
                     },
                     options: { responsive: true, scales: { y: { beginAtZero: true } } }
                 });
@@ -2324,7 +3904,7 @@
                     type: 'bar',
                     data: {
                         labels: Object.keys(funel),
-                        datasets: [{ label: 'Órdenes', data: Object.values(funel), backgroundColor: ['#ff9800', '#0066cc', '#4caf50', '#2e7d32'] }]
+                        datasets: [{ label: 'Órdenes', data: Object.values(funel), backgroundColor: ['#ff9800', '#333333', '#4caf50', '#2e7d32'] }]
                     },
                     options: { responsive: true, scales: { y: { beginAtZero: true } } }
                 });
@@ -2358,7 +3938,7 @@
                     type: 'pie',
                     data: {
                         labels: Object.keys(citasServicio),
-                        datasets: [{ data: Object.values(citasServicio), backgroundColor: ['#0066cc', '#ff9800', '#4caf50', '#f44336'] }]
+                        datasets: [{ data: Object.values(citasServicio), backgroundColor: ['#333333', '#ff9800', '#4caf50', '#f44336'] }]
                     }
                 });
             }
@@ -2372,7 +3952,7 @@
                     type: 'radar',
                     data: {
                         labels: Object.keys(mecanicos),
-                        datasets: [{ label: 'Órdenes', data: Object.values(mecanicos), backgroundColor: 'rgba(0, 102, 204, 0.2)', borderColor: '#0066cc' }]
+                        datasets: [{ label: 'Órdenes', data: Object.values(mecanicos), backgroundColor: 'rgba(0, 102, 204, 0.2)', borderColor: '#333333' }]
                     },
                     options: { responsive: true, scales: { r: { beginAtZero: true } } }
                 });
@@ -2398,7 +3978,7 @@
                 confetti.className = 'confetti';
                 confetti.style.left = Math.random() * window.innerWidth + 'px';
                 confetti.style.top = '-10px';
-                confetti.style.background = ['#0066cc', '#ff9800', '#4caf50', '#f44336'][Math.floor(Math.random() * 4)];
+                confetti.style.background = ['#333333', '#ff9800', '#4caf50', '#f44336'][Math.floor(Math.random() * 4)];
                 confetti.style.animation = `confettiFall ${2 + Math.random() * 1}s linear forwards`;
                 document.body.appendChild(confetti);
                 setTimeout(() => confetti.remove(), 3000);
@@ -2406,7 +3986,7 @@
         }
 
         // INIT
-        renderClientes();
+        checkLogin();
     </script>
 </body>
 </html>
