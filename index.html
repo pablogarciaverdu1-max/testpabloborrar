@@ -2530,6 +2530,10 @@
                 importe: 0
             });
 
+            // Sincronizar orden a Supabase
+            syncToSupabase('ordenes', orders[orders.length - 1]);
+            syncToSupabase('citas', citas[citas.length - 1]);
+
             showSaveStatus();
             closeCitaRapida();
             renderCitasList();
@@ -3429,18 +3433,19 @@
             const servicios = [...new Set(orders.map(o => o.servicio))].sort();
             
             container.innerHTML = `
-                <div style="grid-column: 1 / -1; display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+                <div style="grid-column: 1 / -1; display: flex; gap: 16px; margin-bottom: 20px; align-items: center;">
+                    <label style="font-weight: 600; font-size: 14px; color: #333; white-space: nowrap;">Buscar</label>
                     <input type="text" id="busquedaOrdenes" class="form-input" placeholder="🔍 Buscar..." 
-                           style="flex: 1; min-width: 200px; padding: 10px 12px; font-size: 13px;"
+                           style="flex: 1; padding: 10px 12px; font-size: 13px;"
                            value="${busqueda}"
                            oninput="renderOrdenes()">
                     
-                    <select id="filtroServicio" class="form-select" style="padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
+                    <select id="filtroServicio" class="form-select" style="padding: 10px 12px; font-size: 13px; min-width: 150px;" onchange="renderOrdenes()">
                         <option value="">📋 Todos los servicios</option>
                         ${servicios.map(s => `<option value="${s}" ${s === servicioSeleccionado ? 'selected' : ''}>${s}</option>`).join('')}
                     </select>
                     
-                    <select id="filtroMecanico" class="form-select" style="padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
+                    <select id="filtroMecanico" class="form-select" style="padding: 10px 12px; font-size: 13px; min-width: 150px;" onchange="renderOrdenes()">
                         <option value="">👨‍🔧 Todos los mecánicos</option>
                         ${mecanicos.map(m => `<option value="${m.nombre}" ${m.nombre === mecanicoSeleccionado ? 'selected' : ''}>${m.nombre}</option>`).join('')}
                     </select>
