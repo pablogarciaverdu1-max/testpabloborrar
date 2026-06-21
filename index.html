@@ -1161,6 +1161,7 @@
         <div class="nav-tabs">
             <button class="nav-tab" onclick="switchTab('citas')">Citas</button>
             <button class="nav-tab active" onclick="switchTab('clientes')">Clientes</button>
+            <button class="nav-tab" onclick="switchTab('seguimientos')">📋 Seguimientos</button>
             <button class="nav-tab" onclick="switchTab('ordenes')">Órdenes</button>
             <button class="nav-tab" onclick="switchTab('informes')">Informes</button>
             <button class="nav-tab" onclick="switchTab('admin')" style="margin-left: auto;">Administración</button>
@@ -1185,6 +1186,54 @@
                         </div>
                     </div>
                     <div class="clients-list" id="clientsList"></div>
+                </div>
+            </div>
+
+            <!-- SEGUIMIENTOS -->
+            <div id="view-seguimientos" class="view">
+                <div style="padding: 20px;">
+                    <h2 style="margin-bottom: 20px;">📋 TAREAS</h2>
+                    
+                    <div class="filters-panel" style="margin-bottom: 20px;">
+                        <div class="filter-group">
+                            <label class="filter-label">Filtrar por cliente</label>
+                            <input type="text" class="filter-input" id="seguimientosFilter" placeholder="Nombre, matrícula, email..." onkeyup="filtrarSeguimientos()">
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">✓ Completado</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">📅 Vencimiento</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Tarea</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">👤 Cliente</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">📆 Creación</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">👨‍🔧 Mecánico</th>
+                                </tr>
+                            </thead>
+                            <tbody id="seguimientosList">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- CALENDARIO -->
+                    <div style="margin-top: 40px;">
+                        <h3 style="margin-bottom: 20px;">📅 Calendario Semanal</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <button class="btn" style="background: #333; color: white;" onclick="semanaAnterior()">← Semana Anterior</button>
+                            <h4 id="tituloSemana" style="margin: 0;"></h4>
+                            <button class="btn" style="background: #333; color: white;" onclick="semanaSiguiente()">Semana Siguiente →</button>
+                        </div>
+
+                        <div style="overflow-x: auto; border: 1px solid #ddd; border-radius: 8px;">
+                            <table id="tablaCalendario" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                                <!-- Se genera con JavaScript -->
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1600,11 +1649,13 @@
         // SYNC DESDE SUPABASE → LOCALSTORAGE (CON DESENCRIPTACIÓN)
         async function syncFromSupabase() {
             try {
-                const [clientesRes, citasRes, ordenesRes, mecanicosRes] = await Promise.all([
-                    window.supabaseClient.from('clientes').select('*'),
-                    window.supabaseClient.from('citas').select('*'),
-                    window.supabaseClient.from('ordenes').select('*'),
-                    window.supabaseClient.from('mecanicos').select('*')
+                const [clientesRes, citasRes, ordenesRes, mecanicosRes, seguimientosRes, notasRes] = await Promise.all([
+                    window.supabaseClient.from('CLIENTES').select('*'),
+                    window.supabaseClient.from('CITAS').select('*'),
+                    window.supabaseClient.from('ORDENES').select('*'),
+                    window.supabaseClient.from('MECANICOS').select('*'),
+                    window.supabaseClient.from('SEGUIMIENTOS').select('*'),
+                    window.supabaseClient.from('NOTAS').select('*')
                 ]);
 
                 if (clientesRes.data) {
@@ -1618,11 +1669,15 @@
                 if (citasRes.data) citas = citasRes.data;
                 if (ordenesRes.data) orders = ordenesRes.data;
                 if (mecanicosRes.data) mecanicos = mecanicosRes.data;
+                if (seguimientosRes.data) seguimientos = seguimientosRes.data.filter(s => !s.completado);
+                if (notasRes.data) notas = notasRes.data;
 
                 localStorage.setItem('clients', JSON.stringify(clients));
                 localStorage.setItem('citas', JSON.stringify(citas));
                 localStorage.setItem('orders', JSON.stringify(orders));
                 localStorage.setItem('mecanicos', JSON.stringify(mecanicos));
+                localStorage.setItem('seguimientos', JSON.stringify(seguimientos));
+                localStorage.setItem('notas', JSON.stringify(notas));
 
                 console.log('✓ Sincronización completada desde nube');
                 showSyncStatus('✓ Sincronizado desde nube');
@@ -1634,39 +1689,142 @@
 
         // SYNC A SUPABASE (auto-sync con encriptación y auditoría)
         async function syncToSupabase(tabla, datos) {
+            console.log(`📤 INTENTANDO SINCRONIZAR ${tabla}:`, datos);
+            
             if (!navigator.onLine) {
-                console.warn('Sin conexión, se sincronizará cuando haya conexión');
+                console.warn('❌ Sin conexión a internet');
                 return;
             }
 
             try {
                 // 🔐 Encriptar datos sensibles antes de guardar
-                const datosSeguro = JSON.parse(JSON.stringify(datos));
+                let datosSeguro = JSON.parse(JSON.stringify(datos));
                 
                 if (tabla === 'clientes') {
-                    if (datosSeguro.dni) datosSeguro.dni = encryptData(datosSeguro.dni);
-                    if (datosSeguro.telefono) datosSeguro.telefono = encryptData(datosSeguro.telefono);
+                    console.log('🔄 Transformando cliente para Supabase...');
+                    // Transformar estructura de cliente para Supabase
+                    datosSeguro = {
+                        id: datos.id,
+                        nombre: datos.nombre,
+                        apellido: datos.apellido,
+                        email: datos.email || '',
+                        telefono: datos.telefono,
+                        dni: datos.dni || '',
+                        marca: datos.moto?.modelo?.split(' ')[0] || 'Zontes',
+                        modelo: datos.moto?.modelo || '',
+                        cilindrada: '125cc',
+                        matricula: datos.moto?.matricula || '',
+                        bastidor: datos.moto?.bastidor || '',
+                        kilometraje: datos.moto?.kilometraje || 0,
+                        fechaCreacion: datos.fechaCreacion,
+                        fechaEntrega: datos.fechaEntrega || ''
+                    };
                     
-                    await window.supabaseClient.from('clientes').upsert(datosSeguro);
+                    
+                    console.log('📡 Enviando a Supabase...');
+                    const { data, error } = await window.supabaseClient.from('CLIENTES').upsert(datosSeguro);
+                    
+                    if (error) {
+                        console.error('❌ ERROR SUPABASE:', error);
+                        alert('❌ Error guardando en Supabase: ' + error.message);
+                        return;
+                    }
+                    
+                    console.log('✅ GUARDADO EN SUPABASE:', data);
                     await registrarAuditoria('clientes', datosSeguro.id ? 'UPDATE' : 'INSERT', datosSeguro.id, null, datosSeguro);
                     
                 } else if (tabla === 'citas') {
-                    await window.supabaseClient.from('citas').upsert(datosSeguro);
+                    // Transformar estructura de cita para Supabase
+                    datosSeguro = {
+                        id: datos.id,
+                        clienteId: datos.clienteId,
+                        cliente: datos.cliente,
+                        servicio: datos.servicio,
+                        datetime: datos.datetime,
+                        descripcion: datos.descripcion || '',
+                        estado: datos.estado || 'pendiente'
+                    };
+                    
+                    const { data, error } = await window.supabaseClient.from('CITAS').upsert(datosSeguro);
+                    if (error) {
+                        console.error('❌ Error citas:', error);
+                        return;
+                    }
+                    console.log('✅ Cita guardada:', data);
                     await registrarAuditoria('citas', datosSeguro.id ? 'UPDATE' : 'INSERT', datosSeguro.id, null, datosSeguro);
                     
                 } else if (tabla === 'ordenes') {
-                    await window.supabaseClient.from('ordenes').upsert(datosSeguro);
+                    // Transformar estructura de orden para Supabase
+                    datosSeguro = {
+                        id: datos.id,
+                        numero: datos.numero,
+                        clienteId: datos.clienteId,
+                        servicio: datos.servicio,
+                        estado: datos.estado || 'pendiente',
+                        descripcion: datos.descripcion || '',
+                        importe: datos.importe || 0
+                    };
+                    
+                    const { data, error } = await window.supabaseClient.from('ORDENES').upsert(datosSeguro);
+                    if (error) {
+                        console.error('❌ Error órdenes:', error);
+                        return;
+                    }
+                    console.log('✅ Orden guardada:', data);
                     await registrarAuditoria('ordenes', datosSeguro.id ? 'UPDATE' : 'INSERT', datosSeguro.id, null, datosSeguro);
                     
                 } else if (tabla === 'mecanicos') {
-                    await window.supabaseClient.from('mecanicos').upsert(datosSeguro);
+                    const { data, error } = await window.supabaseClient.from('MECANICOS').upsert(datosSeguro);
+                    if (error) {
+                        console.error('❌ Error mecánicos:', error);
+                        return;
+                    }
+                    console.log('✅ Mecánico guardado:', data);
                     await registrarAuditoria('mecanicos', datosSeguro.id ? 'UPDATE' : 'INSERT', datosSeguro.id, null, datosSeguro);
+                    
+                } else if (tabla === 'seguimientos') {
+                    datosSeguro = {
+                        id: datos.id,
+                        clienteId: datos.clienteId,
+                        mecanico: datos.mecanico,
+                        descripcionTarea: datos.descripcionTarea || '',
+                        servicio: datos.servicio,
+                        estadoMoto: datos.estadoMoto,
+                        fechaSeguimiento: datos.fechaSeguimiento,
+                        completado: datos.completado || false,
+                        fechaCreacion: datos.fechaCreacion
+                    };
+                    
+                    const { data, error } = await window.supabaseClient.from('SEGUIMIENTOS').upsert(datosSeguro);
+                    if (error) {
+                        console.error('❌ Error seguimientos:', error);
+                        return;
+                    }
+                    console.log('✅ Seguimiento guardado:', data);
+                    
+                } else if (tabla === 'notas') {
+                    datosSeguro = {
+                        id: datos.id,
+                        clienteId: datos.clienteId,
+                        mecanico: datos.mecanico,
+                        nota: datos.nota,
+                        fechaVencimiento: datos.fechaVencimiento,
+                        fechaCreacion: datos.fechaCreacion
+                    };
+                    
+                    const { data, error } = await window.supabaseClient.from('NOTAS').upsert(datosSeguro);
+                    if (error) {
+                        console.error('❌ Error notas:', error);
+                        return;
+                    }
+                    console.log('✅ Nota guardada:', data);
                 }
                 
                 console.log(`✓ ${tabla} sincronizado con auditoría`);
                 showSyncStatus(`✓ ${tabla} sincronizado`);
             } catch (error) {
-                console.error('Error sync:', error);
+                console.error('❌ ERROR GENERAL:', error);
+                alert('❌ Error: ' + error.message);
                 showSyncStatus(`❌ Error sincronizando ${tabla}`);
             }
         }
@@ -1773,6 +1931,8 @@
         ];
 
         let citas = [];
+        let seguimientos = [];
+        let notas = [];
         let currentClientId = null;
         let citaType = null;
 
@@ -1787,6 +1947,10 @@
             if (tab === 'clientes') renderClientes();
             else if (tab === 'citas') {
                 renderCitasSelector();
+            }
+            else if (tab === 'seguimientos') {
+                renderSeguimientosGlobales();
+                setTimeout(() => renderCalendario(), 100);
             }
             else if (tab === 'ordenes') renderOrdenes();
             else if (tab === 'informes') renderInformes();
@@ -1943,6 +2107,9 @@
 
             // 🔐 Registrar auditoría
             registrarAuditoria('clientes', 'INSERT', id, null, { nombre, apellido, email });
+            
+            // 📤 Sincronizar a Supabase
+            syncToSupabase('clientes', nuevoCliente);
 
             showSaveStatus();
             closeModal();
@@ -2071,9 +2238,12 @@
             }).join('');
 
             document.getElementById('modalBody').innerHTML = `
-                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-                    <button class="btn btn-success" onclick="abrirCitaRapida()">📅 Crear Cita Rápida</button>
-                    <button class="btn" onclick="abrirCrearOrden()" style="background: #ff9800; color: white;">📦 Crear Orden</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="margin: 0; font-size: 24px; color: #333;">${client.nombre} ${client.apellido}</h2>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-success" onclick="abrirCitaRapida()">📅 Crear Cita Rápida</button>
+                        <button class="btn" onclick="abrirCrearOrden()" style="background: #ff9800; color: white;">📦 Crear Orden</button>
+                    </div>
                 </div>
 
                 <!-- PESTAÑAS -->
@@ -2083,7 +2253,8 @@
                     <button class="tab-btn" onclick="cambiarVistaCilente('citas')" id="tab-citas" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Citas</button>
                     <button class="tab-btn" onclick="cambiarVistaCilente('ordenes')" id="tab-ordenes" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Órdenes</button>
                     <button class="tab-btn" onclick="cambiarVistaCilente('recambios')" id="tab-recambios" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Recambios</button>
-                    <button class="tab-btn" onclick="cambiarVistaCilente('seguimiento')" id="tab-seguimiento" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Seguimiento</button>
+                    <button class="tab-btn" onclick="cambiarVistaCilente('tareas')" id="tab-tareas" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">📋 Tareas</button>
+                    <button class="tab-btn" onclick="cambiarVistaCilente('notas')" id="tab-notas" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">📝 Notas</button>
                     <button class="tab-btn" onclick="cambiarVistaCilente('informe')" id="tab-informe" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666;">Informe</button>
                 </div>
 
@@ -2256,12 +2427,84 @@
                 </div>
 
                 <!-- SEGUIMIENTO -->
-                <div id="vista-seguimiento" class="vista-cliente" style="display: none;">
+                <div id="vista-tareas" class="vista-cliente" style="display: none;">
                     <div class="section">
-                        <div class="section-title">🔧 Acciones
-                            <button class="btn btn-primary btn-small" onclick="crearAccion()">+ Nueva</button>
+                        <div class="section-title">📋 Tareas
+                            <button class="btn btn-primary btn-small" style="margin-left: 16px;" onclick="mostrarFormularioTarea()">+ Crear Tarea</button>
                         </div>
-                        ${client.acciones.length === 0 ? '<div class="empty-state">Sin acciones</div>' : accionesHtml}
+
+                        <div id="formularioTareaContainer" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 12px;" id="titulFormularioTarea">Crear Nueva Tarea</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <div class="form-field">
+                                        <label class="form-label">Mecánico</label>
+                                        <select class="form-select" id="seguimientoMecanico">
+                                            <option value="">Selecciona un mecánico</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-field">
+                                        <label class="form-label">Fecha Seguimiento</label>
+                                        <input type="date" class="form-input" id="seguimientoFechaSeguimiento">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-field">
+                                        <label class="form-label">Hora</label>
+                                        <input type="time" class="form-input" id="seguimientoHora" value="08:00">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-field">
+                                        <label class="form-label">Descripción Tarea</label>
+                                        <textarea class="form-input" id="seguimientoDescripcionTarea" style="min-height: 80px; resize: vertical;" placeholder="Describe la tarea..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px; display: flex; gap: 8px;">
+                                <button class="btn btn-primary" id="btnGuardarTarea" onclick="crearSeguimientoEnCliente()">📋 Crear Tarea</button>
+                                <button class="btn" style="background: #999; color: white;" onclick="ocultarFormularioTarea()">Cancelar</button>
+                            </div>
+                        </div>
+
+                        <div id="seguimientosClienteList"></div>
+                    </div>
+                </div>
+
+                <!-- NOTAS -->
+                <div id="vista-notas" class="vista-cliente" style="display: none;">
+                    <div class="section">
+                        <div class="section-title">📝 Notas y Recordatorios</div>
+                        
+                        <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 12px;">Crear Nueva Nota</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <div class="form-field">
+                                        <label class="form-label">Mecánico</label>
+                                        <select class="form-select" id="notaMecanico">
+                                            <option value="">Selecciona un mecánico</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-field">
+                                        <label class="form-label">Escribir Nota</label>
+                                        <textarea class="form-input" id="notaTexto" style="min-height: 80px; resize: vertical;" placeholder="Escribe aquí..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <button class="btn btn-primary" onclick="crearNotaEnCliente()">Guardar Nota</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 style="margin-bottom: 12px;">Notas Existentes</h3>
+                            <div id="notasClienteList"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -2305,7 +2548,13 @@
             `;
             
             document.getElementById('modalOverlay').classList.add('active');
-            setTimeout(() => cargarFechaHoraEntrega(), 100);
+            setTimeout(() => {
+                cargarFechaHoraEntrega();
+                renderSeguimientosCliente();
+                renderNotasCliente();
+                actualizarSelectMecanicos();
+                actualizarSelectMecanicosTarea();
+            }, 100);
         }
 
         function cambiarVistaCilente(vista) {
@@ -3678,9 +3927,9 @@
             showSaveStatus('Cliente eliminado');
             
             // SYNC A SUPABASE
-            window.supabaseClient.from('clientes').delete().eq('id', clienteId);
-            window.supabaseClient.from('citas').delete().eq('clienteId', clienteId);
-            window.supabaseClient.from('ordenes').delete().eq('clienteId', clienteId);
+            window.supabaseClient.from('CLIENTES').delete().eq('id', clienteId);
+            window.supabaseClient.from('CITAS').delete().eq('clienteId', clienteId);
+            window.supabaseClient.from('ORDENES').delete().eq('clienteId', clienteId);
             
             closeModal();
             renderClientes();
@@ -3987,6 +4236,433 @@
                 confetti.style.animation = `confettiFall ${2 + Math.random() * 1}s linear forwards`;
                 document.body.appendChild(confetti);
                 setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        // ==================== SEGUIMIENTOS GLOBALES ====================
+        function renderSeguimientosGlobales() {
+            const filter = (document.getElementById('seguimientosFilter') || {}).value || '';
+            let filtered = seguimientos;
+
+            if (filter) {
+                filtered = seguimientos.filter(s => {
+                    const cliente = clients.find(c => c.id === s.clienteId);
+                    if (!cliente) return false;
+                    const searchText = `${cliente.nombre} ${cliente.apellido} ${cliente.moto.matricula} ${cliente.email}`.toLowerCase();
+                    return searchText.includes(filter.toLowerCase());
+                });
+            }
+
+            // Ordenar por fecha más cercana a más lejana
+            filtered.sort((a, b) => new Date(a.fechaSeguimiento) - new Date(b.fechaSeguimiento));
+
+            const tbody = document.getElementById('seguimientosList');
+            tbody.innerHTML = filtered.map(s => {
+                const cliente = clients.find(c => c.id === s.clienteId);
+                const nombreCliente = cliente ? `${cliente.nombre} ${cliente.apellido}` : 'Cliente no encontrado';
+                
+                // Truncar descripción si es muy larga (max 50 caracteres)
+                const tareaCorta = s.descripcionTarea && s.descripcionTarea.length > 50 
+                    ? s.descripcionTarea.substring(0, 50) + '...' 
+                    : s.descripcionTarea;
+                
+                // Estilo tachado si está completada
+                const stiloCompletado = s.completado ? 'text-decoration: line-through; opacity: 0.6; background: #f0f0f0;' : '';
+                
+                return `
+                    <tr style="border-bottom: 1px solid #eee; ${stiloCompletado}">
+                        <td style="padding: 12px;">
+                            <input type="checkbox" ${s.completado ? 'checked' : ''} onchange="marcarCompletado(${s.id})">
+                        </td>
+                        <td style="padding: 12px; color: #666;">
+                            ${s.fechaSeguimiento || 'N/A'}
+                        </td>
+                        <td style="padding: 12px; max-width: 300px; word-break: break-word;">
+                            <span title="${s.descripcionTarea || ''}" style="cursor: help; border-bottom: 1px dotted #2196F3;">
+                                ${tareaCorta || 'Sin descripción'}
+                            </span>
+                        </td>
+                        <td style="padding: 12px;">
+                            <a href="#" onclick="openClient(${s.clienteId}); return false;" style="color: #2196F3; cursor: pointer; text-decoration: none;">
+                                <strong>${nombreCliente}</strong>
+                            </a>
+                        </td>
+                        <td style="padding: 12px; color: #999; font-size: 13px;">
+                            ${s.fechaCreacion || ''}
+                        </td>
+                        <td style="padding: 12px;">
+                            ${s.mecanico || ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #999;">Sin tareas pendientes</td></tr>';
+            }
+        }
+
+        function filtrarSeguimientos() {
+            renderSeguimientosGlobales();
+        }
+
+        async function marcarCompletado(seguimientoId) {
+            const seg = seguimientos.find(s => s.id === seguimientoId);
+            if (seg) {
+                seg.completado = true;
+                // Sincronizar con Supabase
+                syncToSupabase('seguimientos', seg);
+                renderSeguimientosGlobales();
+            }
+        }
+
+        // ==================== NOTAS EN FICHA CLIENTE ====================
+        function actualizarSelectMecanicos() {
+            const select = document.getElementById('notaMecanico');
+            if (select) {
+                select.innerHTML = '<option value="">Selecciona un mecánico</option>' + 
+                    mecanicos.map(m => `<option value="${m.nombre}">${m.nombre}</option>`).join('');
+            }
+        }
+
+        function crearNotaEnCliente() {
+            const mecanico = document.getElementById('notaMecanico').value;
+            const nota = document.getElementById('notaTexto').value;
+
+            if (!mecanico || !nota) {
+                alert('Mecánico y Nota son obligatorios');
+                return;
+            }
+
+            const newId = Math.max(...notas.map(n => n.id || 0), 0) + 1;
+            const nuevaNota = {
+                id: newId,
+                clienteId: currentClientId,
+                mecanico: mecanico,
+                nota: nota,
+                fechaVencimiento: '',
+                fechaCreacion: new Date().toISOString().split('T')[0]
+            };
+
+            notas.push(nuevaNota);
+            syncToSupabase('notas', nuevaNota);
+
+            document.getElementById('notaMecanico').value = '';
+            document.getElementById('notaTexto').value = '';
+
+            renderNotasCliente();
+        }
+
+        function renderNotasCliente() {
+            const clientNotas = notas.filter(n => n.clienteId === currentClientId);
+            const notasHtml = clientNotas.map(n => `
+                <div style="background: #f9f9f9; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #ff9800;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <strong>👨‍🔧 ${n.mecanico}</strong>
+                        <span style="color: #999; font-size: 12px;">${n.fechaCreacion}</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">${n.nota}</div>
+                    <button class="btn" style="background: #2196F3; color: white; padding: 4px 12px; font-size: 12px;" onclick="editarNota(${n.id})">✏️ Editar</button>
+                </div>
+            `).join('');
+
+            const notasContainer = document.getElementById('notasClienteList');
+            if (notasContainer) {
+                notasContainer.innerHTML = notasHtml || '<div style="color: #999;">Sin notas</div>';
+            }
+        }
+
+        function editarNota(notaId) {
+            const nota = notas.find(n => n.id === notaId);
+            if (!nota) return;
+
+            document.getElementById('notaMecanico').value = nota.mecanico;
+            document.getElementById('notaTexto').value = nota.nota;
+
+            // Cambiar botón a "Actualizar"
+            const btnGuardar = Array.from(document.querySelectorAll('.btn')).find(b => b.textContent.includes('Guardar'));
+            if (btnGuardar) {
+                btnGuardar.textContent = '💾 Actualizar Nota';
+                btnGuardar.onclick = () => actualizarNota(notaId);
+            }
+        }
+
+        function actualizarNota(notaId) {
+            const mecanico = document.getElementById('notaMecanico').value;
+            const nota_text = document.getElementById('notaTexto').value;
+
+            if (!mecanico || !nota_text) {
+                alert('Mecánico y Nota son obligatorios');
+                return;
+            }
+
+            const nota = notas.find(n => n.id === notaId);
+            if (nota) {
+                nota.mecanico = mecanico;
+                nota.nota = nota_text;
+                syncToSupabase('notas', nota);
+                
+                document.getElementById('notaMecanico').value = '';
+                document.getElementById('notaTexto').value = '';
+
+                const btnGuardar = Array.from(document.querySelectorAll('.btn')).find(b => b.textContent.includes('Actualizar'));
+                if (btnGuardar) {
+                    btnGuardar.textContent = '🔐 Guardar Nota';
+                    btnGuardar.onclick = () => crearNotaEnCliente();
+                }
+
+                renderNotasCliente();
+            }
+        }
+
+        // ==================== SEGUIMIENTOS EN FICHA CLIENTE ====================
+        function mostrarFormularioTarea() {
+            document.getElementById('formularioTareaContainer').style.display = 'block';
+            actualizarSelectMecanicosTarea();
+        }
+
+        function ocultarFormularioTarea() {
+            document.getElementById('formularioTareaContainer').style.display = 'none';
+        }
+
+        function actualizarSelectMecanicosTarea() {
+            const select = document.getElementById('seguimientoMecanico');
+            if (select) {
+                select.innerHTML = '<option value="">Selecciona un mecánico</option>' + 
+                    mecanicos.map(m => `<option value="${m.nombre}">${m.nombre}</option>`).join('');
+            }
+        }
+
+        function crearSeguimientoEnCliente() {
+            const mecanico = document.getElementById('seguimientoMecanico').value;
+            const descripcionTarea = document.getElementById('seguimientoDescripcionTarea').value;
+            const fechaSeguimiento = document.getElementById('seguimientoFechaSeguimiento').value;
+            const hora = document.getElementById('seguimientoHora').value;
+
+            if (!mecanico || !descripcionTarea || !fechaSeguimiento || !hora) {
+                alert('Todos los campos son obligatorios');
+                return;
+            }
+
+            const newId = Math.max(...seguimientos.map(s => s.id || 0), 0) + 1;
+            const nuevoSeguimiento = {
+                id: newId,
+                clienteId: currentClientId,
+                mecanico: mecanico,
+                descripcionTarea: descripcionTarea,
+                servicio: '',
+                estadoMoto: '',
+                fechaSeguimiento: fechaSeguimiento,
+                hora: hora,
+                completado: false,
+                fechaCreacion: new Date().toISOString().split('T')[0]
+            };
+
+            seguimientos.push(nuevoSeguimiento);
+            syncToSupabase('seguimientos', nuevoSeguimiento);
+
+            document.getElementById('seguimientoMecanico').value = '';
+            document.getElementById('seguimientoDescripcionTarea').value = '';
+            document.getElementById('seguimientoFechaSeguimiento').value = '';
+            document.getElementById('seguimientoHora').value = '08:00';
+
+            ocultarFormularioTarea();
+            renderSeguimientosCliente();
+            setTimeout(() => {
+                renderSeguimientosGlobales();
+                renderCalendario();
+            }, 500);
+        }
+
+        function renderSeguimientosCliente() {
+            const clientSeguimientos = seguimientos.filter(s => s.clienteId === currentClientId);
+            const seguimientosHtml = clientSeguimientos.map(s => `
+                <div style="background: #f0f7ff; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #2196F3;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <strong>📋 ${s.servicio}</strong>
+                        <span style="color: #666; font-size: 12px;">🔧 ${s.mecanico}</span>
+                    </div>
+                    <div style="margin-bottom: 8px; color: #333;">${s.descripcionTarea}</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #999; margin-bottom: 8px;">
+                        <span>📊 ${s.estadoMoto}</span>
+                        <span>📅 ${s.fechaSeguimiento}</span>
+                    </div>
+                    <button class="btn" style="background: #2196F3; color: white; padding: 4px 12px; font-size: 12px;" onclick="editarTareaEnCliente(${s.id})">✏️ Editar</button>
+                </div>
+            `).join('');
+
+            const seguimientosContainer = document.getElementById('seguimientosClienteList');
+            if (seguimientosContainer) {
+                seguimientosContainer.innerHTML = seguimientosHtml || '<div style="color: #999;">Sin tareas</div>';
+            }
+        }
+
+        function editarTareaEnCliente(tareaId) {
+            const tarea = seguimientos.find(s => s.id === tareaId);
+            if (!tarea) return;
+
+            document.getElementById('seguimientoMecanico').value = tarea.mecanico;
+            document.getElementById('seguimientoDescripcionTarea').value = tarea.descripcionTarea;
+            document.getElementById('seguimientoFechaSeguimiento').value = tarea.fechaSeguimiento;
+            document.getElementById('seguimientoHora').value = tarea.hora || '08:00';
+
+            document.getElementById('formularioTareaContainer').style.display = 'block';
+            document.getElementById('titulFormularioTarea').textContent = 'Editar Tarea';
+            
+            const btnGuardar = document.getElementById('btnGuardarTarea');
+            btnGuardar.textContent = '💾 Actualizar Tarea';
+            btnGuardar.onclick = () => actualizarTareaEnCliente(tareaId);
+        }
+
+        function actualizarTareaEnCliente(tareaId) {
+            const mecanico = document.getElementById('seguimientoMecanico').value;
+            const descripcionTarea = document.getElementById('seguimientoDescripcionTarea').value;
+            const fechaSeguimiento = document.getElementById('seguimientoFechaSeguimiento').value;
+            const hora = document.getElementById('seguimientoHora').value;
+
+            if (!mecanico || !descripcionTarea || !fechaSeguimiento || !hora) {
+                alert('Todos los campos son obligatorios');
+                return;
+            }
+
+            const tarea = seguimientos.find(s => s.id === tareaId);
+            if (tarea) {
+                tarea.mecanico = mecanico;
+                tarea.descripcionTarea = descripcionTarea;
+                tarea.servicio = '';
+                tarea.estadoMoto = '';
+                tarea.fechaSeguimiento = fechaSeguimiento;
+                tarea.hora = hora;
+                syncToSupabase('seguimientos', tarea);
+
+                document.getElementById('seguimientoMecanico').value = '';
+                document.getElementById('seguimientoDescripcionTarea').value = '';
+                document.getElementById('seguimientoFechaSeguimiento').value = '';
+                document.getElementById('seguimientoHora').value = '08:00';
+
+                document.getElementById('formularioTareaContainer').style.display = 'none';
+                document.getElementById('titulFormularioTarea').textContent = 'Crear Nueva Tarea';
+                const btnGuardar = document.getElementById('btnGuardarTarea');
+                btnGuardar.textContent = '📋 Crear Tarea';
+                btnGuardar.onclick = () => crearSeguimientoEnCliente();
+
+                renderSeguimientosCliente();
+                setTimeout(() => {
+                    renderSeguimientosGlobales();
+                    renderCalendario();
+                }, 500);
+            }
+        }
+
+        // ==================== CALENDARIO ====================
+        let fechaActualCalendario = new Date();
+
+        function getLunesActual(fecha) {
+            const date = new Date(fecha);
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(date.setDate(diff));
+        }
+
+        function semanaAnterior() {
+            fechaActualCalendario.setDate(fechaActualCalendario.getDate() - 7);
+            renderCalendario();
+        }
+
+        function semanaSiguiente() {
+            fechaActualCalendario.setDate(fechaActualCalendario.getDate() + 7);
+            renderCalendario();
+        }
+
+        function renderCalendario() {
+            const lunes = getLunesActual(fechaActualCalendario);
+            const dias = [];
+            
+            for (let i = 0; i < 5; i++) {
+                const fecha = new Date(lunes);
+                fecha.setDate(fecha.getDate() + i);
+                dias.push({
+                    fecha: fecha,
+                    nombre: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'][i],
+                    fechaStr: fecha.toISOString().split('T')[0]
+                });
+            }
+
+            // Actualizar título
+            document.getElementById('tituloSemana').textContent = 
+                `${dias[0].fecha.toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})} - ${dias[4].fecha.toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'})}`;
+
+            // Generar tabla
+            const horas = [];
+            for (let h = 7; h < 19; h++) {
+                for (let m = 0; m < 60; m += 15) {
+                    horas.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                }
+            }
+
+            let html = '<thead><tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;"><th style="padding: 8px; border: 1px solid #ddd; width: 80px; font-weight: 600;">Hora</th>';
+            
+            dias.forEach(d => {
+                html += `<th style="padding: 8px; border: 1px solid #ddd; font-weight: 600; background: #e3f2fd;">${d.nombre}<br><small style="font-weight: 400; color: #666;">${d.fecha.toLocaleDateString('es-ES')}</small></th>`;
+            });
+            
+            html += '</tr></thead><tbody>';
+
+            horas.forEach(hora => {
+                html += `<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: 600; background: #f9f9f9; font-size: 11px;">${hora}</td>`;
+                
+                dias.forEach(d => {
+                    const tareasDiaHora = seguimientos.filter(s => {
+                        if (s.completado) return false;
+                        if (s.fechaSeguimiento !== d.fechaStr) return false;
+                        if (!s.hora) return false;
+                        const [hTarea, mTarea] = s.hora.split(':').map(Number);
+                        const [hHora, mHora] = hora.split(':').map(Number);
+                        return hTarea === hHora && mTarea === mHora;
+                    });
+
+                    if (tareasDiaHora.length > 0) {
+                        const tarea = tareasDiaHora[0];
+                        const cliente = clients.find(c => c.id === tarea.clienteId);
+                        
+                        // Acortar descripción a 35 caracteres
+                        const descripcionCorta = tarea.descripcionTarea && tarea.descripcionTarea.length > 35
+                            ? tarea.descripcionTarea.substring(0, 35) + '...'
+                            : tarea.descripcionTarea || 'Sin descripción';
+                        
+                        html += `<td style="padding: 4px; border: 1px solid #ddd; background: #e3f2fd;">
+                            <div style="background: #2196F3; color: white; padding: 4px; border-radius: 4px; font-size: 10px;">
+                                <div style="display: flex; gap: 4px; align-items: center;">
+                                    <input type="checkbox" style="cursor: pointer;" onclick="marcarCompletadoDesdeCalendario(${tarea.id}); event.stopPropagation();">
+                                    <span style="cursor: pointer; flex: 1;" onclick="abrirClienteEnTareas(${tarea.clienteId})" title="${tarea.descripcionTarea}">
+                                        <strong>${descripcionCorta}</strong>
+                                    </span>
+                                </div>
+                            </div>
+                        </td>`;
+                    } else {
+                        html += `<td style="padding: 4px; border: 1px solid #ddd; background: white;"></td>`;
+                    }
+                });
+                
+                html += '</tr>';
+            });
+
+            html += '</tbody>';
+            document.getElementById('tablaCalendario').innerHTML = html;
+        }
+
+        function abrirClienteEnTareas(clienteId) {
+            openClient(clienteId);
+            setTimeout(() => cambiarVistaCilente('tareas'), 200);
+        }
+
+        function marcarCompletadoDesdeCalendario(seguimientoId) {
+            const seg = seguimientos.find(s => s.id === seguimientoId);
+            if (seg) {
+                seg.completado = true;
+                syncToSupabase('seguimientos', seg);
+                renderCalendario();
             }
         }
 
