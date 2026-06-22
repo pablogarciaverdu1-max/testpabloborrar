@@ -180,6 +180,14 @@ tr.clickable:hover{background:var(--bg3)}
       <button class="btn btn-sec" onclick="calWeek(1)">Siguiente ›</button>
       <span id="calWeekLabel" style="font-weight:600;margin-left:8px"></span>
     </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;align-items:center">
+      <span style="font-size:12px;font-weight:700;color:var(--txt2);margin-right:4px">LEYENDA:</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#ef4444;display:inline-block"></span>Mantenimiento</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#f97316;display:inline-block"></span>Siniestro</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#3b82f6;display:inline-block"></span>ITV</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#22c55e;display:inline-block"></span>Reparación</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#eab308;display:inline-block"></span>Primera revisión</span>
+    </div>
     <div class="cal-wrap"><div id="calContainer"></div></div>
   </div>
 
@@ -202,7 +210,7 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="toolbar">
       <input id="flujoSearch" placeholder="Buscar nombre, teléfono, matrícula, DNI..." style="flex:1;min-width:240px" oninput="renderKanban()">
       <select id="flujoServicio" onchange="renderKanban()"><option value="">Tipo servicio</option></select>
-      <select id="flujoFecha" onchange="renderKanban()"><option value="">Fecha</option></select>
+      <input type="date" id="flujoFecha" onchange="renderKanban()" title="Filtrar por fecha" style="padding:9px 12px;min-width:150px">
       <select id="flujoMecanico" onchange="renderKanban()"><option value="">Mecánico</option></select>
     </div>
     <div class="kanban" id="kanban"></div>
@@ -696,7 +704,26 @@ function delMoto(id){confirmDelete('¿Eliminar esta moto?',()=>{DB.motos.delete(
 function addAnot(id){const t=document.getElementById('mo_nota_'+id).value.trim();if(!t){toast('Escribe una nota','err');return;}const m=DB.motos.get(id);m.anotaciones.push({id:uid(),texto:t,fecha:today()});renderClienteModal();toast('Nota guardada','ok');}
 function tabCitas(c){
   const cs=DB.citas.byCliente(c.id).slice().sort((a,b)=>b.fecha_cita.localeCompare(a.fecha_cita));
-  return `<div class="tabpane active"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Mecánico</th><th>Estado</th></tr></thead><tbody>${cs.map(x=>`<tr><td>${x.fecha_cita}</td><td>${x.hora_cita}</td><td>${servBadge(x.tipo_servicio)}</td><td>${mecName(x.mecanico_id)}</td><td>${estadoBadge(x.estado)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">Sin citas</td></tr>'}</tbody></table></div>`;
+  const estadoOpts=Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+  const rows=cs.map(x=>`<tr>
+    <td>${x.fecha_cita}</td><td>${x.hora_cita}</td><td>${servBadge(x.tipo_servicio)}</td><td>${mecName(x.mecanico_id)}</td>
+    <td><select style="padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg)" onchange="cambiarEstadoCita('${x.id}',this.value)">
+      ${Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}" ${x.estado===k?'selected':''}>${v.label}</option>`).join('')}
+    </select></td>
+  </tr>`).join('');
+  return `<div class="tabpane active"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Mecánico</th><th>Estado</th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="empty">Sin citas</td></tr>'}</tbody></table></div>`;
+}
+function cambiarEstadoCita(citaId, nuevoEstado){
+  const c=DB.citas.get(citaId);if(!c)return;
+  if(nuevoEstado==='entregado_pagado'&&c.estado!=='entregado_pagado'){
+    openCompletar(citaId);
+    // el modal de completar actualizará el estado; si cancela, re-render para volver al valor previo
+    const check=setInterval(()=>{if(!document.getElementById('modalCompletar').classList.contains('open')){clearInterval(check);renderClienteModal();renderKanban();renderCal();}},200);
+    return;
+  }
+  DB.citas.update(citaId,{estado:nuevoEstado});
+  toast('Estado actualizado','ok');
+  renderClienteModal();renderKanban();renderCal();
 }
 function tabRecambios(c){
   let h=`<div class="tabpane active">`;
@@ -830,9 +857,7 @@ function tabHistorial(c){
 function renderKanban(){
   const q=(document.getElementById('flujoSearch').value||'').toLowerCase().trim();
   const fs=document.getElementById('flujoServicio').value;const fm=document.getElementById('flujoMecanico').value;
-  const ffSel=document.getElementById('flujoFecha');const ff=ffSel.value;
-  const fechas=[...new Set(citas.map(c=>c.fecha_cita))].sort();
-  ffSel.innerHTML='<option value="">Fecha</option>'+fechas.map(f=>`<option ${f===ff?'selected':''}>${f}</option>`).join('');
+  const ff=document.getElementById('flujoFecha').value;
   const cols=Object.keys(ESTADOS);
   const colColors={pendiente:'#1e3a5f',en_progreso:'#3d2f00',listo_entrega:'#2d1b69',entregado_pagado:'#14532d'};
   let h='';
