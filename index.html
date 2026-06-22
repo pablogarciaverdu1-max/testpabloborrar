@@ -1968,8 +1968,10 @@
                     <div class="form-group">
                         <div class="form-field">
                             <label class="form-label required">Buscar Cliente</label>
-                            <input type="text" class="form-input" id="buscarClienteInputModal" placeholder="Nombre, teléfono o matrícula..." oninput="buscarClientesExistentesModal()">
-                            <div id="searchSuggestionsModal" class="search-suggestions"></div>
+                            <div style="position: relative;">
+                                <input type="text" class="form-input" id="buscarClienteInputModal" placeholder="Nombre, teléfono o matrícula..." oninput="buscarClientesExistentesModal()" style="width: 100%;">
+                                <div id="searchSuggestionsModal" class="search-suggestions"></div>
+                            </div>
                         </div>
                     </div>
                     <div id="clienteSeleccionadoModal" style="display: none; background: #e8f5e9; padding: 12px; border-radius: 4px; margin-bottom: 12px; color: #2e7d32;"></div>
@@ -2017,39 +2019,48 @@
         }
 
         function buscarClientesExistentesModal() {
-            const search = document.getElementById('buscarClienteInputModal').value.toLowerCase().trim();
-            const suggestions = document.getElementById('searchSuggestionsModal');
-
-            if (search.length < 1) {
-                suggestions.innerHTML = '';
-                suggestions.classList.remove('active');
+            const inputElement = document.getElementById('buscarClienteInputModal');
+            const suggestionsElement = document.getElementById('searchSuggestionsModal');
+            
+            if (!inputElement || !suggestionsElement) {
+                console.error('Elementos no encontrados');
                 return;
             }
 
+            const search = inputElement.value.toLowerCase().trim();
+
+            // Si el campo está vacío, ocultar sugerencias
+            if (search.length < 1) {
+                suggestionsElement.innerHTML = '';
+                suggestionsElement.classList.remove('active');
+                return;
+            }
+
+            // Filtrar clientes
             const filtered = clients.filter(c => {
                 const nombreCompleto = (c.nombre + ' ' + c.apellido).toLowerCase();
-                const telefono = (c.telefono || '').toLowerCase();
+                const telefono = (c.telefono || '').toLowerCase().replace(/\s+/g, '');
+                const searchSinEspacios = search.replace(/\s+/g, '');
                 const matricula = (c.moto && c.moto.matricula) ? c.moto.matricula.toLowerCase() : '';
                 
                 return nombreCompleto.includes(search) || 
-                       telefono.includes(search) || 
+                       telefono.includes(searchSinEspacios) || 
                        matricula.includes(search);
             });
 
+            // Mostrar resultados
             if (filtered.length === 0) {
-                suggestions.innerHTML = '<div class="suggestion-item" style="padding: 12px; color: #999;">No se encontraron clientes</div>';
-                suggestions.classList.add('active');
-                return;
+                suggestionsElement.innerHTML = '<div class="suggestion-item" style="padding: 12px; color: #999; text-align: center;">No se encontraron clientes</div>';
+            } else {
+                suggestionsElement.innerHTML = filtered.map(c => `
+                    <div class="suggestion-item" onclick="seleccionarClienteModal(${c.id}, '${c.nombre} ${c.apellido}', '${c.telefono}', '${c.moto && c.moto.matricula ? c.moto.matricula : 'Sin matrícula'}')">
+                        👤 <strong>${c.nombre} ${c.apellido}</strong><br/>
+                        <small>📞 ${c.telefono} | 🏍️ ${c.moto && c.moto.matricula ? c.moto.matricula : 'N/A'}</small>
+                    </div>
+                `).join('');
             }
 
-            suggestions.innerHTML = filtered.map(c => `
-                <div class="suggestion-item" onclick="seleccionarClienteModal(${c.id}, '${c.nombre} ${c.apellido}', '${c.telefono}', '${c.moto && c.moto.matricula ? c.moto.matricula : 'N/A'}')">
-                    👤 ${c.nombre} ${c.apellido}<br/>
-                    <small>📞 ${c.telefono} | 🏍️ ${c.moto && c.moto.matricula ? c.moto.matricula : 'Sin matrícula'}</small>
-                </div>
-            `).join('');
-
-            suggestions.classList.add('active');
+            suggestionsElement.classList.add('active');
         }
 
         function seleccionarClienteModal(id, nombre, telefono, matricula) {
