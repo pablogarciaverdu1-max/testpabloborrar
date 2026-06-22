@@ -1560,7 +1560,6 @@
                 }
 
                 // ✅ Login exitoso
-                intentosFallidos = 0;
                 currentUser = { name: user, loginTime: new Date().toISOString() };
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 
