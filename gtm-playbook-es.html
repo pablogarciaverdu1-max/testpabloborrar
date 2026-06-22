@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GTM Infrastructure Playbook</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0e1a;
+      color: #e2e8f0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 32px;
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+    .nav-logo { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #7c86ff; }
+    .nav-tabs { display: flex; gap: 8px; }
+    .tab-btn {
+      padding: 7px 18px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+      background: transparent; color: #94a3b8; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s;
+    }
+    .tab-btn:hover { background: rgba(255,255,255,0.07); color: #e2e8f0; }
+    .tab-btn.active { background: #7c86ff; border-color: #7c86ff; color: #fff; box-shadow: 0 0 20px rgba(124,134,255,.4); }
+    .nav-counter { font-size: 12px; color: #475569; }
+    .slides-viewport { flex: 1; overflow: hidden; position: relative; }
+    .slide {
+      position: absolute; inset: 0; overflow-y: auto; padding: 36px 48px 60px;
+      opacity: 0; transform: translateX(60px); transition: opacity .4s ease, transform .4s ease; pointer-events: none;
+    }
+    .slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+    .slide.exit-left { opacity: 0; transform: translateX(-60px); }
+    .slide-header { margin-bottom: 28px; }
+    .slide-badge {
+      display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px;
+    }
+    .badge-blue  { background: rgba(124,134,255,.15); color: #7c86ff; border: 1px solid rgba(124,134,255,.3); }
+    .badge-green { background: rgba(52,211,153,.12);  color: #34d399; border: 1px solid rgba(52,211,153,.3); }
+    .badge-amber { background: rgba(251,191,36,.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,.3); }
+    .slide-title { font-size: 26px; font-weight: 700; line-height: 1.2; color: #f1f5f9; }
+    .slide-subtitle { font-size: 14px; color: #64748b; margin-top: 5px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+    .card {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px; padding: 22px; transition: border-color .2s, background .2s;
+    }
+    .card:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.14); }
+    .card-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; }
+    .card-title.blue  { color: #7c86ff; } .card-title.green { color: #34d399; }
+    .card-title.amber { color: #fbbf24; } .card-title.rose  { color: #fb7185; }
+    .card-title.cyan  { color: #22d3ee; }
+    .pipeline { display: flex; flex-direction: column; gap: 0; }
+    .pipeline-step { display: flex; align-items: center; gap: 12px; padding: 8px 0; position: relative; }
+    .pipeline-step:not(:last-child)::after {
+      content:''; position: absolute; left: 16px; top: 34px; width: 2px;
+      height: calc(100% - 10px); background: rgba(124,134,255,.25);
+    }
+    .step-dot {
+      width: 34px; height: 34px; border-radius: 50%; background: rgba(124,134,255,.15);
+      border: 2px solid rgba(124,134,255,.4); display: flex; align-items: center;
+      justify-content: center; font-size: 13px; flex-shrink: 0;
+    }
+    .step-label { font-size: 13.5px; font-weight: 500; color: #cbd5e1; }
+    .bullet-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .bullet-list li { font-size: 13px; color: #94a3b8; padding-left: 14px; position: relative; line-height: 1.5; }
+    .bullet-list li::before { content:'›'; position: absolute; left: 0; color: #7c86ff; font-weight: 700; }
+    .bullet-list.green li::before { color: #34d399; } .bullet-list.amber li::before { color: #fbbf24; }
+    .bullet-list.rose  li::before { color: #fb7185; } .bullet-list.cyan  li::before { color: #22d3ee; }
+    .stat-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .stat-chip { padding: 7px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+    .chip-red  { background: rgba(251,113,133,.12); color: #fb7185; border: 1px solid rgba(251,113,133,.25); }
+    .chip-blue { background: rgba(124,134,255,.12); color: #7c86ff; border: 1px solid rgba(124,134,255,.25); }
+    .chip-green{ background: rgba(52,211,153,.12);  color: #34d399; border: 1px solid rgba(52,211,153,.25); }
+    .chip-amber{ background: rgba(251,191,36,.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,.25); }
+    .tier-card { border-radius: 14px; padding: 20px; border: 1px solid; }
+    .tier-1 { border-color: rgba(124,134,255,.4); background: rgba(124,134,255,.06); }
+    .tier-2 { border-color: rgba(52,211,153,.4);  background: rgba(52,211,153,.05); }
+    .tier-3 { border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.05); }
+    .tier-label { font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
+    .tier-1 .tier-label { color: #7c86ff; } .tier-2 .tier-label { color: #34d399; } .tier-3 .tier-label { color: #fbbf24; }
+    .tier-name { font-size: 15px; font-weight: 700; color: #f1f5f9; margin-bottom: 12px; }
+    .section-title { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #475569; margin-top: 10px; margin-bottom: 5px; }
+    .logic-box {
+      background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px; padding: 18px 22px; font-family: 'Courier New', monospace;
+      font-size: 12.5px; line-height: 1.9; color: #94a3b8;
+    }
+    .lk { color: #7c86ff; font-weight: 700; } .lv { color: #34d399; } .la { color: #fbbf24; }
+    .kpi-group { margin-bottom: 14px; }
+    .kpi-group-title {
+      font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: #475569; margin-bottom: 6px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .kpi-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .kpi-name { font-size: 13px; color: #94a3b8; }
+    .kpi-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+    .tag-track  { background: rgba(52,211,153,.15);  color: #34d399; }
+    .tag-report { background: rgba(124,134,255,.15); color: #7c86ff; }
+    .tag-alert  { background: rgba(251,113,133,.15); color: #fb7185; }
+    .timeline { display: flex; flex-direction: column; gap: 10px; }
+    .timeline-row { display: flex; gap: 12px; align-items: flex-start; }
+    .timeline-period { min-width: 72px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; text-align: center; }
+    .period-daily  { background: rgba(251,113,133,.12); color: #fb7185; }
+    .period-weekly { background: rgba(124,134,255,.12); color: #7c86ff; }
+    .period-monthly{ background: rgba(52,211,153,.12);  color: #34d399; }
+    .timeline-items { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 2px; }
+    .timeline-item { font-size: 12px; color: #94a3b8; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); padding: 3px 9px; border-radius: 6px; }
+    .outcome-banner {
+      margin-top: 24px; padding: 14px 22px; border-radius: 12px; border-left: 3px solid;
+      background: rgba(255,255,255,.03); display: flex; align-items: center; gap: 14px;
+    }
+    .outcome-banner.blue  { border-color: #7c86ff; } .outcome-banner.green { border-color: #34d399; } .outcome-banner.amber { border-color: #fbbf24; }
+    .outcome-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #475569; flex-shrink: 0; }
+    .outcome-text  { font-size: 14px; font-weight: 500; color: #cbd5e1; }
+    .bottom-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 12px; border-top: 1px solid rgba(255,255,255,.06); flex-shrink: 0; }
+    .arrow-btn {
+      width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04); color: #94a3b8; font-size: 17px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all .2s;
+    }
+    .arrow-btn:hover:not(:disabled) { background: rgba(255,255,255,.1); color: #e2e8f0; }
+    .arrow-btn:disabled { opacity: .25; cursor: default; }
+    .dot-nav { display: flex; gap: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.15); cursor: pointer; transition: all .2s; }
+    .dot.active { background: #7c86ff; width: 24px; border-radius: 4px; }
+    .slide::-webkit-scrollbar { width: 4px; }
+    .slide::-webkit-scrollbar-track { background: transparent; }
+    .slide::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+    .col-stack { display: flex; flex-direction: column; gap: 18px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">GTM Infrastructure Playbook</div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="goTo(0)">01 · Arquitectura de Datos</button>
+    <button class="tab-btn" onclick="goTo(1)">02 · Routing y Optimización</button>
+    <button class="tab-btn" onclick="goTo(2)">03 · Habilitación y Seguimiento</button>
+  </div>
+  <div class="nav-counter" id="counter">1 / 3</div>
+</nav>
+
+<div class="slides-viewport">
+
+  <!-- SLIDE 1 -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="slide-badge badge-blue">Slide 01</div>
+      <div class="slide-title">Auditoría de Infraestructura y Arquitectura de Datos</div>
+      <div class="slide-subtitle">Transformar listas brutas de prospectos en oportunidades cualificadas, enriquecidas y enrutadas automáticamente.</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-chip chip-blue">📋 75 prospectos entrantes</div>
+      <div class="stat-chip chip-green">✓ Sin perfiles duplicados en LinkedIn</div>
+      <div class="stat-chip chip-red">⚠ Campos de enriquecimiento incompletos</div>
+      <div class="stat-chip chip-amber">⚡ Ruido no accionable en el CRM</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title blue">Arquitectura de Datos Propuesta</div>
+        <div class="pipeline">
+          <div class="pipeline-step"><div class="step-dot">📥</div><div class="step-label">Carga de Lista Bruta</div></div>
+          <div class="pipeline-step"><div class="step-dot">✅</div><div class="step-label">Capa de Validación</div></div>
+          <div class="pipeline-step"><div class="step-dot">🔍</div><div class="step-label">Capa de Enriquecimiento</div></div>
+          <div class="pipeline-step"><div class="step-dot">🎯</div><div class="step-label">Puntuación ICP</div></div>
+          <div class="pipeline-step"><div class="step-dot">🔀</div><div class="step-label">Motor de Enrutamiento</div></div>
+          <div class="pipeline-step"><div class="step-dot">🏠</div><div class="step-label">HubSpot CRM</div></div>
+        </div>
+      </div>
+      <div class="col-stack">
+        <div class="card">
+          <div class="card-title rose">Capa de Validación — Rechazo automático si:</div>
+          <ul class="bullet-list rose">
+            <li>URL de LinkedIn ausente</li>
+            <li>Nombre de empresa ausente</li>
+            <li>Títulos de cargo genéricos</li>
+            <li>Dominios inválidos</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title cyan">Capa de Enriquecimiento — Enriquecer con:</div>
+          <ul class="bullet-list cyan">
+            <li>Tamaño de empresa e ingresos</li>
+            <li>Industria y etapa de financiación</li>
+            <li>Stack tecnológico</li>
+            <li>Región geográfica</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title green">Controles de Gobernanza del CRM</div>
+          <ul class="bullet-list green">
+            <li>URL de LinkedIn = identificador único</li>
+            <li>Reglas de prevención de duplicados</li>
+            <li>Validación de propiedades obligatorias</li>
+            <li>Dashboard de monitoreo semanal de sincronización</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="outcome-banner blue">
+      <div class="outcome-label">Resultado</div>
+      <div class="outcome-text">Solo los registros listos para ventas entran en HubSpot.</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2 -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <div class="slide-badge badge-green">Slide 02</div>
+      <div class="slide-title">Enrutamiento Avanzado y Lógica de Optimización Continua</div>
+      <div class="slide-subtitle">El sistema de niveles inteligente garantiza que el BDR correcto contacte la cuenta correcta en el momento oportuno.</div>
+    </div>
+    <div class="grid-3" style="margin-bottom:18px;">
+      <div class="tier-card tier-1">
+        <div class="tier-label">Nivel 1</div>
+        <div class="tier-name">Cuentas Estratégicas</div>
+        <div class="section-title">Criterios</div>
+        <ul class="bullet-list"><li>Encaje perfecto con el ICP</li><li>Alto potencial de ARR</li><li>Marcas estratégicas</li></ul>
+        <div class="section-title">Enrutamiento</div>
+        <ul class="bullet-list"><li>Asignado a BDR senior</li><li>Investigación manual requerida</li><li>Secuencia de outreach personalizada</li></ul>
+      </div>
+      <div class="tier-card tier-2">
+        <div class="tier-label">Nivel 2</div>
+        <div class="tier-name">Cuentas de Crecimiento</div>
+        <div class="section-title">Criterios</div>
+        <ul class="bullet-list green"><li>Buen encaje con el ICP</li><li>Valor de oportunidad medio</li></ul>
+        <div class="section-title">Enrutamiento</div>
+        <ul class="bullet-list green"><li>Secuencias semi-personalizadas</li><li>Mensajería inicial generada por IA</li></ul>
+      </div>
+      <div class="tier-card tier-3">
+        <div class="tier-label">Nivel 3</div>
+        <div class="tier-name">Cuentas de Volumen</div>
+        <div class="section-title">Criterios</div>
+        <ul class="bullet-list amber"><li>Bajo encaje con el ICP</li><li>Encaje poco claro</li></ul>
+        <div class="section-title">Enrutamiento</div>
+        <ul class="bullet-list amber"><li>Campañas outbound totalmente automatizadas</li></ul>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title blue">Lógica de Enrutamiento Dinámico</div>
+        <div class="logic-box">
+          <span class="lk">SI</span><br/>
+          &nbsp;&nbsp;Industria = <span class="lv">Retail / Moda / Artículos Deportivos</span><br/>
+          &nbsp;&nbsp;<span class="lk">Y</span> Cargo contiene:<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="lv">CEO &nbsp;·&nbsp; Category Manager &nbsp;·&nbsp; Director de Ventas</span><br/><br/>
+          <span class="lk">ENTONCES</span> Asignar Puntuación de Prioridad<br/><br/>
+          &nbsp;&nbsp;<span class="lv">Puntuación Alta</span> &nbsp;&nbsp;&nbsp;<span class="la">→</span> Nivel 1<br/>
+          &nbsp;&nbsp;<span class="lv">Puntuación Media</span> <span class="la">→</span> Nivel 2<br/>
+          &nbsp;&nbsp;<span class="lv">Puntuación Baja</span> &nbsp;&nbsp;<span class="la">→</span> Nivel 3
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title green">Bucle de Optimización Continua</div>
+        <div class="section-title" style="margin-top:0">Métricas de Revisión Semanal</div>
+        <ul class="bullet-list green"><li>Tasa de respuesta</li><li>Tasa de reuniones cerradas</li><li>Tasa de SQL</li><li>Tasa de creación de oportunidades</li></ul>
+        <div class="section-title">Acciones de Optimización</div>
+        <ul class="bullet-list cyan"><li>Ajustar umbrales de puntuación</li><li>Actualizar filtros de ICP</li><li>Promover segmentos de alto rendimiento</li><li>Eliminar segmentos de bajo rendimiento</li></ul>
+      </div>
+    </div>
+    <div class="outcome-banner green">
+      <div class="outcome-label">Resultado</div>
+      <div class="outcome-text">Los BDRs dedican su tiempo solo a las cuentas con mayor probabilidad de conversión.</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <div class="slide-badge badge-amber">Slide 03</div>
+      <div class="slide-title">Habilitación de Ventas, Adopción y Seguimiento del Rendimiento</div>
+      <div class="slide-subtitle">Visibilidad completa desde la calidad del dato hasta la generación de pipeline.</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title amber">KPIs Operacionales</div>
+        <div class="kpi-group">
+          <div class="kpi-group-title">Calidad de Datos</div>
+          <div class="kpi-item"><span class="kpi-name">Tasa de duplicados</span><span class="kpi-tag tag-alert">Alerta</span></div>
+          <div class="kpi-item"><span class="kpi-name">Cobertura de enriquecimiento %</span><span class="kpi-tag tag-track">Seguimiento</span></div>
+          <div class="kpi-item"><span class="kpi-name">Éxito de sincronización %</span><span class="kpi-tag tag-track">Seguimiento</span></div>
+        </div>
+        <div class="kpi-group">
+          <div class="kpi-group-title">Rendimiento del Enrutamiento</div>
+          <div class="kpi-item"><span class="kpi-name">Tiempo hasta la asignación</span><span class="kpi-tag tag-report">Reporte</span></div>
+          <div class="kpi-item"><span class="kpi-name">Cumplimiento del SLA</span><span class="kpi-tag tag-track">Seguimiento</span></div>
+          <div class="kpi-item"><span class="kpi-name">Tasa de aceptación de leads</span><span class="kpi-tag tag-report">Reporte</span></div>
+        </div>
+        <div class="kpi-group">
+          <div class="kpi-group-title">Rendimiento de Ventas</div>
+          <div class="kpi-item"><span class="kpi-name">Tasa de respuesta por email</span><span class="kpi-tag tag-track">Seguimiento</span></div>
+          <div class="kpi-item"><span class="kpi-name">Tasa de reuniones cerradas</span><span class="kpi-tag tag-track">Seguimiento</span></div>
+          <div class="kpi-item"><span class="kpi-name">Conversión a SQL</span><span class="kpi-tag tag-report">Reporte</span></div>
+          <div class="kpi-item"><span class="kpi-name">Pipeline generado</span><span class="kpi-tag tag-report">Reporte</span></div>
+        </div>
+      </div>
+      <div class="col-stack">
+        <div class="card">
+          <div class="card-title cyan">Framework de Monitoreo</div>
+          <div class="timeline">
+            <div class="timeline-row">
+              <div class="timeline-period period-daily">Diario</div>
+              <div class="timeline-items">
+                <div class="timeline-item">Alertas de sincronización fallida</div>
+                <div class="timeline-item">Excepciones de enrutamiento</div>
+                <div class="timeline-item">Alertas de duplicados</div>
+              </div>
+            </div>
+            <div class="timeline-row">
+              <div class="timeline-period period-weekly">Semanal</div>
+              <div class="timeline-items">
+                <div class="timeline-item">Revisión de ICP</div>
+                <div class="timeline-item">Revisión de rendimiento por segmento</div>
+              </div>
+            </div>
+            <div class="timeline-row">
+              <div class="timeline-period period-monthly">Mensual</div>
+              <div class="timeline-items">
+                <div class="timeline-item">Auditoría de lógica de enrutamiento</div>
+                <div class="timeline-item">Auditoría de automatización CRM</div>
+                <div class="timeline-item">Análisis de eficiencia del pipeline</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title rose">Responsabilidad GTM y Crecimiento</div>
+          <ul class="bullet-list rose">
+            <li>Auditar la calidad de los datos</li>
+            <li>Proteger la integridad del CRM</li>
+            <li>Optimizar la lógica de enrutamiento</li>
+            <li>Mejorar la conversión outbound</li>
+            <li>Aumentar la productividad de los BDRs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="outcome-banner amber">
+      <div class="outcome-label">Métrica de Éxito</div>
+      <div class="outcome-text">Más pipeline generado por hora de BDR invertida.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-bar">
+  <button class="arrow-btn" id="prev-btn" onclick="navigate(-1)" disabled>←</button>
+  <div class="dot-nav">
+    <div class="dot active" onclick="goTo(0)"></div>
+    <div class="dot" onclick="goTo(1)"></div>
+    <div class="dot" onclick="goTo(2)"></div>
+  </div>
+  <button class="arrow-btn" id="next-btn" onclick="navigate(1)">→</button>
+</div>
+
+<script>
+  let current = 0;
+  const total = 3;
+  function goTo(index) {
+    if (index === current) return;
+    const prev = document.getElementById('slide-' + current);
+    const next = document.getElementById('slide-' + index);
+    prev.classList.add(index > current ? 'exit-left' : '');
+    prev.classList.remove('active');
+    setTimeout(() => prev.classList.remove('exit-left'), 400);
+    next.classList.add('active');
+    current = index;
+    updateUI();
+  }
+  function navigate(dir) {
+    const t = current + dir;
+    if (t >= 0 && t < total) goTo(t);
+  }
+  function updateUI() {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === current));
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    document.getElementById('prev-btn').disabled = current === 0;
+    document.getElementById('next-btn').disabled = current === total - 1;
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+  });
+</script>
+</body>
+</html>
