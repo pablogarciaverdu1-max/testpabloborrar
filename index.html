@@ -3719,14 +3719,14 @@
                                 ${ordersInStatus.map(o => {
                                     const client = clients.find(c => c.id === o.clienteId);
                                     return `
-                                        <div class="order-card" data-order-id="${o.id}" draggable="true" ondragstart="event.dataTransfer.setData('orderId', ${o.id})" onclick="openClient(${o.clienteId})" style="cursor: pointer;">
+                                        <div class="order-card" data-order-id="${o.id}" draggable="true" ondragstart="event.dataTransfer.setData('orderId', ${o.id})" onclick="openClient(${o.clienteId})" style="cursor: pointer; position: relative;">
+                                            <button class="btn" onclick="event.stopPropagation(); eliminarOrden(${o.id})" style="background: #dc3545; color: white; padding: 6px 8px; font-size: 14px; border-radius: 4px; position: absolute; top: 8px; right: 8px; border: none; cursor: pointer;">🗑️</button>
                                             <div class="order-id">${o.numero}</div>
                                             <div class="order-client">👤 ${client.nombre} ${client.apellido}</div>
                                             <div class="order-info">📞 ${client.telefono}</div>
                                             <div class="order-service" style="margin-top: 8px;">🔧 ${o.servicio}</div>
                                             <div class="order-info">🏍️ ${client.moto.marca} ${client.moto.modelo}</div>
                                             <div class="order-info">Matrícula: ${client.moto.matricula}</div>
-                                            <button class="btn" onclick="event.stopPropagation(); eliminarOrden(${o.id})" style="background: #dc3545; color: white; padding: 4px 8px; font-size: 12px; border-radius: 3px; margin-top: 8px; width: 100%;">🗑️ Eliminar</button>
                                         </div>
                                     `;
                                 }).join('')}
