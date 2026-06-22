@@ -1961,6 +1961,152 @@
             }).join('');
         }
 
+        function abrirFormularioClienteExistente() {
+            document.getElementById('modalBody').innerHTML = `
+                <div class="section">
+                    <div class="section-title">Selecciona Cliente Existente</div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label required">Buscar Cliente</label>
+                            <input type="text" class="form-input" id="buscarClienteInputModal" placeholder="Nombre, teléfono o matrícula..." oninput="buscarClientesExistentesModal()">
+                            <div id="searchSuggestionsModal" class="search-suggestions"></div>
+                        </div>
+                    </div>
+                    <div id="clienteSeleccionadoModal" style="display: none; background: #e8f5e9; padding: 12px; border-radius: 4px; margin-bottom: 12px; color: #2e7d32;"></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Crear Cita Rápida</div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label required">Servicio</label>
+                            <select id="rapServicioModal" class="form-select">
+                                <option value="">Selecciona un servicio</option>
+                                <option value="Revisión periodica">Revisión periodica</option>
+                                <option value="Siniestro">Siniestro</option>
+                                <option value="Reparación moto">Reparación moto</option>
+                                <option value="Revisión ITV">Revisión ITV</option>
+                                <option value="1ª Visita">1ª Visita</option>
+                                <option value="Mantenimiento">Mantenimiento</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label required">Fecha y Hora</label>
+                            <input type="datetime-local" id="rapDateTimeModal" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Notas</label>
+                            <textarea id="rapNotasModal" class="form-textarea" placeholder="Notas adicionales..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="crearCitaClienteExistente()">✓ Crear Cita</button>
+                        <button class="btn" onclick="closeModal()">Cancelar</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function buscarClientesExistentesModal() {
+            const search = document.getElementById('buscarClienteInputModal').value.toLowerCase();
+            const suggestions = document.getElementById('searchSuggestionsModal');
+
+            if (search.length < 1) {
+                suggestions.classList.remove('active');
+                return;
+            }
+
+            const filtered = clients.filter(c =>
+                (c.nombre + ' ' + c.apellido).toLowerCase().includes(search) ||
+                c.telefono.toLowerCase().includes(search) ||
+                (c.moto && c.moto.matricula && c.moto.matricula.toLowerCase().includes(search))
+            );
+
+            if (filtered.length === 0) {
+                suggestions.classList.remove('active');
+                return;
+            }
+
+            suggestions.innerHTML = filtered.map(c => `
+                <div class="suggestion-item" onclick="seleccionarClienteModal(${c.id}, '${c.nombre} ${c.apellido}')">
+                    👤 ${c.nombre} ${c.apellido}<br/>
+                    <small>📞 ${c.telefono} | 🏍️ ${c.moto && c.moto.matricula ? c.moto.matricula : 'N/A'}</small>
+                </div>
+            `).join('');
+
+            suggestions.classList.add('active');
+        }
+
+        function seleccionarClienteModal(id, nombre) {
+            clienteSeleccionadoId = id;
+            document.getElementById('buscarClienteInputModal').value = nombre;
+            document.getElementById('searchSuggestionsModal').classList.remove('active');
+            
+            const seleccionado = document.getElementById('clienteSeleccionadoModal');
+            seleccionado.style.display = 'block';
+            seleccionado.innerHTML = `✓ ${nombre} seleccionado`;
+        }
+
+        function crearCitaClienteExistente() {
+            if (!clienteSeleccionadoId) {
+                alert('Debes seleccionar un cliente');
+                return;
+            }
+
+            const servicio = document.getElementById('rapServicioModal').value;
+            const datetime = document.getElementById('rapDateTimeModal').value;
+            const notas = document.getElementById('rapNotasModal').value;
+
+            if (!servicio || !datetime) {
+                alert('Servicio y Fecha/Hora son obligatorios');
+                return;
+            }
+
+            const client = clients.find(c => c.id === clienteSeleccionadoId);
+            citas.push({
+                id: Math.max(...citas.map(c => c.id || 0), 0) + 1,
+                clienteId: client.id,
+                cliente: client.nombre + ' ' + client.apellido,
+                servicio: servicio,
+                datetime: datetime,
+                descripcion: notas,
+                estado: 'pendiente',
+                seguimientos: []
+            });
+
+            // Crear orden automáticamente en Pendiente
+            const nuevoIdOrden = Math.max(...orders.map(o => o.id || 0), 0) + 1;
+            const nuevoNumeroOrden = 'ORD-' + String(nuevoIdOrden).padStart(3, '0');
+            orders.push({
+                id: nuevoIdOrden,
+                numero: nuevoNumeroOrden,
+                clienteId: client.id,
+                servicio: servicio,
+                estado: 'pendiente',
+                descripcion: notas,
+                importe: 0
+            });
+
+            // Sincronizar a Supabase
+            syncToSupabase('ordenes', orders[orders.length - 1]);
+            syncToSupabase('citas', citas[citas.length - 1]);
+
+            showSaveStatus();
+            closeModal();
+            renderCitasList();
+            renderOrdenes();
+            clienteSeleccionadoId = null;
+        }
+
         function newCliente() {
             currentClientId = null;
             const newId = Math.max(...clients.map(c => c.id), 0) + 1;
