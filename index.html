@@ -1894,6 +1894,7 @@
             if (tab === 'clientes') renderClientes();
             else if (tab === 'citas') {
                 renderCitasSelector();
+                setTimeout(() => renderCalendarioInterno(), 100);
             }
             else if (tab === 'seguimientos') {
                 renderSeguimientosGlobales();
