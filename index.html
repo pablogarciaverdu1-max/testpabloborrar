@@ -1523,19 +1523,21 @@
         // 🔐 SEGURIDAD: RATE LIMITING
         // ============================================
 
-        let intentosFallidos = 0;
-        let bloqueadoHasta = null;
+        // VARIABLES DE BLOQUEO DESACTIVADAS
+        // let intentosFallidos = 0;
+        // let bloqueadoHasta = null;
 
-        async function verificarBloqueo() {
-            if (bloqueadoHasta && new Date() < bloqueadoHasta) {
-                const minutos = Math.ceil((bloqueadoHasta - new Date()) / 60000);
-                throw new Error(`Bloqueado ${minutos} minutos por múltiples intentos fallidos`);
-            }
-            if (bloqueadoHasta && new Date() >= bloqueadoHasta) {
-                bloqueadoHasta = null;
-                intentosFallidos = 0;
-            }
-        }
+        // FUNCIÓN DE BLOQUEO DESACTIVADA
+        // async function verificarBloqueo() {
+        //     if (bloqueadoHasta && new Date() < bloqueadoHasta) {
+        //         const minutos = Math.ceil((bloqueadoHasta - new Date()) / 60000);
+        //         throw new Error(`Bloqueado ${minutos} minutos por múltiples intentos fallidos`);
+        //     }
+        //     if (bloqueadoHasta && new Date() >= bloqueadoHasta) {
+        //         bloqueadoHasta = null;
+        //         intentosFallidos = 0;
+        //     }
+        // }
 
         // LOGIN CON SEGURIDAD
         async function handleLogin(event) {
@@ -1545,27 +1547,15 @@
             const errorDiv = document.getElementById('loginError');
 
             try {
-                // 🔐 Verificar bloqueo por rate limiting
-                await verificarBloqueo();
-
                 console.log('🔐 Intento de login');
 
                 // ✅ Validar credenciales (en producción usar bcrypt en servidor)
                 const credValidas = user === 'GRUPO VIA' && password === 'VIA12';
 
                 if (!credValidas) {
-                    intentosFallidos++;
-                    console.warn(`⚠️ Login fallido (intento ${intentosFallidos}/5)`);
-                    
-                    if (intentosFallidos >= 5) {
-                        bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000);
-                        errorDiv.textContent = '❌ Bloqueado 15 minutos por múltiples intentos fallidos';
-                    } else {
-                        errorDiv.textContent = `❌ Credenciales incorrectas (${intentosFallidos}/5)`;
-                    }
-                    
+                    errorDiv.textContent = '❌ Credenciales incorrectas';
                     errorDiv.classList.add('show');
-                    setTimeout(() => errorDiv.classList.remove('show'), 5000);
+                    setTimeout(() => errorDiv.classList.remove('show'), 3000);
                     return;
                 }
 
