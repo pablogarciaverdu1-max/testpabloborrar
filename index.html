@@ -1305,7 +1305,8 @@
 
             <!-- ÓRDENES -->
             <div id="view-ordenes" class="view">
-                <div class="pipeline-container" id="pipelineContainer"></div>
+                <div id="pipelineContainer"></div>
+                <div class="pipeline-container" id="ordenesCardsContainer"></div>
             </div>
 
             <!-- INFORMES -->
@@ -1952,7 +1953,10 @@
                 renderSeguimientosGlobales();
                 setTimeout(() => renderCalendario(), 100);
             }
-            else if (tab === 'ordenes') renderOrdenes();
+            else if (tab === 'ordenes') {
+                initFiltrosOrdenes();
+                setTimeout(() => renderOrdenes(), 50);
+            }
             else if (tab === 'informes') renderInformes();
             else if (tab === 'admin') renderAdmin();
         }
@@ -3632,6 +3636,44 @@
         }
 
         // ÓRDENES
+        function initFiltrosOrdenes() {
+            const container = document.getElementById('pipelineContainer');
+            const servicios = [...new Set(orders.map(o => o.servicio))].sort();
+            
+            const filterDiv = document.createElement('div');
+            filterDiv.id = 'ordenesFiltrosDiv';
+            filterDiv.style.cssText = 'grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;';
+            filterDiv.innerHTML = `
+                <div>
+                    <label style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 6px;">🔍 Buscar</label>
+                    <input type="text" id="busquedaOrdenes" class="form-input" placeholder="Cliente, teléfono, matrícula..." 
+                           style="width: 100%; padding: 10px 12px; font-size: 13px;"
+                           oninput="renderOrdenes()">
+                </div>
+                
+                <div>
+                    <label style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 6px;">📋 Servicio</label>
+                    <select id="filtroServicio" class="form-select" style="width: 100%; padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
+                        <option value="">Todos los servicios</option>
+                        ${servicios.map(s => `<option value="${s}">${s}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div>
+                    <label style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 6px;">👨‍🔧 Mecánico</label>
+                    <select id="filtroMecanico" class="form-select" style="width: 100%; padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
+                        <option value="">Todos los mecánicos</option>
+                        ${mecanicos.map(m => `<option value="${m.nombre}">${m.nombre}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+            
+            if (!document.getElementById('ordenesFiltrosDiv')) {
+                container.innerHTML = '';
+                container.appendChild(filterDiv);
+            }
+        }
+
         function renderOrdenes() {
             const statuses = ['pendiente', 'en-progreso', 'listo-entrega', 'entregado-pagado'];
             const statusLabels = {
@@ -3643,7 +3685,7 @@
 
             const container = document.getElementById('pipelineContainer');
             
-            // Obtener valores de filtros ANTES de re-renderizar
+            // Obtener valores de filtros
             const busquedaInput = document.getElementById('busquedaOrdenes');
             const servicioFilter = document.getElementById('filtroServicio');
             const mecanicoFilter = document.getElementById('filtroMecanico');
@@ -3678,69 +3720,40 @@
                 return coincideBusqueda && coincideServicio && coincideMecanico;
             });
             
-            // Obtener servicios únicos
-            const servicios = [...new Set(orders.map(o => o.servicio))].sort();
-            
-            container.innerHTML = `
-                <div style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-                    <div>
-                        <label style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 6px;">🔍 Buscar</label>
-                        <input type="text" id="busquedaOrdenes" class="form-input" placeholder="Cliente, teléfono, matrícula..." 
-                               style="width: 100%; padding: 10px 12px; font-size: 13px;"
-                               value="${busqueda}"
-                               oninput="renderOrdenes()">
-                    </div>
-                    
-                    <div>
-                        <label style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 6px;">📋 Servicio</label>
-                        <select id="filtroServicio" class="form-select" style="width: 100%; padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
-                            <option value="">Todos los servicios</option>
-                            ${servicios.map(s => `<option value="${s}" ${s === servicioSeleccionado ? 'selected' : ''}>${s}</option>`).join('')}
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 6px;">👨‍🔧 Mecánico</label>
-                        <select id="filtroMecanico" class="form-select" style="width: 100%; padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
-                            <option value="">Todos los mecánicos</option>
-                            ${mecanicos.map(m => `<option value="${m.nombre}" ${m.nombre === mecanicoSeleccionado ? 'selected' : ''}>${m.nombre}</option>`).join('')}
-                        </select>
-                    </div>
-                </div>
-                ${statuses.map(status => {
-                    const ordersInStatus = ordenesFiltradas.filter(o => o.estado === status);
-                    return `
-                        <div class="pipeline-column">
-                            <div class="column-title">
-                                ${statusLabels[status]}
-                                <span class="column-count">${ordersInStatus.length}</span>
-                            </div>
-                            <div class="dropzone" ondragover="event.preventDefault(); this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropOrder(event, '${status}')">
-                                ${ordersInStatus.map(o => {
-                                    const client = clients.find(c => c.id === o.clienteId);
-                                    return `
-                                        <div class="order-card" data-order-id="${o.id}" draggable="true" ondragstart="event.dataTransfer.setData('orderId', ${o.id})" onclick="openClient(${o.clienteId})" style="cursor: pointer; position: relative;">
-                                            <button class="btn" onclick="event.stopPropagation(); eliminarOrden(${o.id})" style="background: #dc3545; color: white; padding: 6px 8px; font-size: 14px; border-radius: 4px; position: absolute; top: 8px; right: 8px; border: none; cursor: pointer;">🗑️</button>
-                                            <div class="order-id">${o.numero}</div>
-                                            <div class="order-client">👤 ${client.nombre} ${client.apellido}</div>
-                                            <div class="order-info">📞 ${client.telefono}</div>
-                                            <div class="order-service" style="margin-top: 8px;">🔧 ${o.servicio}</div>
-                                            <div class="order-info">🏍️ ${client.moto.marca} ${client.moto.modelo}</div>
-                                            <div class="order-info">Matrícula: ${client.moto.matricula}</div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
+            // Renderizar solo las tarjetas (no los filtros)
+            const tarjetasHTML = statuses.map(status => {
+                const ordersInStatus = ordenesFiltradas.filter(o => o.estado === status);
+                return `
+                    <div class="pipeline-column">
+                        <div class="column-title">
+                            ${statusLabels[status]}
+                            <span class="column-count">${ordersInStatus.length}</span>
                         </div>
-                    `;
-                }).join('')}
-            `;
+                        <div class="dropzone" ondragover="event.preventDefault(); this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropOrder(event, '${status}')">
+                            ${ordersInStatus.map(o => {
+                                const client = clients.find(c => c.id === o.clienteId);
+                                return `
+                                    <div class="order-card" data-order-id="${o.id}" draggable="true" ondragstart="event.dataTransfer.setData('orderId', ${o.id})" onclick="openClient(${o.clienteId})" style="cursor: pointer; position: relative;">
+                                        <button class="btn" onclick="event.stopPropagation(); eliminarOrden(${o.id})" style="background: #dc3545; color: white; padding: 6px 8px; font-size: 14px; border-radius: 4px; position: absolute; top: 8px; right: 8px; border: none; cursor: pointer;">🗑️</button>
+                                        <div class="order-id">${o.numero}</div>
+                                        <div class="order-client">👤 ${client.nombre} ${client.apellido}</div>
+                                        <div class="order-info">📞 ${client.telefono}</div>
+                                        <div class="order-service" style="margin-top: 8px;">🔧 ${o.servicio}</div>
+                                        <div class="order-info">🏍️ ${client.moto.marca} ${client.moto.modelo}</div>
+                                        <div class="order-info">Matrícula: ${client.moto.matricula}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
             
-            // Re-enfocar el input después de renderizar
-            setTimeout(() => {
-                const input = document.getElementById('busquedaOrdenes');
-                if (input) input.focus();
-            }, 0);
+            // Actualizar solo el contenido de las tarjetas, no los filtros
+            const tarjetasContainer = document.getElementById('ordenesCardsContainer');
+            if (tarjetasContainer) {
+                tarjetasContainer.innerHTML = tarjetasHTML;
+            }
         }
 
         function dropOrder(e, status) {
@@ -4594,12 +4607,10 @@
             document.getElementById('tituloSemana').textContent = 
                 `${dias[0].fecha.toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})} - ${dias[4].fecha.toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'})}`;
 
-            // Generar tabla
+            // Generar tabla - UNA FILA POR HORA
             const horas = [];
             for (let h = 7; h < 19; h++) {
-                for (let m = 0; m < 60; m += 15) {
-                    horas.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-                }
+                horas.push(`${String(h).padStart(2, '0')}:00`);
             }
 
             let html = '<thead><tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;"><th style="padding: 8px; border: 1px solid #ddd; width: 80px; font-weight: 600;">Hora</th>';
@@ -4620,7 +4631,7 @@
                         if (!s.hora) return false;
                         const [hTarea, mTarea] = s.hora.split(':').map(Number);
                         const [hHora, mHora] = hora.split(':').map(Number);
-                        return hTarea === hHora && mTarea === mHora;
+                        return hTarea === hHora; // Solo comparar la hora, no los minutos
                     });
 
                     if (tareasDiaHora.length > 0) {
