@@ -1311,12 +1311,9 @@
                     
                     <!-- COLUMNA DERECHA -->
                     <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
-                        <!-- BLOQUE 1: BOTONES CREAR CITA -->
+                        <!-- BLOQUE 1: BOTÓN CREAR NUEVA CITA -->
                         <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5;">
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                                <button class="btn" onclick="newCliente()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">+ Cliente Nuevo</button>
-                                <button class="btn" onclick="abrirFormularioClienteExistente()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">📅 Crear Cita Nueva</button>
-                            </div>
+                            <button class="btn" onclick="abrirCrearNuevaCita()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; width: 100%;">📅 Crear Nueva Cita</button>
                         </div>
                         
                         <!-- BLOQUE 2: CALENDARIO -->
@@ -1711,7 +1708,7 @@
         }
 
         // SYNC A SUPABASE (auto-sync con encriptación y auditoría)
-        async function syncToSupabase(tabla, datos) {
+        async function // syncToSupabase(tabla, datos) {
             console.log(`📤 INTENTANDO SINCRONIZAR ${tabla}:`, datos);
             
             if (!navigator.onLine) {
@@ -1962,6 +1959,78 @@
             }).join('');
         }
 
+        function abrirFormularioCrearCita() {
+            const client = clients.find(c => c.id === clienteSeleccionadoId);
+            
+            document.getElementById('modalBody').innerHTML = `
+                <div class="section">
+                    <div class="section-title">✓ Cliente Seleccionado</div>
+                    <div style="background: #e8f5e9; padding: 12px; border-radius: 4px; color: #2e7d32; margin-bottom: 16px;">
+                        👤 ${client.nombre} ${client.apellido}
+                        <br/><small>📞 ${client.telefono} | 🏍️ ${client.moto && client.moto.matricula ? client.moto.matricula : 'N/A'}</small>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Datos de la Cita</div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Mecánico</label>
+                            <select id="rapMecanicoModal2" class="form-select">
+                                <option value="">Selecciona mecánico</option>
+                                <option value="Miguel Ángel">Miguel Ángel</option>
+                                <option value="Roberto">Roberto</option>
+                                <option value="Carlos Martínez">Carlos Martínez</option>
+                                <option value="Juan López">Juan López</option>
+                                <option value="Pedro González">Pedro González</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label required">Servicio Solicitado</label>
+                            <select id="rapServicioModal2" class="form-select">
+                                <option value="">Selecciona un servicio</option>
+                                <option value="Revisión periodica">Revisión periodica</option>
+                                <option value="Siniestro">Siniestro</option>
+                                <option value="Reparación moto">Reparación moto</option>
+                                <option value="Revisión ITV">Revisión ITV</option>
+                                <option value="1ª Visita">1ª Visita</option>
+                                <option value="Mantenimiento">Mantenimiento</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label required">Fecha</label>
+                            <input type="date" id="rapFechaModal2" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label required">Desde Hora</label>
+                            <input type="time" id="rapDesdeHoraModal2" class="form-input">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label required">Hasta Hora</label>
+                            <input type="time" id="rapHastaHoraModal2" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Nota (se guardará en la ficha del cliente)</label>
+                            <textarea id="rapNotasModal2" class="form-textarea" placeholder="Notas adicionales..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="crearCitaFinal()">✓ Crear Cita</button>
+                        <button class="btn" onclick="closeModal()">Cancelar</button>
+                    </div>
+                </div>
+            `;
+        }
+
         function abrirFormularioClienteExistente() {
             document.getElementById('modalBody').innerHTML = `
                 <div class="section">
@@ -2091,12 +2160,90 @@
             document.getElementById('searchSuggestionsModal').classList.remove('active');
             document.getElementById('searchSuggestionsModal').innerHTML = '';
             
-            const seleccionado = document.getElementById('clienteSeleccionadoModal');
-            seleccionado.style.display = 'block';
-            seleccionado.innerHTML = `✓ ${nombre} seleccionado<br/><small>📞 ${telefono} | 🏍️ ${matricula}</small>`;
+            // Mostrar formulario de cita directamente
+            setTimeout(() => abrirFormularioCrearCita(), 300);
         }
 
-        function crearCitaClienteExistente() {
+        function crearCitaFinal() {
+            if (!clienteSeleccionadoId) {
+                alert('No hay cliente seleccionado');
+                return;
+            }
+
+            const servicio = document.getElementById('rapServicioModal2').value;
+            const fecha = document.getElementById('rapFechaModal2').value;
+            const desdeHora = document.getElementById('rapDesdeHoraModal2').value;
+            const hastaHora = document.getElementById('rapHastaHoraModal2').value;
+            const mecanico = document.getElementById('rapMecanicoModal2').value;
+            const notas = document.getElementById('rapNotasModal2').value;
+
+            if (!servicio || !fecha || !desdeHora || !hastaHora) {
+                alert('Servicio, Fecha, Desde Hora y Hasta Hora son obligatorios');
+                return;
+            }
+
+            if (hastaHora <= desdeHora) {
+                alert('La hora de fin debe ser posterior a la hora de inicio');
+                return;
+            }
+
+            // Crear datetime
+            const datetime = fecha + 'T' + desdeHora;
+
+            const client = clients.find(c => c.id === clienteSeleccionadoId);
+            
+            // Crear cita
+            citas.push({
+                id: Math.max(...citas.map(c => c.id || 0), 0) + 1,
+                clienteId: client.id,
+                cliente: client.nombre + ' ' + client.apellido,
+                servicio: servicio,
+                datetime: datetime,
+                descripcion: notas,
+                estado: 'pendiente',
+                mecanico: mecanico,
+                horaFin: hastaHora,
+                seguimientos: []
+            });
+
+            // Crear nota en la ficha del cliente
+            if (notas.trim()) {
+                const fechaHoy = new Date().toISOString().split('T')[0];
+                const notaObj = {
+                    id: Math.max(...(client.notas ? client.notas.map(n => n.id || 0) : [0]), 0) + 1,
+                    mecanico: mecanico || 'Sin asignar',
+                    nota: notas,
+                    fechaVencimiento: fecha,
+                    fechaCreacion: fechaHoy
+                };
+                
+                if (!client.notas) client.notas = [];
+                client.notas.push(notaObj);
+            }
+
+            // Crear orden automáticamente
+            const nuevoIdOrden = Math.max(...orders.map(o => o.id || 0), 0) + 1;
+            const nuevoNumeroOrden = 'ORD-' + String(nuevoIdOrden).padStart(3, '0');
+            orders.push({
+                id: nuevoIdOrden,
+                numero: nuevoNumeroOrden,
+                clienteId: client.id,
+                servicio: servicio,
+                estado: 'pendiente',
+                descripcion: notas,
+                importe: 0
+            });
+
+            showSaveStatus();
+            closeModal();
+            renderCitasList();
+            renderCalendarioInterno();
+            renderOrdenes();
+            clienteSeleccionadoId = null;
+        }
+
+        // FUNCIÓN ANTIGUA - AHORA SE USA crearCitaFinal()
+        // function crearCitaClienteExistente() {
             if (!clienteSeleccionadoId) {
                 alert('Debes seleccionar un cliente');
                 return;
@@ -2167,10 +2314,10 @@
                 importe: 0
             });
 
-            // Sincronizar a Supabase
-            syncToSupabase('clientes', client);
-            syncToSupabase('ordenes', orders[orders.length - 1]);
-            syncToSupabase('citas', citas[citas.length - 1]);
+            // Sincronizar a Supabase (DESACTIVADO - ERROR CON TELÉFONO)
+            // // syncToSupabase('clientes', client);
+            // syncToSupabase('ordenes', orders[orders.length - 1]);
+            // syncToSupabase('citas', citas[citas.length - 1]);
 
             showSaveStatus();
             closeModal();
@@ -2178,6 +2325,28 @@
             renderCalendarioInterno();
             renderOrdenes();
             clienteSeleccionadoId = null;
+        }
+
+        function abrirCrearNuevaCita() {
+            document.getElementById('modalBody').innerHTML = `
+                <div class="section">
+                    <div class="section-title">¿Qué tipo de cliente?</div>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button class="btn" onclick="flujoClienteExistente()" style="background: #4CAF50; color: white; padding: 14px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">👤 Cliente Existente</button>
+                        <button class="btn" onclick="flujoClienteNuevo()" style="background: #2196F3; color: white; padding: 14px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">➕ Cliente Nuevo</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function flujoClienteExistente() {
+            abrirFormularioClienteExistente();
+        }
+
+        function flujoClienteNuevo() {
+            newCliente();
         }
 
         function newCliente() {
@@ -2302,11 +2471,13 @@
             registrarAuditoria('clientes', 'INSERT', id, null, { nombre, apellido, email });
             
             // 📤 Sincronizar a Supabase (DESACTIVADO TEMPORALMENTE)
-            // syncToSupabase('clientes', nuevoCliente);
+            // // syncToSupabase('clientes', nuevoCliente);
 
             showSaveStatus();
-            closeModal();
-            renderClientes();
+            
+            // Guardar ID del cliente y mostrar formulario de cita
+            clienteSeleccionadoId = id;
+            setTimeout(() => abrirFormularioCrearCita(), 500);
         }
 
         function getEstadoFunel(clientId) {
@@ -2980,8 +3151,8 @@
             });
 
             // Sincronizar orden a Supabase
-            syncToSupabase('ordenes', orders[orders.length - 1]);
-            syncToSupabase('citas', citas[citas.length - 1]);
+            // syncToSupabase('ordenes', orders[orders.length - 1]);
+            // syncToSupabase('citas', citas[citas.length - 1]);
 
             showSaveStatus();
             closeCitaRapida();
@@ -3436,9 +3607,10 @@
             const newCita = citas.find(c => c.clienteId === newClientId);
             const newOrden = orders.find(o => o.clienteId === newClientId);
             
-            syncToSupabase('clientes', newClient);
-            syncToSupabase('citas', newCita);
-            syncToSupabase('ordenes', newOrden);
+            // Sincronizar a Supabase (DESACTIVADO - ERROR CON TELÉFONO)
+            // // syncToSupabase('clientes', newClient);
+            // // syncToSupabase('citas', newCita);
+            // // syncToSupabase('ordenes', newOrden);
             
             renderCitasSelector();
         }
@@ -3494,8 +3666,8 @@
             const newCita = citas.find(c => c.clienteId === clienteSeleccionadoId && c.id === Math.max(...citas.map(c => c.id)));
             const newOrden = orders.find(o => o.clienteId === clienteSeleccionadoId && o.id === Math.max(...orders.map(o => o.id)));
             
-            syncToSupabase('citas', newCita);
-            syncToSupabase('ordenes', newOrden);
+            // syncToSupabase('citas', newCita);
+            // syncToSupabase('ordenes', newOrden);
             
             renderCitasSelector();
         }
@@ -4590,7 +4762,7 @@
             if (seg) {
                 seg.completado = true;
                 // Sincronizar con Supabase
-                syncToSupabase('seguimientos', seg);
+                // syncToSupabase('seguimientos', seg);
                 renderSeguimientosGlobales();
             }
         }
@@ -4624,7 +4796,7 @@
             };
 
             notas.push(nuevaNota);
-            syncToSupabase('notas', nuevaNota);
+            // syncToSupabase('notas', nuevaNota);
 
             document.getElementById('notaMecanico').value = '';
             document.getElementById('notaTexto').value = '';
@@ -4679,7 +4851,7 @@
             if (nota) {
                 nota.mecanico = mecanico;
                 nota.nota = nota_text;
-                syncToSupabase('notas', nota);
+                // syncToSupabase('notas', nota);
                 
                 document.getElementById('notaMecanico').value = '';
                 document.getElementById('notaTexto').value = '';
@@ -4763,7 +4935,7 @@
             };
 
             seguimientos.push(nuevoSeguimiento);
-            syncToSupabase('seguimientos', nuevoSeguimiento);
+            // syncToSupabase('seguimientos', nuevoSeguimiento);
 
             document.getElementById('seguimientoMecanico').value = '';
             document.getElementById('seguimientoDescripcionTarea').value = '';
@@ -4839,7 +5011,7 @@
                 tarea.estadoMoto = '';
                 tarea.fechaSeguimiento = fechaSeguimiento;
                 tarea.hora = hora;
-                syncToSupabase('seguimientos', tarea);
+                // syncToSupabase('seguimientos', tarea);
 
                 document.getElementById('seguimientoMecanico').value = '';
                 document.getElementById('seguimientoDescripcionTarea').value = '';
@@ -4965,7 +5137,7 @@
             const seg = seguimientos.find(s => s.id === seguimientoId);
             if (seg) {
                 seg.completado = true;
-                syncToSupabase('seguimientos', seg);
+                // syncToSupabase('seguimientos', seg);
                 renderCalendario();
             }
         }
