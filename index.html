@@ -1268,71 +1268,80 @@
             <!-- CITAS -->
             <div id="view-citas" class="view">
                 <div class="citas-container">
-                    <div>
-                        <div id="citasFormContainer" class="citas-form"></div>
+                    <!-- COLUMNA IZQUIERDA -->
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
+                        <!-- BLOQUE 1: FILTROS -->
+                        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                <div>
+                                    <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Fecha</label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="filtroFecha" class="form-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('filtroFecha')" readonly style="cursor: pointer; background: white;">
+                                        <div id="calendarioMini_filtroFecha" class="calendario-mini" style="display: none;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Tipo de Servicio</label>
+                                    <select id="filtroServicio" class="form-select" onchange="filtrarCitas()">
+                                        <option value="">Todos los servicios</option>
+                                        <option value="Revisión periodica">Revisión periodica</option>
+                                        <option value="Siniestro">Siniestro</option>
+                                        <option value="Reparación moto">Reparación moto</option>
+                                        <option value="Revisión ITV">Revisión ITV</option>
+                                        <option value="1ª Visita">1ª Visita</option>
+                                        <option value="Mantenimiento">Mantenimiento</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn" onclick="limpiarFiltros()" style="width: 100%; margin-bottom: 12px; background: #fff; border: 1px solid #ddd;">Limpiar filtros</button>
+                            
+                            <!-- BOTONES VISTA -->
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn" onclick="cambiarVistaCalendario('dia')" id="btnDia" style="flex: 1; background: #f0f0f0; color: #333;">📆 Hoy</button>
+                                <button class="btn" onclick="cambiarVistaCalendario('semana')" id="btnSemana" style="flex: 1; background: #333333; color: white;">📅 Semana</button>
+                            </div>
+                        </div>
                         
-                        <!-- LISTA DE CITAS -->
-                        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5; margin-top: 16px; max-height: 400px; overflow-y: auto;">
+                        <!-- BLOQUE 2: LISTADO DE CITAS -->
+                        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5; flex: 1; overflow-y: auto; max-height: 600px;">
                             <div style="font-weight: 600; margin-bottom: 12px;">📅 Citas Agendadas</div>
                             <div class="citas-list" id="citasList"></div>
                         </div>
                     </div>
-                    <div>
-                        <div class="calendar-container">
-                            <div class="calendar-info"></div>
-                            <div style="padding: 16px; background: white; border-radius: 6px; border: 1px solid #e5e5e5;">
-                                <!-- FILTROS ARRIBA -->
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                                    <div>
-                                        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Fecha</label>
-                                        <div style="position: relative;">
-                                            <input type="text" id="filtroFecha" class="form-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('filtroFecha')" readonly style="cursor: pointer; background: white;">
-                                            <div id="calendarioMini_filtroFecha" class="calendario-mini" style="display: none;"></div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Tipo de Servicio</label>
-                                        <select id="filtroServicio" class="form-select" onchange="filtrarCitas()">
-                                            <option value="">Todos los servicios</option>
-                                            <option value="Revisión periodica">Revisión periodica</option>
-                                            <option value="Siniestro">Siniestro</option>
-                                            <option value="Reparación moto">Reparación moto</option>
-                                            <option value="Revisión ITV">Revisión ITV</option>
-                                            <option value="1ª Visita">1ª Visita</option>
-                                            <option value="Mantenimiento">Mantenimiento</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button class="btn" onclick="limpiarFiltros()" style="width: 100%; margin-bottom: 16px; background: #fff; border: 1px solid #ddd;">Limpiar filtros</button>
-
-                                <!-- BOTONES DE VISTA -->
-                                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                                    <button class="btn" onclick="cambiarVistaCalendario('dia')" id="btnDia" style="background: #f0f0f0; color: #333;">📆 Hoy</button>
-                                    <button class="btn" onclick="cambiarVistaCalendario('semana')" id="btnSemana" style="background: #333333; color: white;">📅 Semana</button>
-                                </div>
-
-                                <!-- LEYENDA -->
-                                <div style="background: #f9f9f9; padding: 8px 12px; border-radius: 4px; margin-bottom: 16px; font-size: 11px;">
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #ff6b6b; border-radius: 2px;"></div> <span>Revisión periodica</span></div>
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #ffa94d; border-radius: 2px;"></div> <span>Siniestro</span></div>
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #4ecdc4; border-radius: 2px;"></div> <span>Reparación moto</span></div>
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #95e1d3; border-radius: 2px;"></div> <span>Revisión ITV</span></div>
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #a29bfe; border-radius: 2px;"></div> <span>1ª Visita</span></div>
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #fdcb6e; border-radius: 2px;"></div> <span>Mantenimiento</span></div>
-                                    </div>
-                                </div>
-
-                                <!-- NAVEGACIÓN SEMANA -->
-                                <div id="navegacionSemana" style="display: none; margin-bottom: 16px; text-align: center;">
-                                    <button class="btn" onclick="semanaAnteriorCitas()" style="background: #333333; color: white; padding: 6px 12px; font-size: 12px;">← Semana Anterior</button>
-                                    <button class="btn" onclick="resetSemana()" style="background: #f0f0f0; color: #333; padding: 6px 12px; font-size: 12px; margin: 0 8px;">Hoy</button>
-                                    <button class="btn" onclick="semanaSiguienteCitas()" style="background: #333333; color: white; padding: 6px 12px; font-size: 12px;">Semana Siguiente →</button>
-                                </div>
-
-                                <!-- CALENDARIO -->
-                                <div id="calendarioInterno" style="font-size: 13px;"></div>
+                    
+                    <!-- COLUMNA DERECHA -->
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
+                        <!-- BLOQUE 1: BOTONES CREAR CITA -->
+                        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5;">
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <button class="btn" onclick="newCliente()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">+ Cliente Nuevo</button>
+                                <button class="btn" onclick="abrirFormularioClienteExistente()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">👤 Cliente Existente</button>
                             </div>
+                        </div>
+                        
+                        <!-- BLOQUE 2: CALENDARIO -->
+                        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5; flex: 1; overflow-y: auto;">
+                            <!-- LEYENDA -->
+                            <div style="background: #f9f9f9; padding: 8px 12px; border-radius: 4px; margin-bottom: 16px; font-size: 11px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #ff6b6b; border-radius: 2px;"></div> <span>Revisión periodica</span></div>
+                                    <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #ffa94d; border-radius: 2px;"></div> <span>Siniestro</span></div>
+                                    <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #4ecdc4; border-radius: 2px;"></div> <span>Reparación moto</span></div>
+                                    <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #95e1d3; border-radius: 2px;"></div> <span>Revisión ITV</span></div>
+                                    <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #a29bfe; border-radius: 2px;"></div> <span>1ª Visita</span></div>
+                                    <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #ffd93d; border-radius: 2px;"></div> <span>Mantenimiento</span></div>
+                                </div>
+                            </div>
+                            
+                            <!-- NAVEGACIÓN SEMANA -->
+                            <div id="navegacionSemana" style="display: none; margin-bottom: 16px; text-align: center;">
+                                <button class="btn" onclick="semanaAnteriorCitas()" style="background: #333333; color: white; padding: 6px 12px; font-size: 12px;">← Semana Anterior</button>
+                                <button class="btn" onclick="resetSemana()" style="background: #f0f0f0; color: #333; padding: 6px 12px; font-size: 12px; margin: 0 8px;">Hoy</button>
+                                <button class="btn" onclick="semanaSiguienteCitas()" style="background: #333333; color: white; padding: 6px 12px; font-size: 12px;">Semana Siguiente →</button>
+                            </div>
+                            
+                            <!-- CALENDARIO -->
+                            <div id="calendarioInterno" style="font-size: 13px;"></div>
                         </div>
                     </div>
                 </div>
