@@ -1271,30 +1271,6 @@
                     <div>
                         <div id="citasFormContainer" class="citas-form"></div>
                         
-                        <!-- FILTROS ARRIBA -->
-                        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5; margin-top: 16px;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                <div>
-                                    <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Fecha</label>
-                                    <div style="position: relative;">
-                                        <input type="text" id="filtroFecha" class="form-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('filtroFecha')" readonly style="cursor: pointer; background: white;">
-                                        <div id="calendarioMini_filtroFecha" class="calendario-mini" style="display: none;"></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Tipo de Servicio</label>
-                                    <select id="filtroServicio" class="form-select" onchange="filtrarCitas()">
-                                        <option value="">Todos los servicios</option>
-                                        <option value="Revisión periodica">Revisión periodica</option>
-                                        <option value="Siniestro">Siniestro</option>
-                                        <option value="Reparación moto">Reparación moto</option>
-                                        <option value="Revisión ITV">Revisión ITV</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button class="btn" onclick="limpiarFiltros()" style="width: 100%; margin-top: 12px; background: #fff; border: 1px solid #ddd;">Limpiar filtros</button>
-                        </div>
-                        
                         <!-- LISTA DE CITAS -->
                         <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5; margin-top: 16px; max-height: 400px; overflow-y: auto;">
                             <div style="font-weight: 600; margin-bottom: 12px;">📅 Citas Agendadas</div>
@@ -1305,11 +1281,34 @@
                         <div class="calendar-container">
                             <div class="calendar-info"></div>
                             <div style="padding: 16px; background: white; border-radius: 6px; border: 1px solid #e5e5e5;">
+                                <!-- FILTROS ARRIBA -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                                    <div>
+                                        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Fecha</label>
+                                        <div style="position: relative;">
+                                            <input type="text" id="filtroFecha" class="form-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('filtroFecha')" readonly style="cursor: pointer; background: white;">
+                                            <div id="calendarioMini_filtroFecha" class="calendario-mini" style="display: none;"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 12px;">Tipo de Servicio</label>
+                                        <select id="filtroServicio" class="form-select" onchange="filtrarCitas()">
+                                            <option value="">Todos los servicios</option>
+                                            <option value="Revisión periodica">Revisión periodica</option>
+                                            <option value="Siniestro">Siniestro</option>
+                                            <option value="Reparación moto">Reparación moto</option>
+                                            <option value="Revisión ITV">Revisión ITV</option>
+                                            <option value="1ª Visita">1ª Visita</option>
+                                            <option value="Mantenimiento">Mantenimiento</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn" onclick="limpiarFiltros()" style="width: 100%; margin-bottom: 16px; background: #fff; border: 1px solid #ddd;">Limpiar filtros</button>
+
                                 <!-- BOTONES DE VISTA -->
                                 <div style="display: flex; gap: 8px; margin-bottom: 16px;">
                                     <button class="btn" onclick="cambiarVistaCalendario('dia')" id="btnDia" style="background: #f0f0f0; color: #333;">📆 Hoy</button>
                                     <button class="btn" onclick="cambiarVistaCalendario('semana')" id="btnSemana" style="background: #333333; color: white;">📅 Semana</button>
-                                    <button class="btn" onclick="cambiarVistaCalendario('mes')" id="btnMes" style="background: #f0f0f0; color: #333;">📊 Mes</button>
                                 </div>
 
                                 <!-- LEYENDA -->
@@ -3268,10 +3267,12 @@
 
         // COLORES POR SERVICIO
         const coloresServicio = {
-            'Revisión periodica': '#ff6b6b',
-            'Siniestro': '#ffa94d',
-            'Reparación moto': '#4ecdc4',
-            'Revisión ITV': '#95e1d3'
+            'Revisión periodica': '#ff6b6b',    // Rojo
+            'Siniestro': '#ffa94d',              // Naranja
+            'Reparación moto': '#4ecdc4',        // Verde/Turquesa
+            'Revisión ITV': '#95e1d3',           // Celeste/Azul claro
+            '1ª Visita': '#a29bfe',              // Morado/Púrpura
+            'Mantenimiento': '#ffd93d'           // Amarillo/Dorado
         };
 
         // CALENDARIO MINI
@@ -3383,7 +3384,7 @@
         }
 
         function obtenerColorServicio(servicio) {
-            return coloresServicio[servicio] || '#333333';
+            return coloresServicio[servicio] || '#b0b0b0';  // Gris claro en lugar de negro
         }
 
         function obtenerCitasFiltradas() {
@@ -3510,7 +3511,7 @@
                 const nombreDia = d.toLocaleDateString('es-ES', {weekday: 'short'}).toUpperCase();
                 const numDia = d.getDate();
                 const esHoy = d.toDateString() === hoy.toDateString();
-                html += `<div style="background: ${esHoy ? '#333333' : 'white'}; color: ${esHoy ? 'white' : 'inherit'}; padding: 12px; font-weight: 600; font-size: 12px; text-align: center; position: sticky; top: 0; z-index: 5;">${nombreDia}<br>${numDia}</div>`;
+                html += `<div style="background: ${esHoy ? '#2196F3' : 'white'}; color: ${esHoy ? 'white' : 'inherit'}; padding: 12px; font-weight: 600; font-size: 12px; text-align: center; position: sticky; top: 0; z-index: 5;">${nombreDia}<br>${numDia}</div>`;
             });
             
             horas.forEach(hora => {
