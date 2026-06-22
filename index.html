@@ -3054,21 +3054,7 @@
 
         // CITAS
         function renderCitasSelector() {
-            const form = document.getElementById('citasFormContainer');
-            
-            form.innerHTML = `
-                <div style="margin-top: 16px;">
-                <div class="citas-selector-buttons">
-                    <button class="btn-toggle" id="btnNuevo" onclick="seleccionarTipoCita('nuevo')">
-                        ➕ Cliente Nuevo
-                    </button>
-                    <button class="btn-toggle" id="btnExistente" onclick="seleccionarTipoCita('existente')">
-                        👥 Cliente Existente
-                    </button>
-                </div>
-                <div id="formularioCita"></div>
-            `;
-
+            // Solo renderiza la lista de citas, no intenta modificar formularios
             renderCitasList();
         }
 
