@@ -1145,7 +1145,23 @@
 </head>
 <body>
     <!-- LOGIN SCREEN -->
-    <div class="app-container" id="appContainer">
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <div class="login-logo">VIASCOOTER</div>
+            <div class="login-subtitle">Grupo VÍA Motos - CRM Profesional</div>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <input type="text" id="loginUser" placeholder="Usuario" required autofocus>
+                <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                <button type="submit" class="login-btn">Acceder</button>
+                <div id="loginError" class="login-error"></div>
+            </form>
+            <div style="text-align: center; margin-top: 24px; font-size: 12px; color: #999;">
+                Sistema de Gestión Integral
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container hidden" id="appContainer">
         <div class="header">
             <h1>VIASCOOTER GRUPO VÍA</h1>
             <button onclick="logout()" style="background: #1a1a1a; border: 1px solid #1a1a1a; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; min-height: 40px; transition: all 0.2s ease;" onmouseover="this.style.background='#000000'" onmouseout="this.style.background='#1a1a1a'">Salir</button>
@@ -1281,8 +1297,8 @@
                             
                             <!-- BOTONES VISTA -->
                             <div style="display: flex; gap: 8px;">
-                                <button class="btn" onclick="filtrarCitasPorVista('dia')" id="btnDiaFiltro" style="flex: 1; background: #f0f0f0; color: #333;">📆 Hoy</button>
-                                <button class="btn" onclick="filtrarCitasPorVista('semana')" id="btnSemanaFiltro" style="flex: 1; background: #333333; color: white;">📅 Semana</button>
+                                <button class="btn" onclick="cambiarVistaCalendario('dia')" id="btnDia" style="flex: 1; background: #f0f0f0; color: #333;">📆 Hoy</button>
+                                <button class="btn" onclick="cambiarVistaCalendario('semana')" id="btnSemana" style="flex: 1; background: #333333; color: white;">📅 Semana</button>
                             </div>
                         </div>
                         
@@ -1295,9 +1311,12 @@
                     
                     <!-- COLUMNA DERECHA -->
                     <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
-                        <!-- BLOQUE 1: BOTÓN CREAR NUEVA CITA -->
+                        <!-- BLOQUE 1: BOTONES CREAR CITA -->
                         <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5;">
-                            <button class="btn" onclick="abrirCrearNuevaCita()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; width: 100%;">📅 Crear Nueva Cita</button>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <button class="btn" onclick="newCliente()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">+ Cliente Nuevo</button>
+                                <button class="btn" onclick="abrirFormularioClienteExistente()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">👤 Cliente Existente</button>
+                            </div>
                         </div>
                         
                         <!-- BLOQUE 2: CALENDARIO -->
@@ -1507,25 +1526,137 @@
         // 🔐 SEGURIDAD: RATE LIMITING
         // ============================================
 
-        // VARIABLES DE BLOQUEO DESACTIVADAS
-        // let intentosFallidos = 0;
-        // let bloqueadoHasta = null;
+        let intentosFallidos = 0;
+        let bloqueadoHasta = null;
 
-        // FUNCIÓN DE BLOQUEO DESACTIVADA
-        // async function verificarBloqueo() {
-        //     if (bloqueadoHasta && new Date() < bloqueadoHasta) {
-        //         const minutos = Math.ceil((bloqueadoHasta - new Date()) / 60000);
-        //         throw new Error(`Bloqueado ${minutos} minutos por múltiples intentos fallidos`);
-        //     }
-        //     if (bloqueadoHasta && new Date() >= bloqueadoHasta) {
-        //         bloqueadoHasta = null;
-        //         intentosFallidos = 0;
-        //     }
-        // }
+        async function verificarBloqueo() {
+            if (bloqueadoHasta && new Date() < bloqueadoHasta) {
+                const minutos = Math.ceil((bloqueadoHasta - new Date()) / 60000);
+                throw new Error(`Bloqueado ${minutos} minutos por múltiples intentos fallidos`);
+            }
+            if (bloqueadoHasta && new Date() >= bloqueadoHasta) {
+                bloqueadoHasta = null;
+                intentosFallidos = 0;
+            }
+        }
 
-        // LOGIN DESACTIVADO - ACCESO DIRECTO
+        // LOGIN CON SEGURIDAD
+        async function handleLogin(event) {
+            event.preventDefault();
+            const user = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            try {
+                // 🔐 Verificar bloqueo por rate limiting
+                await verificarBloqueo();
+
+                console.log('🔐 Intento de login');
+
+                // ✅ Validar credenciales (en producción usar bcrypt en servidor)
+                const credValidas = user === 'GRUPO VIA' && password === 'VIA12';
+
+                if (!credValidas) {
+                    intentosFallidos++;
+                    console.warn(`⚠️ Login fallido (intento ${intentosFallidos}/5)`);
+                    
+                    if (intentosFallidos >= 5) {
+                        bloqueadoHasta = new Date(Date.now() + 15 * 60 * 1000);
+                        errorDiv.textContent = '❌ Bloqueado 15 minutos por múltiples intentos fallidos';
+                    } else {
+                        errorDiv.textContent = `❌ Credenciales incorrectas (${intentosFallidos}/5)`;
+                    }
+                    
+                    errorDiv.classList.add('show');
+                    setTimeout(() => errorDiv.classList.remove('show'), 5000);
+                    return;
+                }
+
+                // ✅ Login exitoso
+                intentosFallidos = 0;
+                currentUser = { name: user, loginTime: new Date().toISOString() };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // 🔐 Crear sesión segura
+                sessionStorage.setItem('_st', 'TOKEN_' + Math.random().toString(36).substring(2, 15));
+                sessionStorage.setItem('_se', new Date(Date.now() + 60 * 60 * 1000).toISOString());
+
+                // 🔐 Registrar login en auditoría
+                await registrarAuditoria('sesiones', 'LOGIN', null, null, { usuario: user });
+
+                console.log('✅ Login exitoso - Sesión iniciada');
+                
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContainer').classList.remove('hidden');
+                errorDiv.classList.remove('show');
+                
+                renderClientes();
+                syncFromSupabase();
+
+                // 🔐 Auto-logout después de 60 minutos
+                setTimeout(() => {
+                    console.warn('⏱️ Sesión expirada por timeout');
+                    logout();
+                }, 60 * 60 * 1000);
+
+            } catch (error) {
+                console.error('❌ Error al login:', error.message);
+                errorDiv.textContent = error.message || 'Error al iniciar sesión';
+                errorDiv.classList.add('show');
+                setTimeout(() => errorDiv.classList.remove('show'), 5000);
+            }
+        }
+
+        // CHECK LOGIN CON VALIDACIÓN DE SESIÓN
+        function checkLogin() {
+            const user = localStorage.getItem('currentUser');
+            const sessionToken = sessionStorage.getItem('_st');
+            const sessionExpiry = sessionStorage.getItem('_se');
+
+            if (user && sessionToken && sessionExpiry) {
+                // Verificar que la sesión no haya expirado
+                if (new Date(sessionExpiry) > new Date()) {
+                    currentUser = JSON.parse(user);
+                    console.log('✅ Sesión válida restaurada');
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appContainer').classList.remove('hidden');
+                    
+                    // Renovar timeout
+                    setTimeout(() => {
+                        console.warn('⏱️ Sesión expirada por timeout');
+                        logout();
+                    }, 60 * 60 * 1000);
+                } else {
+                    console.warn('❌ Sesión expirada');
+                    logout();
+                }
+            } else {
+                document.getElementById('appContainer').classList.add('hidden');
+            }
+        }
+
+        // LOGOUT SEGURO
         async function logout() {
-            location.reload();
+            try {
+                // 🔐 Registrar logout en auditoría
+                if (currentUser) {
+                    await registrarAuditoria('sesiones', 'LOGOUT', null, null, { usuario: currentUser.name });
+                }
+                
+                // 🔐 Limpiar datos de sesión
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                sessionStorage.clear();
+                
+                // 🔐 Limpiar clave de encriptación
+                console.log('🔐 Sesión cerrada - Datos de sesión eliminados');
+                
+                // Volver a login
+                location.reload();
+            } catch (error) {
+                console.error('Error al logout:', error);
+                location.reload();
+            }
         }
 
         // SYNC STATUS
@@ -1580,7 +1711,7 @@
         }
 
         // SYNC A SUPABASE (auto-sync con encriptación y auditoría)
-        async function // syncToSupabase(tabla, datos) {
+        async function syncToSupabase(tabla, datos) {
             console.log(`📤 INTENTANDO SINCRONIZAR ${tabla}:`, datos);
             
             if (!navigator.onLine) {
@@ -1831,78 +1962,6 @@
             }).join('');
         }
 
-        function abrirFormularioCrearCita() {
-            const client = clients.find(c => c.id === clienteSeleccionadoId);
-            
-            document.getElementById('modalBody').innerHTML = `
-                <div class="section">
-                    <div class="section-title">✓ Cliente Seleccionado</div>
-                    <div style="background: #e8f5e9; padding: 12px; border-radius: 4px; color: #2e7d32; margin-bottom: 16px;">
-                        👤 ${client.nombre} ${client.apellido}
-                        <br/><small>📞 ${client.telefono} | 🏍️ ${client.moto && client.moto.matricula ? client.moto.matricula : 'N/A'}</small>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">Datos de la Cita</div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label">Mecánico</label>
-                            <select id="rapMecanicoModal2" class="form-select">
-                                <option value="">Selecciona mecánico</option>
-                                <option value="Miguel Ángel">Miguel Ángel</option>
-                                <option value="Roberto">Roberto</option>
-                                <option value="Carlos Martínez">Carlos Martínez</option>
-                                <option value="Juan López">Juan López</option>
-                                <option value="Pedro González">Pedro González</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label required">Servicio Solicitado</label>
-                            <select id="rapServicioModal2" class="form-select">
-                                <option value="">Selecciona un servicio</option>
-                                <option value="Revisión periodica">Revisión periodica</option>
-                                <option value="Siniestro">Siniestro</option>
-                                <option value="Reparación moto">Reparación moto</option>
-                                <option value="Revisión ITV">Revisión ITV</option>
-                                <option value="1ª Visita">1ª Visita</option>
-                                <option value="Mantenimiento">Mantenimiento</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label required">Fecha</label>
-                            <input type="date" id="rapFechaModal2" class="form-input">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label required">Desde Hora</label>
-                            <input type="time" id="rapDesdeHoraModal2" class="form-input">
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label required">Hasta Hora</label>
-                            <input type="time" id="rapHastaHoraModal2" class="form-input">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label">Nota (se guardará en la ficha del cliente)</label>
-                            <textarea id="rapNotasModal2" class="form-textarea" placeholder="Notas adicionales..."></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="crearCitaFinal()">✓ Crear Cita</button>
-                        <button class="btn" onclick="closeModal()">Cancelar</button>
-                    </div>
-                </div>
-            `;
-        }
-
         function abrirFormularioClienteExistente() {
             document.getElementById('modalBody').innerHTML = `
                 <div class="section">
@@ -1923,18 +1982,7 @@
                     <div class="section-title">Crear Cita Rápida</div>
                     <div class="form-group">
                         <div class="form-field">
-                            <label class="form-label">Mecánico</label>
-                            <select id="rapMecanicoModal" class="form-select">
-                                <option value="">Selecciona mecánico</option>
-                                <option value="Miguel Ángel">Miguel Ángel</option>
-                                <option value="Roberto">Roberto</option>
-                                <option value="Carlos Martínez">Carlos Martínez</option>
-                                <option value="Juan López">Juan López</option>
-                                <option value="Pedro González">Pedro González</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label required">Servicio Solicitado</label>
+                            <label class="form-label required">Servicio</label>
                             <select id="rapServicioModal" class="form-select">
                                 <option value="">Selecciona un servicio</option>
                                 <option value="Revisión periodica">Revisión periodica</option>
@@ -1948,23 +1996,13 @@
                     </div>
                     <div class="form-group">
                         <div class="form-field">
-                            <label class="form-label required">Fecha</label>
-                            <input type="date" id="rapFechaModal" class="form-input">
+                            <label class="form-label required">Fecha y Hora</label>
+                            <input type="datetime-local" id="rapDateTimeModal" class="form-input">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="form-field">
-                            <label class="form-label required">Desde Hora</label>
-                            <input type="time" id="rapDesdeHoraModal" class="form-input">
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label required">Hasta Hora</label>
-                            <input type="time" id="rapHastaHoraModal" class="form-input">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label">Nota (se guardará en la ficha del cliente)</label>
+                            <label class="form-label">Notas</label>
                             <textarea id="rapNotasModal" class="form-textarea" placeholder="Notas adicionales..."></textarea>
                         </div>
                     </div>
@@ -2032,119 +2070,27 @@
             document.getElementById('searchSuggestionsModal').classList.remove('active');
             document.getElementById('searchSuggestionsModal').innerHTML = '';
             
-            // Mostrar formulario de cita directamente
-            setTimeout(() => abrirFormularioCrearCita(), 300);
+            const seleccionado = document.getElementById('clienteSeleccionadoModal');
+            seleccionado.style.display = 'block';
+            seleccionado.innerHTML = `✓ ${nombre} seleccionado<br/><small>📞 ${telefono} | 🏍️ ${matricula}</small>`;
         }
 
-        function crearCitaFinal() {
-            if (!clienteSeleccionadoId) {
-                alert('No hay cliente seleccionado');
-                return;
-            }
-
-            const servicio = document.getElementById('rapServicioModal2').value;
-            const fecha = document.getElementById('rapFechaModal2').value;
-            const desdeHora = document.getElementById('rapDesdeHoraModal2').value;
-            const hastaHora = document.getElementById('rapHastaHoraModal2').value;
-            const mecanico = document.getElementById('rapMecanicoModal2').value;
-            const notas = document.getElementById('rapNotasModal2').value;
-
-            if (!servicio || !fecha || !desdeHora || !hastaHora) {
-                alert('Servicio, Fecha, Desde Hora y Hasta Hora son obligatorios');
-                return;
-            }
-
-            if (hastaHora <= desdeHora) {
-                alert('La hora de fin debe ser posterior a la hora de inicio');
-                return;
-            }
-
-            // Crear datetime
-            const datetime = fecha + 'T' + desdeHora;
-
-            const client = clients.find(c => c.id === clienteSeleccionadoId);
-            
-            // Crear cita
-            citas.push({
-                id: Math.max(...citas.map(c => c.id || 0), 0) + 1,
-                clienteId: client.id,
-                cliente: client.nombre + ' ' + client.apellido,
-                servicio: servicio,
-                datetime: datetime,
-                descripcion: notas,
-                estado: 'pendiente',
-                mecanico: mecanico,
-                horaFin: hastaHora,
-                seguimientos: []
-            });
-
-            // Crear nota en la ficha del cliente
-            if (notas.trim()) {
-                const fechaHoy = new Date().toISOString().split('T')[0];
-                const notaObj = {
-                    id: Math.max(...(client.notas ? client.notas.map(n => n.id || 0) : [0]), 0) + 1,
-                    mecanico: mecanico || 'Sin asignar',
-                    nota: notas,
-                    fechaVencimiento: fecha,
-                    fechaCreacion: fechaHoy
-                };
-                
-                if (!client.notas) client.notas = [];
-                client.notas.push(notaObj);
-            }
-
-            // Crear orden automáticamente
-            const nuevoIdOrden = Math.max(...orders.map(o => o.id || 0), 0) + 1;
-            const nuevoNumeroOrden = 'ORD-' + String(nuevoIdOrden).padStart(3, '0');
-            orders.push({
-                id: nuevoIdOrden,
-                numero: nuevoNumeroOrden,
-                clienteId: client.id,
-                servicio: servicio,
-                estado: 'pendiente',
-                descripcion: notas,
-                importe: 0
-            });
-
-            showSaveStatus();
-            closeModal();
-            renderCitasList();
-            renderCalendarioInterno();
-            renderOrdenes();
-            clienteSeleccionadoId = null;
-        }
-
-        // FUNCIÓN ANTIGUA - AHORA SE USA crearCitaFinal()
-        // function crearCitaClienteExistente() {
+        function crearCitaClienteExistente() {
             if (!clienteSeleccionadoId) {
                 alert('Debes seleccionar un cliente');
                 return;
             }
 
             const servicio = document.getElementById('rapServicioModal').value;
-            const fecha = document.getElementById('rapFechaModal').value;
-            const desdeHora = document.getElementById('rapDesdeHoraModal').value;
-            const hastaHora = document.getElementById('rapHastaHoraModal').value;
-            const mecanico = document.getElementById('rapMecanicoModal').value;
+            const datetime = document.getElementById('rapDateTimeModal').value;
             const notas = document.getElementById('rapNotasModal').value;
 
-            if (!servicio || !fecha || !desdeHora || !hastaHora) {
-                alert('Servicio, Fecha, Desde Hora y Hasta Hora son obligatorios');
+            if (!servicio || !datetime) {
+                alert('Servicio y Fecha/Hora son obligatorios');
                 return;
             }
-
-            // Validar que hastaHora > desdeHora
-            if (hastaHora <= desdeHora) {
-                alert('La hora de fin debe ser posterior a la hora de inicio');
-                return;
-            }
-
-            // Crear datetime combinando fecha y desdeHora
-            const datetime = fecha + 'T' + desdeHora;
 
             const client = clients.find(c => c.id === clienteSeleccionadoId);
-            
-            // Crear cita
             citas.push({
                 id: Math.max(...citas.map(c => c.id || 0), 0) + 1,
                 clienteId: client.id,
@@ -2153,25 +2099,8 @@
                 datetime: datetime,
                 descripcion: notas,
                 estado: 'pendiente',
-                mecanico: mecanico,
-                horaFin: hastaHora,
                 seguimientos: []
             });
-
-            // Crear nota en la ficha del cliente
-            if (notas.trim()) {
-                const fechaHoy = new Date().toISOString().split('T')[0];
-                const notaObj = {
-                    id: Math.max(...(client.notas ? client.notas.map(n => n.id || 0) : [0]), 0) + 1,
-                    mecanico: mecanico || 'Sin asignar',
-                    nota: notas,
-                    fechaVencimiento: fecha,
-                    fechaCreacion: fechaHoy
-                };
-                
-                if (!client.notas) client.notas = [];
-                client.notas.push(notaObj);
-            }
 
             // Crear orden automáticamente en Pendiente
             const nuevoIdOrden = Math.max(...orders.map(o => o.id || 0), 0) + 1;
@@ -2186,39 +2115,15 @@
                 importe: 0
             });
 
-            // Sincronizar a Supabase (DESACTIVADO - ERROR CON TELÉFONO)
-            // // syncToSupabase('clientes', client);
-            // syncToSupabase('ordenes', orders[orders.length - 1]);
-            // syncToSupabase('citas', citas[citas.length - 1]);
+            // Sincronizar a Supabase
+            syncToSupabase('ordenes', orders[orders.length - 1]);
+            syncToSupabase('citas', citas[citas.length - 1]);
 
             showSaveStatus();
             closeModal();
             renderCitasList();
-            renderCalendarioInterno();
             renderOrdenes();
             clienteSeleccionadoId = null;
-        }
-
-        function abrirCrearNuevaCita() {
-            document.getElementById('modalBody').innerHTML = `
-                <div class="section">
-                    <div class="section-title">¿Qué tipo de cliente?</div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <button class="btn" onclick="flujoClienteExistente()" style="background: #4CAF50; color: white; padding: 14px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">👤 Cliente Existente</button>
-                        <button class="btn" onclick="flujoClienteNuevo()" style="background: #2196F3; color: white; padding: 14px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">➕ Cliente Nuevo</button>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('modalOverlay').classList.add('active');
-        }
-
-        function flujoClienteExistente() {
-            abrirFormularioClienteExistente();
-        }
-
-        function flujoClienteNuevo() {
-            newCliente();
         }
 
         function newCliente() {
@@ -2260,30 +2165,12 @@
                     <div class="section-title">🏍️ Características Moto</div>
                     <div class="form-group">
                         <div class="form-field">
-                            <label class="form-label">Marca</label>
-                            <select class="form-select" id="newMarca">
-                                <option value="">Selecciona marca</option>
-                                <option value="Zontes">Zontes</option>
-                                <option value="Yamaha">Yamaha</option>
-                                <option value="Honda">Honda</option>
-                                <option value="Suzuki">Suzuki</option>
-                                <option value="Ducati">Ducati</option>
-                                <option value="KTM">KTM</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
                             <label class="form-label">Modelo</label>
-                            <input type="text" class="form-input" id="newModelo" placeholder="Modelo">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-field">
-                            <label class="form-label">Cilindrada</label>
-                            <input type="text" class="form-input" id="newCilindrada" placeholder="ej: 125cc, 600cc">
+                            <input type="text" class="form-input" id="newModelo">
                         </div>
                         <div class="form-field">
                             <label class="form-label">Matrícula</label>
-                            <input type="text" class="form-input" id="newMatricula" placeholder="Matrícula">
+                            <input type="text" class="form-input" id="newMatricula">
                         </div>
                     </div>
                 </div>
@@ -2326,15 +2213,12 @@
                 fechaEntrega: '',
                 recambios: [],
                 moto: {
-                    marca: document.getElementById('newMarca').value,
                     modelo: document.getElementById('newModelo').value,
-                    cilindrada: document.getElementById('newCilindrada').value,
                     matricula: document.getElementById('newMatricula').value,
                     bastidor: '',
                     kilometraje: 0
                 },
-                acciones: [],
-                notas: []
+                acciones: []
             };
 
             clients.push(nuevoCliente);
@@ -2342,14 +2226,12 @@
             // 🔐 Registrar auditoría
             registrarAuditoria('clientes', 'INSERT', id, null, { nombre, apellido, email });
             
-            // 📤 Sincronizar a Supabase (DESACTIVADO TEMPORALMENTE)
-            // // syncToSupabase('clientes', nuevoCliente);
+            // 📤 Sincronizar a Supabase
+            syncToSupabase('clientes', nuevoCliente);
 
             showSaveStatus();
-            
-            // Guardar ID del cliente y mostrar formulario de cita
-            clienteSeleccionadoId = id;
-            setTimeout(() => abrirFormularioCrearCita(), 500);
+            closeModal();
+            renderClientes();
         }
 
         function getEstadoFunel(clientId) {
@@ -3023,8 +2905,8 @@
             });
 
             // Sincronizar orden a Supabase
-            // syncToSupabase('ordenes', orders[orders.length - 1]);
-            // syncToSupabase('citas', citas[citas.length - 1]);
+            syncToSupabase('ordenes', orders[orders.length - 1]);
+            syncToSupabase('citas', citas[citas.length - 1]);
 
             showSaveStatus();
             closeCitaRapida();
@@ -3479,10 +3361,9 @@
             const newCita = citas.find(c => c.clienteId === newClientId);
             const newOrden = orders.find(o => o.clienteId === newClientId);
             
-            // Sincronizar a Supabase (DESACTIVADO - ERROR CON TELÉFONO)
-            // // syncToSupabase('clientes', newClient);
-            // // syncToSupabase('citas', newCita);
-            // // syncToSupabase('ordenes', newOrden);
+            syncToSupabase('clientes', newClient);
+            syncToSupabase('citas', newCita);
+            syncToSupabase('ordenes', newOrden);
             
             renderCitasSelector();
         }
@@ -3538,8 +3419,8 @@
             const newCita = citas.find(c => c.clienteId === clienteSeleccionadoId && c.id === Math.max(...citas.map(c => c.id)));
             const newOrden = orders.find(o => o.clienteId === clienteSeleccionadoId && o.id === Math.max(...orders.map(o => o.id)));
             
-            // syncToSupabase('citas', newCita);
-            // syncToSupabase('ordenes', newOrden);
+            syncToSupabase('citas', newCita);
+            syncToSupabase('ordenes', newOrden);
             
             renderCitasSelector();
         }
@@ -3686,18 +3567,6 @@
         }
 
 
-        function filtrarCitasPorVista(vista) {
-            // Solo filtra el listado de citas, NO el calendario
-            let filtroVista = vista;
-            renderCitasList();
-            
-            // Actualizar estilos de botones
-            document.getElementById('btnDiaFiltro').style.background = vista === 'dia' ? '#333333' : '#f0f0f0';
-            document.getElementById('btnDiaFiltro').style.color = vista === 'dia' ? 'white' : '#333';
-            document.getElementById('btnSemanaFiltro').style.background = vista === 'semana' ? '#333333' : '#f0f0f0';
-            document.getElementById('btnSemanaFiltro').style.color = vista === 'semana' ? 'white' : '#333';
-        }
-
         function filtrarCitas() {
             renderCitasList();
             renderCalendarioInterno();
@@ -3809,24 +3678,10 @@
                 html += `<div style="background: white; padding: 8px; font-size: 11px; font-weight: 500; text-align: center; position: sticky; left: 0; z-index: 4; background: #f9f9f9;">${hora}:00</div>`;
                 diasSemana.forEach(d => {
                     const fechaStr = d.toISOString().split('T')[0];
-                    // Filtrar citas que ocurren en esta hora o después
-                    const citasEnEstaHora = citasFiltradas.filter(c => {
-                        const fechaCita = c.datetime.split('T')[0];
-                        if (fechaCita !== fechaStr) return false;
-                        const horaCita = new Date(c.datetime).getHours();
-                        // Mostrar si comienza en esta hora o si se superpone
-                        const horaFin = c.horaFin ? parseInt(c.horaFin.split(':')[0]) : horaCita + 1;
-                        return horaCita <= hora && hora < horaFin;
-                    });
-                    
-                    const contenido = citasEnEstaHora.length > 0 ? citasEnEstaHora.map(c => {
+                    const citasHora = citasFiltradas.filter(c => c.datetime.startsWith(fechaStr) && new Date(c.datetime).getHours() === hora);
+                    const contenido = citasHora.length > 0 ? citasHora.map(c => {
                         const color = obtenerColorServicio(c.servicio);
-                        const horaCita = new Date(c.datetime).getHours();
-                        const minCita = new Date(c.datetime).getMinutes();
-                        const horaFin = c.horaFin ? c.horaFin : `${horaCita + 1}:00`;
-                        const duracion = c.horaFin ? `${new Date(c.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${horaFin}` : new Date(c.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                        
-                        return `<div style="background: ${color}; color: white; padding: 4px; font-size: 10px; border-radius: 3px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" onclick="abrirDetallesCita(${c.id})" title="${c.servicio} (${duracion})">${duracion} ${c.servicio}</div>`;
+                        return `<div style="background: ${color}; color: white; padding: 4px; font-size: 10px; border-radius: 3px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" onclick="abrirDetallesCita(${c.id})" title="${c.servicio}">${new Date(c.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ${c.servicio}</div>`;
                     }).join('') : '';
                     html += `<div style="background: white; padding: 4px; min-height: 60px; border: 1px solid #eee;">${contenido}</div>`;
                 });
@@ -4634,7 +4489,7 @@
             if (seg) {
                 seg.completado = true;
                 // Sincronizar con Supabase
-                // syncToSupabase('seguimientos', seg);
+                syncToSupabase('seguimientos', seg);
                 renderSeguimientosGlobales();
             }
         }
@@ -4668,7 +4523,7 @@
             };
 
             notas.push(nuevaNota);
-            // syncToSupabase('notas', nuevaNota);
+            syncToSupabase('notas', nuevaNota);
 
             document.getElementById('notaMecanico').value = '';
             document.getElementById('notaTexto').value = '';
@@ -4723,7 +4578,7 @@
             if (nota) {
                 nota.mecanico = mecanico;
                 nota.nota = nota_text;
-                // syncToSupabase('notas', nota);
+                syncToSupabase('notas', nota);
                 
                 document.getElementById('notaMecanico').value = '';
                 document.getElementById('notaTexto').value = '';
@@ -4807,7 +4662,7 @@
             };
 
             seguimientos.push(nuevoSeguimiento);
-            // syncToSupabase('seguimientos', nuevoSeguimiento);
+            syncToSupabase('seguimientos', nuevoSeguimiento);
 
             document.getElementById('seguimientoMecanico').value = '';
             document.getElementById('seguimientoDescripcionTarea').value = '';
@@ -4883,7 +4738,7 @@
                 tarea.estadoMoto = '';
                 tarea.fechaSeguimiento = fechaSeguimiento;
                 tarea.hora = hora;
-                // syncToSupabase('seguimientos', tarea);
+                syncToSupabase('seguimientos', tarea);
 
                 document.getElementById('seguimientoMecanico').value = '';
                 document.getElementById('seguimientoDescripcionTarea').value = '';
@@ -5009,15 +4864,13 @@
             const seg = seguimientos.find(s => s.id === seguimientoId);
             if (seg) {
                 seg.completado = true;
-                // syncToSupabase('seguimientos', seg);
+                syncToSupabase('seguimientos', seg);
                 renderCalendario();
             }
         }
 
-        // INIT - ACCESO DIRECTO SIN LOGIN
-        currentUser = { name: 'GRUPO VÍA', loginTime: new Date().toISOString() };
-        renderClientes();
-        switchTab('citas');
+        // INIT
+        checkLogin();
     </script>
 </body>
 </html>
