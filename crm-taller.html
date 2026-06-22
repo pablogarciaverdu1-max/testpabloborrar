@@ -98,7 +98,7 @@ tr.clickable:hover{background:var(--bg3)}
 .cd-body{display:flex;flex:1;overflow:hidden}
 .cd-left{width:240px;min-width:240px;border-right:1px solid var(--border);padding:24px;overflow-y:auto}
 .cd-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.avatar{width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;margin:0 auto 14px}
+.avatar{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin:0 auto 14px;letter-spacing:-.01em;position:relative;border:2px solid rgba(255,255,255,.1);box-shadow:0 0 20px rgba(0,0,0,.5)}
 .cd-info{font-size:13px;line-height:1.9;color:var(--txt2)}
 .cd-info b{color:var(--txt);display:block;font-size:12px}
 .quick-stats{display:flex;gap:10px;margin:16px 0}
@@ -687,8 +687,12 @@ function renderClienteModal(){
   document.getElementById('clienteModalTitle').textContent=cliFull(c);
   const ms=DB.motos.byCliente(c.id);const cs=DB.citas.byCliente(c.id);
   const initials=(c.nombre[0]||'')+((c.apellidos&&c.apellidos[0])||'');
+  const avatarColors=[['#1e3a5f','#3b82f6'],['#3d1f00','#f97316'],['#1a1a3e','#6366f1'],['#14352d','#22c55e'],['#3d1a2e','#ec4899'],['#1e2d40','#06b6d4'],['#2d1f3d','#a855f7'],['#3a2010','#fb923c']];
+  const ac=avatarColors[(c.nombre.charCodeAt(0)+((c.apellidos||'').charCodeAt(0)||0))%avatarColors.length];
   document.getElementById('cdLeft').innerHTML=`
-    <div class="avatar">${esc(initials.toUpperCase())}</div>
+    <div class="avatar" style="background:linear-gradient(135deg,${ac[0]} 0%,${ac[1]}55 100%);border-color:${ac[1]}44;box-shadow:0 0 20px ${ac[1]}33">
+      <span style="text-shadow:0 1px 4px rgba(0,0,0,.5)">${esc(initials.toUpperCase())}</span>
+    </div>
     <div style="text-align:center;font-weight:700;font-size:16px;margin-bottom:14px">${esc(cliFull(c))}</div>
     <div class="cd-info"><b>Teléfono</b>${esc(c.telefono)}<b>Correo</b>${esc(c.correo)||'—'}<b>DNI</b>${esc(c.dni||'—')}<b>Alta</b>${c.fecha_creacion}</div>
     <div class="quick-stats"><div class="qs"><div class="n">${cs.length}</div><div class="l">Citas</div></div><div class="qs"><div class="n">${ms.length}</div><div class="l">Motos</div></div></div>
