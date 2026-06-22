@@ -3682,22 +3682,30 @@
             const servicios = [...new Set(orders.map(o => o.servicio))].sort();
             
             container.innerHTML = `
-                <div style="grid-column: 1 / -1; display: flex; gap: 16px; margin-bottom: 20px; align-items: center;">
-                    <label style="font-weight: 600; font-size: 14px; color: #333; white-space: nowrap;">Buscar</label>
-                    <input type="text" id="busquedaOrdenes" class="form-input" placeholder="🔍 Buscar..." 
-                           style="flex: 1; padding: 10px 12px; font-size: 13px;"
-                           value="${busqueda}"
-                           oninput="renderOrdenes()">
+                <div style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div>
+                        <label style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 6px;">🔍 Buscar</label>
+                        <input type="text" id="busquedaOrdenes" class="form-input" placeholder="Cliente, teléfono, matrícula..." 
+                               style="width: 100%; padding: 10px 12px; font-size: 13px;"
+                               value="${busqueda}"
+                               oninput="renderOrdenes()">
+                    </div>
                     
-                    <select id="filtroServicio" class="form-select" style="padding: 10px 12px; font-size: 13px; min-width: 150px;" onchange="renderOrdenes()">
-                        <option value="">📋 Todos los servicios</option>
-                        ${servicios.map(s => `<option value="${s}" ${s === servicioSeleccionado ? 'selected' : ''}>${s}</option>`).join('')}
-                    </select>
+                    <div>
+                        <label style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 6px;">📋 Servicio</label>
+                        <select id="filtroServicio" class="form-select" style="width: 100%; padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
+                            <option value="">Todos los servicios</option>
+                            ${servicios.map(s => `<option value="${s}" ${s === servicioSeleccionado ? 'selected' : ''}>${s}</option>`).join('')}
+                        </select>
+                    </div>
                     
-                    <select id="filtroMecanico" class="form-select" style="padding: 10px 12px; font-size: 13px; min-width: 150px;" onchange="renderOrdenes()">
-                        <option value="">👨‍🔧 Todos los mecánicos</option>
-                        ${mecanicos.map(m => `<option value="${m.nombre}" ${m.nombre === mecanicoSeleccionado ? 'selected' : ''}>${m.nombre}</option>`).join('')}
-                    </select>
+                    <div>
+                        <label style="font-weight: 600; font-size: 14px; color: #333; display: block; margin-bottom: 6px;">👨‍🔧 Mecánico</label>
+                        <select id="filtroMecanico" class="form-select" style="width: 100%; padding: 10px 12px; font-size: 13px;" onchange="renderOrdenes()">
+                            <option value="">Todos los mecánicos</option>
+                            ${mecanicos.map(m => `<option value="${m.nombre}" ${m.nombre === mecanicoSeleccionado ? 'selected' : ''}>${m.nombre}</option>`).join('')}
+                        </select>
+                    </div>
                 </div>
                 ${statuses.map(status => {
                     const ordersInStatus = ordenesFiltradas.filter(o => o.estado === status);
@@ -3711,20 +3719,14 @@
                                 ${ordersInStatus.map(o => {
                                     const client = clients.find(c => c.id === o.clienteId);
                                     return `
-                                        <div class="order-card" data-order-id="${o.id}" draggable="true" ondragstart="event.dataTransfer.setData('orderId', ${o.id})" onclick="openClient(${o.clienteId})" style="cursor: pointer; display: flex; justify-content: space-between;">
-                                            <div style="flex: 1;">
-                                                <div class="order-id">${o.numero}</div>
-                                                <div class="order-client">👤 ${client.nombre} ${client.apellido}</div>
-                                                <div class="order-info">📧 ${client.email}</div>
-                                                <div class="order-info">📞 ${client.telefono}</div>
-                                                <div class="order-info">🆔 ${client.dni || '-'}</div>
-                                                <div class="order-service" style="margin-top: 8px;">🔧 ${o.servicio}</div>
-                                                <div class="order-info">🏍️ ${client.moto.marca} ${client.moto.modelo}</div>
-                                                <div class="order-info">Matrícula: ${client.moto.matricula}</div>
-                                                ${o.importe > 0 ? `<div style="margin-top: 8px; font-weight: 600; color: #4caf50;">💰 €${o.importe}</div>` : ''}
-                                                ${client.recambios && client.recambios.length > 0 ? `<div style="margin-top: 4px; font-weight: 600; color: #555555;">🔧 Recambios: €${client.recambios.reduce((sum, id) => sum + (recambiosDisponibles.find(r => r.id === id)?.precio || 0), 0)}</div>` : ''}
-                                            </div>
-                                            <button class="btn" onclick="event.stopPropagation(); eliminarOrden(${o.id})" style="background: #dc3545; color: white; padding: 4px 8px; font-size: 12px; border-radius: 3px; height: fit-content; margin-top: 8px;">🗑️</button>
+                                        <div class="order-card" data-order-id="${o.id}" draggable="true" ondragstart="event.dataTransfer.setData('orderId', ${o.id})" onclick="openClient(${o.clienteId})" style="cursor: pointer;">
+                                            <div class="order-id">${o.numero}</div>
+                                            <div class="order-client">👤 ${client.nombre} ${client.apellido}</div>
+                                            <div class="order-info">📞 ${client.telefono}</div>
+                                            <div class="order-service" style="margin-top: 8px;">🔧 ${o.servicio}</div>
+                                            <div class="order-info">🏍️ ${client.moto.marca} ${client.moto.modelo}</div>
+                                            <div class="order-info">Matrícula: ${client.moto.matricula}</div>
+                                            <button class="btn" onclick="event.stopPropagation(); eliminarOrden(${o.id})" style="background: #dc3545; color: white; padding: 4px 8px; font-size: 12px; border-radius: 3px; margin-top: 8px; width: 100%;">🗑️ Eliminar</button>
                                         </div>
                                     `;
                                 }).join('')}
