@@ -7,7 +7,6 @@
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -20,148 +19,207 @@
       --accent: #3b82f6;
       --danger: #ef4444;
       --success: #22c55e;
-      --warning: #f59e0b;
-
-      --mantenimiento: #ef4444;
-      --siniestro: #f97316;
-      --itv: #3b82f6;
-      --reparacion: #22c55e;
-      --primera: #eab308;
     }
     body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* Layout */
-    .app { display: flex; flex-direction: column; height: 100vh; }
-    .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
-    .header h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-    .header h1 span { font-size: 24px; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    .app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    /* Config Panel */
-    .config-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 20px; }
-    .config-panel h2 { margin-bottom: 16px; color: var(--accent); }
-    .config-form { display: flex; flex-direction: column; gap: 12px; }
-    .config-form label { font-size: 13px; color: var(--muted); margin-bottom: 4px; display: block; }
-    .config-form input { width: 100%; padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 14px; }
+    /* Header */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .legend { display: flex; gap: 14px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 
     /* Toolbar */
-    .toolbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .week-nav { display: flex; align-items: center; gap: 8px; }
-    .week-label { font-weight: 600; font-size: 15px; min-width: 200px; text-align: center; }
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .week-nav { display: flex; align-items: center; gap: 8px; margin-left: 8px; }
+    .week-label { font-size: 14px; font-weight: 600; min-width: 220px; text-align: center; }
 
-    /* Calendar */
-    .calendar-wrapper { flex: 1; overflow: auto; padding: 0 20px 20px; }
-    .calendar { display: grid; min-width: 900px; }
-    .calendar-header { display: grid; grid-template-columns: 70px repeat(5, 1fr); border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
-    .cal-header-cell { padding: 10px 8px; text-align: center; font-size: 13px; font-weight: 600; color: var(--muted); border-right: 1px solid var(--border); }
-    .cal-header-cell.today { color: var(--accent); }
-    .cal-header-cell:first-child { border-right: 1px solid var(--border); }
-    .calendar-body { display: grid; grid-template-columns: 70px repeat(5, 1fr); }
-    .time-label { padding: 0 8px; font-size: 11px; color: var(--muted); text-align: right; display: flex; align-items: flex-start; padding-top: 4px; border-right: 1px solid var(--border); }
-    .cal-cell { border-right: 1px solid var(--border); border-bottom: 1px solid rgba(71,85,105,0.4); min-height: 38px; position: relative; cursor: pointer; transition: background 0.1s; }
-    .cal-cell:hover { background: rgba(59,130,246,0.06); }
-    .time-row { display: contents; }
-    .time-row:first-child .cal-cell { border-top: 1px solid var(--border); }
+    /* Calendar scroll area */
+    .calendar-scroll { flex: 1; overflow: auto; }
 
-    /* Appointment chips */
-    .apt-chip { position: absolute; inset: 2px; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: 600; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; gap: 1px; z-index: 2; border: none; text-align: left; }
-    .apt-chip:hover { filter: brightness(1.15); }
+    /* Calendar grid */
+    .calendar {
+      display: grid;
+      grid-template-columns: 64px repeat(5, 1fr);
+      min-width: 700px;
+    }
+
+    /* Sticky header row */
+    .cal-col-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--bg);
+      border-bottom: 2px solid var(--border);
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+    }
+    .cal-col-header:last-child { border-right: none; }
+    .cal-col-header.today { color: var(--accent); }
+    .cal-col-header .day-num { font-size: 22px; font-weight: 700; line-height: 1; display: block; margin-top: 2px; }
+
+    /* Time label */
+    .time-label {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid rgba(71,85,105,0.35);
+      padding: 0 8px 0 0;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      display: flex;
+      align-items: flex-start;
+      padding-top: 4px;
+      height: 40px;
+    }
+
+    /* Calendar cell */
+    .cal-cell {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid rgba(71,85,105,0.35);
+      height: 40px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .cal-cell:last-child { border-right: none; }
+    .cal-cell:hover { background: rgba(59,130,246,0.07); }
+    .cal-cell.today-col { background: rgba(59,130,246,0.04); }
+
+    /* Appointment chip */
+    .apt-chip {
+      position: absolute;
+      inset: 2px;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      z-index: 2;
+      border: none;
+      text-align: left;
+      color: white;
+    }
+    .apt-chip:hover { filter: brightness(1.12); }
     .apt-chip .apt-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .apt-chip .apt-service { font-weight: 400; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 10px; }
-    .apt-cancelled { opacity: 0.4; text-decoration: line-through; }
+    .apt-chip .apt-svc  { font-weight: 400; opacity: 0.88; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .apt-chip.cancelled { opacity: 0.4; }
+    .apt-chip.cancelled .apt-name { text-decoration: line-through; }
 
     /* Buttons */
-    .btn { padding: 8px 16px; border-radius: 6px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover { background: #2563eb; }
+    .btn { padding: 7px 14px; border-radius: 6px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; }
+    .btn-primary  { background: var(--accent); color: white; }
+    .btn-primary:hover  { background: #2563eb; }
     .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
     .btn-secondary:hover { background: var(--border); }
-    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger   { background: var(--danger); color: white; }
     .btn-danger:hover { background: #dc2626; }
-    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
     .btn-ghost:hover { background: var(--surface2); color: var(--text); }
     .btn-sm { padding: 5px 10px; font-size: 12px; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* Modal */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
-    .modal-lg { max-width: 700px; }
-    .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    .modal-header h2 { font-size: 18px; font-weight: 700; }
-    .modal-body { padding: 20px 24px; flex: 1; }
-    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
-    .close-btn { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 2px 6px; border-radius: 4px; line-height: 1; }
+    .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .modal-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .modal-header h2 { font-size: 17px; font-weight: 700; }
+    .modal-body   { padding: 18px 22px; flex: 1; }
+    .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+    .close-btn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 2px 6px; border-radius: 4px; line-height: 1; }
     .close-btn:hover { background: var(--surface2); color: var(--text); }
 
     /* Form */
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
-    .form-group label.required::after { content: ' *'; color: var(--danger); }
+    .form-group { margin-bottom: 13px; }
+    .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .form-group label.req::after { content: ' *'; color: var(--danger); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    input, select, textarea { width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 14px; font-family: inherit; transition: border-color 0.15s; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    input, select, textarea {
+      width: 100%; padding: 8px 11px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: 13px;
+      font-family: inherit; transition: border-color 0.15s;
+    }
     input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
     input::placeholder, textarea::placeholder { color: var(--muted); }
-    textarea { resize: vertical; min-height: 80px; }
+    textarea { resize: vertical; min-height: 72px; }
     select option { background: var(--surface2); }
 
-    /* Search results */
-    .search-results { border: 1px solid var(--border); border-radius: 6px; background: var(--surface2); max-height: 200px; overflow-y: auto; margin-top: 4px; }
-    .search-result-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
-    .search-result-item:last-child { border-bottom: none; }
-    .search-result-item:hover { background: var(--border); }
-    .search-result-item .result-name { font-weight: 600; font-size: 14px; }
-    .search-result-item .result-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-    /* Steps */
-    .step-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
-    .step { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-    .step-dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+    /* Step indicator */
+    .steps { display: flex; align-items: center; gap: 6px; margin-bottom: 18px; }
+    .step-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
     .step-dot.active { background: var(--accent); color: white; }
-    .step-dot.done { background: var(--success); color: white; }
-    .step-dot.idle { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .step-dot.done   { background: var(--success); color: white; }
+    .step-dot.idle   { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .step-label { font-size: 12px; }
+    .step-label.active { color: var(--text); }
+    .step-label.idle   { color: var(--muted); }
     .step-line { flex: 1; height: 1px; background: var(--border); }
 
     /* Choice cards */
-    .choice-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
-    .choice-card { background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; padding: 24px; cursor: pointer; text-align: center; transition: all 0.15s; }
+    .choice-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; }
+    .choice-card {
+      background: var(--surface2); border: 2px solid var(--border);
+      border-radius: 10px; padding: 22px 16px; cursor: pointer;
+      text-align: center; transition: all 0.15s;
+    }
     .choice-card:hover { border-color: var(--accent); background: rgba(59,130,246,0.08); }
-    .choice-card .cc-icon { font-size: 36px; margin-bottom: 10px; }
-    .choice-card .cc-title { font-size: 16px; font-weight: 700; }
-    .choice-card .cc-desc { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .choice-card .cc-icon { font-size: 32px; margin-bottom: 8px; }
+    .choice-card .cc-title { font-size: 15px; font-weight: 700; }
+    .choice-card .cc-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
-    /* Detail panel */
-    .detail-section { margin-bottom: 16px; }
-    .detail-section h3 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .detail-item label { font-size: 12px; color: var(--muted); }
-    .detail-item p { font-size: 14px; font-weight: 500; }
-    .service-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: white; }
+    /* Search results dropdown */
+    .search-drop { border: 1px solid var(--border); border-radius: 6px; background: var(--surface2); max-height: 190px; overflow-y: auto; margin-top: 4px; }
+    .search-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover { background: var(--border); }
+    .search-item .si-name { font-weight: 600; font-size: 13px; }
+    .search-item .si-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
     /* Alerts */
-    .alert { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 12px; }
-    .alert-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
-    .alert-success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86efac; }
+    .alert { padding: 9px 13px; border-radius: 6px; font-size: 13px; margin-bottom: 12px; }
+    .alert-err  { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+    .alert-ok   { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86efac; }
     .alert-info { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
 
-    /* Legend */
-    .legend { display: flex; gap: 12px; flex-wrap: wrap; }
-    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
-    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    /* Detail view */
+    .detail-section { margin-bottom: 14px; }
+    .detail-section h3 { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .detail-item label { font-size: 11px; color: var(--muted); }
+    .detail-item p { font-size: 14px; font-weight: 500; margin-top: 1px; }
+    .svc-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: white; }
 
-    /* Loading spinner */
-    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .empty-state { text-align: center; padding: 40px; color: var(--muted); }
-    .empty-state .es-icon { font-size: 48px; margin-bottom: 12px; }
-
-    /* Responsive tweaks */
     @media (max-width: 600px) {
-      .form-row, .form-row-3 { grid-template-columns: 1fr; }
-      .choice-cards { grid-template-columns: 1fr; }
+      .form-row, .form-row-3, .choice-cards { grid-template-columns: 1fr; }
+      .legend { display: none; }
     }
   </style>
 </head>
@@ -170,467 +228,381 @@
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
 
-// ── Config ─────────────────────────────────────────────────────────────────
-const SUPABASE_CONFIG_KEY = 'crm_taller_supabase_config';
+// ─── Constants ───────────────────────────────────────────────────────────────
+const SERVICES = [
+  { value: 'mantenimiento', label: 'Mantenimiento',   color: '#ef4444' },
+  { value: 'siniestro',     label: 'Siniestro',       color: '#f97316' },
+  { value: 'itv',           label: 'Revisión ITV',    color: '#3b82f6' },
+  { value: 'reparacion',    label: 'Reparación moto', color: '#22c55e' },
+  { value: 'primera',       label: '1ª Visita',       color: '#eab308' },
+];
+const SVC_MAP = Object.fromEntries(SERVICES.map(s => [s.value, s]));
 
-const SERVICE_COLORS = {
-  mantenimiento: { bg: '#ef4444', label: 'Mantenimiento' },
-  siniestro:     { bg: '#f97316', label: 'Siniestro' },
-  itv:           { bg: '#3b82f6', label: 'Revisión ITV' },
-  reparacion:    { bg: '#22c55e', label: 'Reparación moto' },
-  primera:       { bg: '#eab308', label: '1ª Visita' },
+// 08:00 → 18:30, slots de 30 min = 22 slots
+const SLOTS = [];
+for (let h = 8; h <= 18; h++) {
+  SLOTS.push(`${String(h).padStart(2,'0')}:00`);
+  if (h < 18) SLOTS.push(`${String(h).padStart(2,'0')}:30`);
+}
+SLOTS.push('18:30');
+
+const DAYS_SHORT = ['Lun','Mar','Mié','Jue','Vie'];
+
+// ─── Mock data store (in-memory, simulates a DB) ─────────────────────────────
+let _clientes = [
+  { id: 'c1', nombre: 'Carlos',  apellidos: 'García',   telefono: '600111222', dni: '12345678A' },
+  { id: 'c2', nombre: 'María',   apellidos: 'López',    telefono: '611333444', dni: '87654321B' },
+  { id: 'c3', nombre: 'Alejandro', apellidos: 'Martín', telefono: '622555666', dni: ''          },
+];
+let _motos = [
+  { id: 'm1', cliente_id: 'c1', marca: 'Honda',  modelo: 'CB500F', cilindrada: '500', matricula: '1234ABC', bastidor: 'JH2PC35...' },
+  { id: 'm2', cliente_id: 'c2', marca: 'Yamaha', modelo: 'MT-07',  cilindrada: '700', matricula: '5678DEF', bastidor: 'VN4RJ0...'  },
+  { id: 'm3', cliente_id: 'c3', marca: 'KTM',    modelo: 'Duke 390', cilindrada: '390', matricula: '9999GHI', bastidor: '' },
+];
+
+const today = new Date();
+const pad = n => String(n).padStart(2,'0');
+const todayStr = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+let _citas = [
+  { id: 'a1', cliente_id:'c1', moto_id:'m1', tipo_servicio:'mantenimiento', fecha_cita: todayStr, hora_cita:'09:00', nota:'Cambio de aceite', estado:'scheduled', fecha_creacion: new Date().toISOString() },
+  { id: 'a2', cliente_id:'c2', moto_id:'m2', tipo_servicio:'itv',           fecha_cita: todayStr, hora_cita:'10:30', nota:'',               estado:'scheduled', fecha_creacion: new Date().toISOString() },
+  { id: 'a3', cliente_id:'c3', moto_id:'m3', tipo_servicio:'primera',       fecha_cita: todayStr, hora_cita:'12:00', nota:'Cliente nuevo',   estado:'scheduled', fecha_creacion: new Date().toISOString() },
+];
+
+// Mock DB API (will be replaced by Supabase calls later)
+const DB = {
+  getCitasByWeek(start, end) {
+    const result = _citas
+      .filter(c => c.fecha_cita >= start && c.fecha_cita <= end)
+      .map(c => ({
+        ...c,
+        clientes: _clientes.find(cl => cl.id === c.cliente_id) || null,
+        motos:    _motos.find(m => m.id === c.moto_id) || null,
+      }));
+    return result;
+  },
+  searchClientes(q) {
+    const lq = q.toLowerCase();
+    const byClient = _clientes.filter(c =>
+      c.nombre.toLowerCase().includes(lq) ||
+      (c.apellidos||'').toLowerCase().includes(lq) ||
+      (c.telefono||'').includes(lq) ||
+      (c.dni||'').toLowerCase().includes(lq)
+    );
+    const byMoto = _motos
+      .filter(m => (m.matricula||'').toLowerCase().includes(lq))
+      .map(m => _clientes.find(c => c.id === m.cliente_id))
+      .filter(Boolean);
+    const seen = new Set();
+    return [...byClient, ...byMoto].filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
+  },
+  getMotosByCliente(clienteId) {
+    return _motos.filter(m => m.cliente_id === clienteId);
+  },
+  createCliente(data) {
+    const c = { id: 'c' + Date.now(), fecha_creacion: new Date().toISOString(), ...data };
+    _clientes.push(c);
+    return c;
+  },
+  createMoto(data) {
+    const m = { id: 'm' + Date.now(), fecha_creacion: new Date().toISOString(), ...data };
+    _motos.push(m);
+    return m;
+  },
+  createCita(data) {
+    const a = { id: 'a' + Date.now(), fecha_creacion: new Date().toISOString(), estado: 'scheduled', ...data };
+    _citas.push(a);
+    return a;
+  },
+  cancelCita(id) {
+    const c = _citas.find(a => a.id === id);
+    if (c) c.estado = 'cancelled';
+  },
+  findDuplicate(telefono, dni) {
+    return _clientes.find(c =>
+      (telefono && c.telefono === telefono) ||
+      (dni && dni && c.dni === dni)
+    ) || null;
+  },
 };
 
-const SERVICES = Object.entries(SERVICE_COLORS).map(([k,v]) => ({ value: k, ...v }));
-
-const HOURS = [];
-for (let h = 8; h <= 18; h++) {
-  HOURS.push(`${String(h).padStart(2,'0')}:00`);
-  if (h < 18 || true) HOURS.push(`${String(h).padStart(2,'0')}:30`);
-}
-// Filter to 08:00 – 18:30
-const SLOTS = HOURS.filter(t => {
-  const [hh, mm] = t.split(':').map(Number);
-  return (hh > 8 || (hh === 8 && mm >= 0)) && (hh < 18 || (hh === 18 && mm <= 30));
-}).slice(0, 22); // 08:00 to 18:30 = 22 slots
-
-const DAYS_ES = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
-const DAY_ABBR = ['Lun','Mar','Mié','Jue','Vie'];
-
-// ── Supabase client factory ─────────────────────────────────────────────────
-function createClient(url, key) {
-  return supabase.createClient(url, key);
-}
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
-function getWeekDates(refDate) {
-  const d = new Date(refDate);
-  const day = d.getDay(); // 0=Sun
+// ─── Date helpers ─────────────────────────────────────────────────────────────
+function getWeekDates(offset) {
+  const ref = new Date();
+  ref.setDate(ref.getDate() + offset * 7);
+  const day = ref.getDay();
   const diff = day === 0 ? -6 : 1 - day;
-  const mon = new Date(d);
-  mon.setDate(d.getDate() + diff);
+  const mon = new Date(ref);
+  mon.setDate(ref.getDate() + diff);
   return Array.from({ length: 5 }, (_, i) => {
-    const dd = new Date(mon);
-    dd.setDate(mon.getDate() + i);
-    return dd;
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    return d;
   });
 }
+function fmtDate(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function fmtDisplay(d) { return d.toLocaleDateString('es-ES', { day:'2-digit', month:'short' }); }
+function isToday(d) { return fmtDate(d) === todayStr; }
 
-function fmtDate(d) {
-  return d.toISOString().slice(0, 10);
-}
-
-function fmtDateDisplay(d) {
-  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
-}
-
-function isToday(d) {
-  return fmtDate(d) === fmtDate(new Date());
-}
-
-// ── Main App ─────────────────────────────────────────────────────────────────
+// ─── App ──────────────────────────────────────────────────────────────────────
 function App() {
-  const [config, setConfig] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(SUPABASE_CONFIG_KEY)) || null; }
-    catch { return null; }
-  });
-  const [sb, setSb] = useState(null);
-
-  useEffect(() => {
-    if (config?.url && config?.key) {
-      try { setSb(createClient(config.url, config.key)); }
-      catch { setSb(null); }
-    }
-  }, [config]);
-
-  if (!config || !sb) {
-    return <ConfigScreen onSave={cfg => { localStorage.setItem(SUPABASE_CONFIG_KEY, JSON.stringify(cfg)); setConfig(cfg); }} />;
-  }
-
-  return <CRMApp sb={sb} onResetConfig={() => { localStorage.removeItem(SUPABASE_CONFIG_KEY); setConfig(null); setSb(null); }} />;
-}
-
-// ── Config Screen ─────────────────────────────────────────────────────────
-function ConfigScreen({ onSave }) {
-  const [url, setUrl] = useState('');
-  const [key, setKey] = useState('');
-  const [err, setErr] = useState('');
-
-  function handleSave() {
-    if (!url.trim() || !key.trim()) { setErr('Rellena URL y clave anónima de Supabase.'); return; }
-    setErr('');
-    onSave({ url: url.trim(), key: key.trim() });
-  }
-
-  return (
-    <div className="app">
-      <div className="header">
-        <h1><span>🏍️</span> CRM Taller de Motos</h1>
-      </div>
-      <div style={{flex:1, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px'}}>
-        <div className="config-panel" style={{maxWidth:480, width:'100%'}}>
-          <h2>⚙️ Configurar Supabase</h2>
-          <p style={{color:'var(--muted)', fontSize:'14px', marginBottom:'16px'}}>
-            Introduce las credenciales de tu proyecto Supabase para conectar la aplicación.
-          </p>
-          {err && <div className="alert alert-error">{err}</div>}
-          <div className="config-form">
-            <div className="form-group">
-              <label>URL del proyecto Supabase</label>
-              <input placeholder="https://xxxx.supabase.co" value={url} onChange={e=>setUrl(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label>Clave anónima (anon key)</label>
-              <input placeholder="eyJhbGc..." value={key} onChange={e=>setKey(e.target.value)} type="password" />
-            </div>
-            <button className="btn btn-primary" onClick={handleSave}>Conectar →</button>
-          </div>
-          <div className="alert alert-info" style={{marginTop:'16px', fontSize:'12px'}}>
-            <strong>SQL para crear tablas:</strong><br/>
-            <code style={{whiteSpace:'pre-wrap', fontSize:'11px', display:'block', marginTop:'8px'}}>{SQL_SCHEMA}</code>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const SQL_SCHEMA = `-- Ejecutar en SQL Editor de Supabase:
-create table clientes (
-  id uuid primary key default gen_random_uuid(),
-  nombre text not null, apellidos text,
-  telefono text, dni text,
-  fecha_creacion timestamptz default now()
-);
-create table motos (
-  id uuid primary key default gen_random_uuid(),
-  cliente_id uuid references clientes(id) on delete cascade,
-  marca text, modelo text, cilindrada text,
-  matricula text, bastidor text,
-  fecha_creacion timestamptz default now()
-);
-create type servicio_enum as enum
-  ('mantenimiento','siniestro','itv','reparacion','primera');
-create type estado_enum as enum ('scheduled','cancelled');
-create table citas (
-  id uuid primary key default gen_random_uuid(),
-  cliente_id uuid references clientes(id) on delete cascade,
-  moto_id uuid references motos(id) on delete set null,
-  tipo_servicio servicio_enum not null,
-  fecha_cita date not null, hora_cita time not null,
-  nota text, estado estado_enum default 'scheduled',
-  fecha_creacion timestamptz default now(),
-  fecha_actualizacion timestamptz default now()
-);`;
-
-// ── CRM App ───────────────────────────────────────────────────────────────
-function CRMApp({ sb, onResetConfig }) {
   const [weekOffset, setWeekOffset] = useState(0);
   const [citas, setCitas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showNewModal, setShowNewModal] = useState(false);
-  const [selectedCita, setSelectedCita] = useState(null);
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [detailCita, setDetailCita] = useState(null);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
-  const refDate = new Date();
-  refDate.setDate(refDate.getDate() + weekOffset * 7);
-  const weekDates = getWeekDates(refDate);
+  const weekDates = getWeekDates(weekOffset);
   const weekStart = fmtDate(weekDates[0]);
-  const weekEnd = fmtDate(weekDates[4]);
+  const weekEnd   = fmtDate(weekDates[4]);
 
-  const loadCitas = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const { data, error: e } = await sb
-        .from('citas')
-        .select(`*, clientes(nombre, apellidos, telefono, dni), motos(marca, modelo, matricula)`)
-        .gte('fecha_cita', weekStart)
-        .lte('fecha_cita', weekEnd)
-        .order('hora_cita');
-      if (e) throw e;
-      setCitas(data || []);
-    } catch (e) {
-      setError('Error cargando citas: ' + (e.message || e));
-    }
-    setLoading(false);
-  }, [sb, weekStart, weekEnd]);
+  const load = useCallback(() => {
+    setCitas(DB.getCitasByWeek(weekStart, weekEnd));
+  }, [weekStart, weekEnd]);
 
-  useEffect(() => { loadCitas(); }, [loadCitas]);
+  useEffect(() => { load(); }, [load]);
 
-  async function handleCancel() {
-    if (!selectedCita) return;
-    const { error: e } = await sb.from('citas').update({ estado: 'cancelled', fecha_actualizacion: new Date().toISOString() }).eq('id', selectedCita.id);
-    if (e) { alert('Error: ' + e.message); return; }
-    setShowCancelConfirm(false);
-    setSelectedCita(null);
-    loadCitas();
-  }
-
-  const citasBySlot = {};
+  // Build slot → citas map
+  const slotMap = {};
   citas.forEach(c => {
-    const key = `${c.fecha_cita}_${c.hora_cita?.slice(0,5)}`;
-    if (!citasBySlot[key]) citasBySlot[key] = [];
-    citasBySlot[key].push(c);
+    const key = `${c.fecha_cita}_${c.hora_cita}`;
+    (slotMap[key] = slotMap[key] || []).push(c);
   });
+
+  function handleCancelConfirmed() {
+    DB.cancelCita(detailCita.id);
+    setConfirmCancel(false);
+    setDetailCita(null);
+    load();
+  }
 
   return (
     <div className="app">
+      {/* Header */}
       <div className="header">
-        <h1><span>🏍️</span> CRM Taller de Motos</h1>
-        <div className="header-right">
-          <div className="legend">
-            {SERVICES.map(s => (
-              <div key={s.value} className="legend-item">
-                <div className="legend-dot" style={{background:s.bg}} />
-                {s.label}
-              </div>
-            ))}
-          </div>
-          <button className="btn btn-ghost btn-sm" onClick={onResetConfig}>⚙️</button>
+        <h1>🏍️ CRM Taller de Motos</h1>
+        <div className="legend">
+          {SERVICES.map(s => (
+            <div key={s.value} className="legend-item">
+              <div className="legend-dot" style={{background:s.color}} />
+              {s.label}
+            </div>
+          ))}
         </div>
       </div>
 
+      {/* Toolbar */}
       <div className="toolbar">
-        <button className="btn btn-primary" onClick={() => setShowNewModal(true)}>
-          + Nueva Cita
-        </button>
+        <button className="btn btn-primary" onClick={() => setShowNew(true)}>+ Nueva Cita</button>
         <div className="week-nav">
-          <button className="btn btn-secondary btn-sm" onClick={() => setWeekOffset(o => o - 1)}>‹ Semana anterior</button>
-          <span className="week-label">
-            {fmtDateDisplay(weekDates[0])} – {fmtDateDisplay(weekDates[4])}
-          </span>
-          <button className="btn btn-secondary btn-sm" onClick={() => setWeekOffset(o => o + 1)}>Semana siguiente ›</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => setWeekOffset(o => o-1)}>‹ Anterior</button>
+          <span className="week-label">{fmtDisplay(weekDates[0])} – {fmtDisplay(weekDates[4])}</span>
+          <button className="btn btn-ghost btn-sm" onClick={() => setWeekOffset(o => o+1)}>Siguiente ›</button>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => setWeekOffset(0)}>Hoy</button>
-        {loading && <span style={{color:'var(--muted)', fontSize:'13px'}}>Cargando...</span>}
+        <button className="btn btn-secondary btn-sm" onClick={() => setWeekOffset(0)}>Hoy</button>
       </div>
 
-      {error && <div className="alert alert-error" style={{margin:'12px 20px'}}>{error}</div>}
-
-      <div className="calendar-wrapper">
+      {/* Calendar */}
+      <div className="calendar-scroll">
         <div className="calendar">
-          <div className="calendar-header">
-            <div className="cal-header-cell" />
-            {weekDates.map((d, i) => (
-              <div key={i} className={`cal-header-cell${isToday(d) ? ' today' : ''}`}>
-                {DAY_ABBR[i]}<br/>
-                <span style={{fontSize:'18px', fontWeight:700}}>{d.getDate()}</span>
-              </div>
-            ))}
-          </div>
-          <div className="calendar-body">
-            {SLOTS.map(slot => (
-              <React.Fragment key={slot}>
-                <div className="time-label">{slot}</div>
-                {weekDates.map((d, di) => {
-                  const dateStr = fmtDate(d);
-                  const key = `${dateStr}_${slot}`;
-                  const slotCitas = citasBySlot[key] || [];
-                  return (
-                    <div key={di} className="cal-cell" onClick={() => { if (!slotCitas.length) setShowNewModal(true); }}>
-                      {slotCitas.map(c => {
-                        const svc = SERVICE_COLORS[c.tipo_servicio] || { bg: '#666' };
-                        const cancelled = c.estado === 'cancelled';
-                        return (
-                          <button
-                            key={c.id}
-                            className={`apt-chip${cancelled ? ' apt-cancelled' : ''}`}
-                            style={{ background: svc.bg, color: 'white' }}
-                            onClick={e => { e.stopPropagation(); setSelectedCita(c); }}
-                          >
-                            <span className="apt-name">{c.clientes?.nombre} {c.clientes?.apellidos}</span>
-                            <span className="apt-service">{svc.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </React.Fragment>
-            ))}
-          </div>
+          {/* Column headers */}
+          <div className="cal-col-header" style={{position:'sticky',top:0}} />
+          {weekDates.map((d, i) => (
+            <div key={i} className={`cal-col-header${isToday(d) ? ' today' : ''}`}>
+              {DAYS_SHORT[i]}
+              <span className="day-num">{d.getDate()}</span>
+            </div>
+          ))}
+
+          {/* Slot rows */}
+          {SLOTS.map(slot => (
+            <React.Fragment key={slot}>
+              <div className="time-label">{slot}</div>
+              {weekDates.map((d, di) => {
+                const dateStr = fmtDate(d);
+                const key = `${dateStr}_${slot}`;
+                const chips = slotMap[key] || [];
+                return (
+                  <div
+                    key={di}
+                    className={`cal-cell${isToday(d) ? ' today-col' : ''}`}
+                    onClick={() => { if (!chips.length) setShowNew(true); }}
+                  >
+                    {chips.map(c => {
+                      const svc = SVC_MAP[c.tipo_servicio] || { color:'#64748b', label: c.tipo_servicio };
+                      return (
+                        <button
+                          key={c.id}
+                          className={`apt-chip${c.estado==='cancelled' ? ' cancelled' : ''}`}
+                          style={{background: svc.color}}
+                          onClick={e => { e.stopPropagation(); setDetailCita(c); }}
+                        >
+                          <span className="apt-name">
+                            {c.clientes?.nombre} {c.clientes?.apellidos}
+                          </span>
+                          <span className="apt-svc">{svc.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
-      {showNewModal && (
+      {/* Modals */}
+      {showNew && (
         <NewCitaModal
-          sb={sb}
-          onClose={() => setShowNewModal(false)}
-          onCreated={() => { setShowNewModal(false); loadCitas(); }}
+          onClose={() => setShowNew(false)}
+          onCreated={() => { setShowNew(false); load(); }}
         />
       )}
-
-      {selectedCita && !showCancelConfirm && (
-        <CitaDetailModal
-          cita={selectedCita}
-          onClose={() => setSelectedCita(null)}
-          onCancel={() => setShowCancelConfirm(true)}
+      {detailCita && !confirmCancel && (
+        <DetailModal
+          cita={detailCita}
+          onClose={() => setDetailCita(null)}
+          onCancel={() => setConfirmCancel(true)}
         />
       )}
-
-      {showCancelConfirm && (
+      {confirmCancel && (
         <ConfirmModal
-          title="¿Cancelar cita?"
-          message={`¿Seguro que quieres cancelar la cita de ${selectedCita?.clientes?.nombre} ${selectedCita?.clientes?.apellidos || ''}?`}
-          onConfirm={handleCancel}
-          onClose={() => setShowCancelConfirm(false)}
+          message={`¿Cancelar la cita de ${detailCita?.clientes?.nombre} ${detailCita?.clientes?.apellidos || ''}?`}
+          onConfirm={handleCancelConfirmed}
+          onClose={() => setConfirmCancel(false)}
         />
       )}
     </div>
   );
 }
 
-// ── New Cita Modal (multi-step) ───────────────────────────────────────────
-function NewCitaModal({ sb, onClose, onCreated }) {
-  const [step, setStep] = useState('choice'); // choice | new-client | search-client | moto | cita
-  const [cliente, setCliente] = useState(null);
-  const [moto, setMoto] = useState(null);
-  const [error, setError] = useState('');
-  const [saving, setSaving] = useState(false);
+// ─── New Cita Modal (4 steps) ─────────────────────────────────────────────────
+const STEP_LABELS = ['Tipo cliente', 'Cliente', 'Moto', 'Cita'];
 
-  // Client form state
-  const [clientForm, setClientForm] = useState({ nombre:'', apellidos:'', telefono:'', dni:'' });
-  // Moto form state
-  const [motoForm, setMotoForm] = useState({ marca:'', modelo:'', cilindrada:'', matricula:'', bastidor:'' });
-  // Cita form state
-  const [citaForm, setCitaForm] = useState({ tipo_servicio:'mantenimiento', fecha_cita: fmtDate(new Date()), hora_cita:'09:00', nota:'' });
+function StepIndicator({ current }) {
+  return (
+    <div className="steps">
+      {STEP_LABELS.map((label, i) => {
+        const n = i + 1;
+        const state = current > n ? 'done' : current === n ? 'active' : 'idle';
+        return (
+          <React.Fragment key={i}>
+            <div className={`step-dot ${state}`}>{state === 'done' ? '✓' : n}</div>
+            <span className={`step-label ${state === 'active' ? 'active' : 'idle'}`}>{label}</span>
+            {i < STEP_LABELS.length - 1 && <div className="step-line" />}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
 
-  // Search state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [searching, setSearching] = useState(false);
-  const searchTimer = useRef(null);
+function NewCitaModal({ onClose, onCreated }) {
+  // step: 'choice' | 'new-client' | 'search-client' | 'moto' | 'cita'
+  const [step, setStep] = useState('choice');
+  const [err, setErr]   = useState('');
 
-  // Client motos for existing client
+  // Data accumulated across steps
+  const [cliente, setCliente]       = useState(null);
   const [clientMotos, setClientMotos] = useState([]);
   const [selectedMotoId, setSelectedMotoId] = useState('new');
 
+  const [clientForm, setClientForm] = useState({ nombre:'', apellidos:'', telefono:'', dni:'' });
+  const [motoForm,   setMotoForm]   = useState({ marca:'', modelo:'', cilindrada:'', matricula:'', bastidor:'' });
+  const [citaForm,   setCitaForm]   = useState({
+    tipo_servicio: 'mantenimiento',
+    fecha_cita: todayStr,
+    hora_cita: '09:00',
+    nota: '',
+  });
+
+  // Search
+  const [query,   setQuery]   = useState('');
+  const [results, setResults] = useState([]);
+  const timer = useRef(null);
+
   useEffect(() => {
     if (step !== 'search-client') return;
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    if (!searchQuery.trim()) { setSearchResults([]); return; }
-    searchTimer.current = setTimeout(async () => {
-      setSearching(true);
-      const q = searchQuery.trim();
-      const { data } = await sb.from('clientes').select('*, motos(*)').or(
-        `nombre.ilike.%${q}%,apellidos.ilike.%${q}%,telefono.ilike.%${q}%,dni.ilike.%${q}%`
-      ).limit(10);
-      // Also search by moto matricula
-      const { data: mData } = await sb.from('motos').select('*, clientes(*)').ilike('matricula', `%${q}%`).limit(5);
-      const fromMotos = (mData || []).map(m => ({ ...m.clientes, motos: [m] }));
-      const combined = [...(data||[]), ...fromMotos];
-      const seen = new Set();
-      setSearchResults(combined.filter(c => { if (seen.has(c.id)) return false; seen.add(c.id); return true; }));
-      setSearching(false);
-    }, 350);
-  }, [searchQuery, step]);
+    if (timer.current) clearTimeout(timer.current);
+    if (!query.trim()) { setResults([]); return; }
+    timer.current = setTimeout(() => {
+      setResults(DB.searchClientes(query.trim()));
+    }, 250);
+  }, [query, step]);
 
-  async function loadClientMotos(clientId) {
-    const { data } = await sb.from('motos').select('*').eq('cliente_id', clientId);
-    setClientMotos(data || []);
-    setSelectedMotoId(data?.length ? data[0].id : 'new');
-  }
-
-  function selectCliente(c) {
+  function pickCliente(c) {
     setCliente(c);
-    loadClientMotos(c.id);
+    const motos = DB.getMotosByCliente(c.id);
+    setClientMotos(motos);
+    setSelectedMotoId(motos.length ? motos[0].id : 'new');
     setStep('moto');
+    setErr('');
   }
 
-  async function saveNewClient() {
-    if (!clientForm.nombre.trim()) { setError('El nombre es obligatorio.'); return; }
-    setSaving(true); setError('');
-    // Check duplicate by phone or dni
-    if (clientForm.telefono || clientForm.dni) {
-      let or = [];
-      if (clientForm.telefono) or.push(`telefono.eq.${clientForm.telefono}`);
-      if (clientForm.dni) or.push(`dni.eq.${clientForm.dni}`);
-      const { data: existing } = await sb.from('clientes').select('*').or(or.join(',')).limit(1);
-      if (existing?.length) {
-        setSaving(false);
-        setError(`Ya existe un cliente con ese ${clientForm.telefono ? 'teléfono' : 'DNI'}. ¿Usar el existente?`);
-        return;
-      }
+  function saveNewClient() {
+    if (!clientForm.nombre.trim()) { setErr('El nombre es obligatorio.'); return; }
+    const dup = DB.findDuplicate(clientForm.telefono, clientForm.dni);
+    if (dup) {
+      setErr(`Ya existe un cliente con ese ${clientForm.telefono && dup.telefono === clientForm.telefono ? 'teléfono' : 'DNI'}: ${dup.nombre} ${dup.apellidos}. ¿Usar el existente?`);
+      return;
     }
-    const { data, error: e } = await sb.from('clientes').insert([clientForm]).select().single();
-    setSaving(false);
-    if (e) { setError(e.message); return; }
-    setCliente(data);
+    const c = DB.createCliente(clientForm);
+    setCliente(c);
     setClientMotos([]);
     setSelectedMotoId('new');
     setStep('moto');
+    setErr('');
   }
 
-  async function saveCita() {
-    setError('');
-    if (!citaForm.fecha_cita || !citaForm.hora_cita) { setError('Fecha y hora son obligatorias.'); return; }
-    setSaving(true);
+  function saveCita() {
+    if (!citaForm.fecha_cita || !citaForm.hora_cita) { setErr('Fecha y hora son obligatorias.'); return; }
     let motoId = null;
     if (selectedMotoId === 'new') {
-      // Save new moto if at least marca or matricula filled
       if (motoForm.marca || motoForm.matricula) {
-        const { data: md, error: me } = await sb.from('motos').insert([{ ...motoForm, cliente_id: cliente.id }]).select().single();
-        if (me) { setSaving(false); setError(me.message); return; }
-        motoId = md.id;
+        const m = DB.createMoto({ ...motoForm, cliente_id: cliente.id });
+        motoId = m.id;
       }
     } else {
       motoId = selectedMotoId;
     }
-    const { error: ce } = await sb.from('citas').insert([{
-      cliente_id: cliente.id,
-      moto_id: motoId,
-      tipo_servicio: citaForm.tipo_servicio,
-      fecha_cita: citaForm.fecha_cita,
-      hora_cita: citaForm.hora_cita,
-      nota: citaForm.nota,
-      estado: 'scheduled',
-    }]);
-    setSaving(false);
-    if (ce) { setError(ce.message); return; }
+    DB.createCita({ ...citaForm, cliente_id: cliente.id, moto_id: motoId });
     onCreated();
   }
 
-  const stepNames = { choice: 1, 'new-client': 2, 'search-client': 2, moto: 3, cita: 4 };
-  const currentStep = stepNames[step] || 1;
+  const stepNum = { choice:1, 'new-client':2, 'search-client':2, moto:3, cita:4 }[step] || 1;
+
+  function goBack() {
+    setErr('');
+    if (step === 'new-client' || step === 'search-client') setStep('choice');
+    else if (step === 'moto') setStep('choice');
+    else if (step === 'cita') setStep('moto');
+  }
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal modal-lg">
+    <div className="backdrop">
+      <div className="modal">
         <div className="modal-header">
           <h2>Nueva Cita</h2>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
         <div className="modal-body">
-          {/* Step indicator */}
-          <div className="step-indicator">
-            {['Tipo cliente','Cliente','Moto','Cita'].map((label, i) => (
-              <React.Fragment key={i}>
-                <div className="step">
-                  <div className={`step-dot ${currentStep > i+1 ? 'done' : currentStep === i+1 ? 'active' : 'idle'}`}>
-                    {currentStep > i+1 ? '✓' : i+1}
-                  </div>
-                  <span style={{fontSize:'12px', color: currentStep === i+1 ? 'var(--text)' : 'var(--muted)'}}>{label}</span>
-                </div>
-                {i < 3 && <div className="step-line" />}
-              </React.Fragment>
-            ))}
-          </div>
+          <StepIndicator current={stepNum} />
+          {err && <div className="alert alert-err">{err}</div>}
 
-          {error && <div className="alert alert-error">{error}</div>}
-
-          {/* Step: choice */}
           {step === 'choice' && (
             <div>
-              <p style={{color:'var(--muted)', marginBottom:'16px'}}>¿El cliente es nuevo o ya existe en el sistema?</p>
+              <p style={{color:'var(--muted)', fontSize:'13px', marginBottom:'14px'}}>
+                ¿El cliente ya está registrado en el sistema?
+              </p>
               <div className="choice-cards">
-                <div className="choice-card" onClick={() => setStep('new-client')}>
+                <div className="choice-card" onClick={() => { setErr(''); setStep('new-client'); }}>
                   <div className="cc-icon">👤</div>
                   <div className="cc-title">Cliente nuevo</div>
-                  <div className="cc-desc">Registrar nuevo cliente</div>
+                  <div className="cc-desc">Primera vez en el taller</div>
                 </div>
-                <div className="choice-card" onClick={() => setStep('search-client')}>
+                <div className="choice-card" onClick={() => { setErr(''); setStep('search-client'); }}>
                   <div className="cc-icon">🔍</div>
                   <div className="cc-title">Cliente existente</div>
                   <div className="cc-desc">Buscar por nombre, DNI, teléfono o matrícula</div>
@@ -639,13 +611,12 @@ function NewCitaModal({ sb, onClose, onCreated }) {
             </div>
           )}
 
-          {/* Step: new client form */}
           {step === 'new-client' && (
-            <div>
+            <>
               <div className="form-row">
                 <div className="form-group">
-                  <label className="required">Nombre</label>
-                  <input value={clientForm.nombre} onChange={e=>setClientForm(f=>({...f,nombre:e.target.value}))} placeholder="Nombre" />
+                  <label className="req">Nombre</label>
+                  <input value={clientForm.nombre} onChange={e=>setClientForm(f=>({...f,nombre:e.target.value}))} placeholder="Nombre" autoFocus />
                 </div>
                 <div className="form-group">
                   <label>Apellidos</label>
@@ -662,64 +633,54 @@ function NewCitaModal({ sb, onClose, onCreated }) {
                   <input value={clientForm.dni} onChange={e=>setClientForm(f=>({...f,dni:e.target.value}))} placeholder="12345678A" />
                 </div>
               </div>
-            </div>
+            </>
           )}
 
-          {/* Step: search client */}
           {step === 'search-client' && (
-            <div>
+            <>
               <div className="form-group">
-                <label>Buscar cliente</label>
-                <input
-                  autoFocus
-                  value={searchQuery}
-                  onChange={e=>setSearchQuery(e.target.value)}
-                  placeholder="Nombre, DNI, teléfono o matrícula..."
-                />
+                <label>Buscar por nombre, DNI, teléfono o matrícula</label>
+                <input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Escribe para buscar..." />
               </div>
-              {searching && <p style={{color:'var(--muted)', fontSize:'13px'}}>Buscando...</p>}
-              {searchResults.length > 0 && (
-                <div className="search-results">
-                  {searchResults.map(c => (
-                    <div key={c.id} className="search-result-item" onClick={() => selectCliente(c)}>
-                      <div className="result-name">{c.nombre} {c.apellidos}</div>
-                      <div className="result-meta">
+              {results.length > 0 && (
+                <div className="search-drop">
+                  {results.map(c => (
+                    <div key={c.id} className="search-item" onClick={() => pickCliente(c)}>
+                      <div className="si-name">{c.nombre} {c.apellidos}</div>
+                      <div className="si-meta">
                         {c.telefono && `📞 ${c.telefono}`}
                         {c.dni && ` · DNI: ${c.dni}`}
-                        {c.motos?.length > 0 && ` · Motos: ${c.motos.map(m=>m.matricula||m.marca).join(', ')}`}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-              {searchQuery && !searching && searchResults.length === 0 && (
+              {query && results.length === 0 && (
                 <div className="alert alert-info">
-                  No se encontró ningún cliente.{' '}
-                  <button className="btn btn-sm btn-secondary" style={{marginTop:'8px'}} onClick={() => setStep('new-client')}>
-                    Crear nuevo cliente
+                  No encontrado.{' '}
+                  <button className="btn btn-sm btn-secondary" style={{marginTop:'6px'}}
+                    onClick={() => { setClientForm({nombre:query,apellidos:'',telefono:'',dni:''}); setStep('new-client'); setErr(''); }}>
+                    Crear como cliente nuevo
                   </button>
                 </div>
               )}
-            </div>
+            </>
           )}
 
-          {/* Step: moto */}
           {step === 'moto' && (
-            <div>
-              {cliente && (
-                <div className="alert alert-success" style={{marginBottom:'14px'}}>
-                  Cliente: <strong>{cliente.nombre} {cliente.apellidos}</strong>
-                  {cliente.telefono && ` · ${cliente.telefono}`}
-                </div>
-              )}
+            <>
+              <div className="alert alert-ok" style={{marginBottom:'14px'}}>
+                Cliente: <strong>{cliente?.nombre} {cliente?.apellidos}</strong>
+                {cliente?.telefono && <span style={{color:'var(--muted)'}}> · {cliente.telefono}</span>}
+              </div>
               {clientMotos.length > 0 && (
                 <div className="form-group">
-                  <label>¿Qué moto?</label>
+                  <label>Moto del cliente</label>
                   <select value={selectedMotoId} onChange={e=>setSelectedMotoId(e.target.value)}>
                     {clientMotos.map(m => (
-                      <option key={m.id} value={m.id}>{m.marca} {m.modelo} – {m.matricula}</option>
+                      <option key={m.id} value={m.id}>{m.marca} {m.modelo} – {m.matricula || 'sin matrícula'}</option>
                     ))}
-                    <option value="new">+ Nueva moto</option>
+                    <option value="new">+ Registrar nueva moto</option>
                   </select>
                 </div>
               )}
@@ -732,7 +693,7 @@ function NewCitaModal({ sb, onClose, onCreated }) {
                     </div>
                     <div className="form-group">
                       <label>Modelo</label>
-                      <input value={motoForm.modelo} onChange={e=>setMotoForm(f=>({...f,modelo:e.target.value}))} placeholder="CB500, MT07..." />
+                      <input value={motoForm.modelo} onChange={e=>setMotoForm(f=>({...f,modelo:e.target.value}))} placeholder="CB500, MT-07..." />
                     </div>
                   </div>
                   <div className="form-row-3">
@@ -751,25 +712,24 @@ function NewCitaModal({ sb, onClose, onCreated }) {
                   </div>
                 </>
               )}
-            </div>
+            </>
           )}
 
-          {/* Step: cita */}
           {step === 'cita' && (
-            <div>
+            <>
               <div className="form-group">
-                <label className="required">Tipo de servicio</label>
+                <label className="req">Tipo de servicio</label>
                 <select value={citaForm.tipo_servicio} onChange={e=>setCitaForm(f=>({...f,tipo_servicio:e.target.value}))}>
                   {SERVICES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label className="required">Fecha</label>
+                  <label className="req">Fecha</label>
                   <input type="date" value={citaForm.fecha_cita} onChange={e=>setCitaForm(f=>({...f,fecha_cita:e.target.value}))} />
                 </div>
                 <div className="form-group">
-                  <label className="required">Hora</label>
+                  <label className="req">Hora</label>
                   <select value={citaForm.hora_cita} onChange={e=>setCitaForm(f=>({...f,hora_cita:e.target.value}))}>
                     {SLOTS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -777,70 +737,48 @@ function NewCitaModal({ sb, onClose, onCreated }) {
               </div>
               <div className="form-group">
                 <label>Nota</label>
-                <textarea value={citaForm.nota} onChange={e=>setCitaForm(f=>({...f,nota:e.target.value}))} placeholder="Observaciones, descripción del problema..." />
+                <textarea value={citaForm.nota} onChange={e=>setCitaForm(f=>({...f,nota:e.target.value}))} placeholder="Descripción del problema, observaciones..." />
               </div>
-            </div>
+            </>
           )}
         </div>
 
         <div className="modal-footer">
-          {step !== 'choice' && (
-            <button className="btn btn-ghost" onClick={() => {
-              const prev = { 'new-client':'choice', 'search-client':'choice', moto: cliente ? (step === 'moto' ? 'choice' : 'moto') : 'choice', cita:'moto' };
-              setStep(prev[step] || 'choice');
-              setError('');
-            }}>← Atrás</button>
-          )}
+          {step !== 'choice' && <button className="btn btn-ghost" onClick={goBack}>← Atrás</button>}
           <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-          {step === 'new-client' && (
-            <button className="btn btn-primary" disabled={saving} onClick={saveNewClient}>
-              {saving ? <><span className="spinner" /> Guardando...</> : 'Guardar cliente →'}
-            </button>
-          )}
-          {step === 'moto' && (
-            <button className="btn btn-primary" onClick={() => { setError(''); setStep('cita'); }}>
-              Siguiente →
-            </button>
-          )}
-          {step === 'cita' && (
-            <button className="btn btn-primary" disabled={saving} onClick={saveCita}>
-              {saving ? <><span className="spinner" /> Guardando...</> : '✓ Crear cita'}
-            </button>
-          )}
+          {step === 'new-client'    && <button className="btn btn-primary" onClick={saveNewClient}>Guardar cliente →</button>}
+          {step === 'moto'          && <button className="btn btn-primary" onClick={() => { setErr(''); setStep('cita'); }}>Siguiente →</button>}
+          {step === 'cita'          && <button className="btn btn-primary" onClick={saveCita}>✓ Crear cita</button>}
         </div>
       </div>
     </div>
   );
 }
 
-// ── Cita Detail Modal ──────────────────────────────────────────────────────
-function CitaDetailModal({ cita, onClose, onCancel }) {
-  const svc = SERVICE_COLORS[cita.tipo_servicio] || { bg: '#666', label: cita.tipo_servicio };
+// ─── Detail Modal ──────────────────────────────────────────────────────────────
+function DetailModal({ cita, onClose, onCancel }) {
+  const svc = SVC_MAP[cita.tipo_servicio] || { color:'#64748b', label: cita.tipo_servicio };
   const c = cita.clientes || {};
-  const m = cita.motos || {};
-  const cancelled = cita.estado === 'cancelled';
-
+  const m = cita.motos    || {};
   return (
-    <div className="modal-backdrop">
+    <div className="backdrop">
       <div className="modal">
         <div className="modal-header">
           <h2>Detalle de Cita</h2>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
         <div className="modal-body">
-          <div style={{marginBottom:'16px', display:'flex', alignItems:'center', gap:'10px'}}>
-            <span className="service-badge" style={{background:svc.bg}}>{svc.label}</span>
-            {cancelled && <span className="service-badge" style={{background:'#64748b'}}>Cancelada</span>}
+          <div style={{display:'flex', gap:'8px', alignItems:'center', marginBottom:'16px'}}>
+            <span className="svc-badge" style={{background:svc.color}}>{svc.label}</span>
+            {cita.estado === 'cancelled' && <span className="svc-badge" style={{background:'#64748b'}}>Cancelada</span>}
           </div>
-
           <div className="detail-section">
             <h3>📅 Fecha y Hora</h3>
             <div className="detail-grid">
               <div className="detail-item"><label>Fecha</label><p>{cita.fecha_cita}</p></div>
-              <div className="detail-item"><label>Hora</label><p>{cita.hora_cita?.slice(0,5)}</p></div>
+              <div className="detail-item"><label>Hora</label><p>{cita.hora_cita}</p></div>
             </div>
           </div>
-
           <div className="detail-section">
             <h3>👤 Cliente</h3>
             <div className="detail-grid">
@@ -849,46 +787,45 @@ function CitaDetailModal({ cita, onClose, onCancel }) {
               <div className="detail-item"><label>DNI</label><p>{c.dni || '—'}</p></div>
             </div>
           </div>
-
-          {m.marca && (
+          {(m.marca || m.matricula) && (
             <div className="detail-section">
               <h3>🏍️ Moto</h3>
               <div className="detail-grid">
                 <div className="detail-item"><label>Marca / Modelo</label><p>{m.marca} {m.modelo}</p></div>
                 <div className="detail-item"><label>Matrícula</label><p>{m.matricula || '—'}</p></div>
+                {m.cilindrada && <div className="detail-item"><label>Cilindrada</label><p>{m.cilindrada}</p></div>}
+                {m.bastidor   && <div className="detail-item"><label>Bastidor</label><p>{m.bastidor}</p></div>}
               </div>
             </div>
           )}
-
           {cita.nota && (
             <div className="detail-section">
               <h3>📝 Nota</h3>
-              <p style={{fontSize:'14px', color:'var(--text)'}}>{cita.nota}</p>
+              <p style={{fontSize:'14px'}}>{cita.nota}</p>
             </div>
           )}
         </div>
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>Cerrar</button>
-          {!cancelled && (
-            <button className="btn btn-danger" onClick={onCancel}>Cancelar cita</button>
-          )}
+          {cita.estado !== 'cancelled' && <button className="btn btn-danger" onClick={onCancel}>Cancelar cita</button>}
         </div>
       </div>
     </div>
   );
 }
 
-// ── Confirm Modal ──────────────────────────────────────────────────────────
-function ConfirmModal({ title, message, onConfirm, onClose }) {
+// ─── Confirm Modal ────────────────────────────────────────────────────────────
+function ConfirmModal({ message, onConfirm, onClose }) {
   return (
-    <div className="modal-backdrop">
-      <div className="modal" style={{maxWidth:400}}>
+    <div className="backdrop">
+      <div className="modal" style={{maxWidth:380}}>
         <div className="modal-header">
-          <h2>{title}</h2>
+          <h2>Confirmar cancelación</h2>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
         <div className="modal-body">
-          <p style={{color:'var(--muted)'}}>{message}</p>
+          <p style={{color:'var(--muted)', fontSize:'14px'}}>{message}</p>
+          <p style={{fontSize:'13px', color:'var(--muted)', marginTop:'8px'}}>Esta acción no se puede deshacer.</p>
         </div>
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>No, mantener</button>
