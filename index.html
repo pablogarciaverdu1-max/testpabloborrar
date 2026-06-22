@@ -1297,8 +1297,8 @@
                             
                             <!-- BOTONES VISTA -->
                             <div style="display: flex; gap: 8px;">
-                                <button class="btn" onclick="cambiarVistaCalendario('dia')" id="btnDia" style="flex: 1; background: #f0f0f0; color: #333;">📆 Hoy</button>
-                                <button class="btn" onclick="cambiarVistaCalendario('semana')" id="btnSemana" style="flex: 1; background: #333333; color: white;">📅 Semana</button>
+                                <button class="btn" onclick="filtrarCitasPorVista('dia')" id="btnDiaFiltro" style="flex: 1; background: #f0f0f0; color: #333;">📆 Hoy</button>
+                                <button class="btn" onclick="filtrarCitasPorVista('semana')" id="btnSemanaFiltro" style="flex: 1; background: #333333; color: white;">📅 Semana</button>
                             </div>
                         </div>
                         
@@ -1315,7 +1315,7 @@
                         <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e5e5;">
                             <div style="display: flex; flex-direction: column; gap: 10px;">
                                 <button class="btn" onclick="newCliente()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">+ Cliente Nuevo</button>
-                                <button class="btn" onclick="abrirFormularioClienteExistente()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">👤 Cliente Existente</button>
+                                <button class="btn" onclick="abrirFormularioClienteExistente()" style="background: #ffb366; color: white; padding: 12px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">📅 Crear Cita Nueva</button>
                             </div>
                         </div>
                         
@@ -1982,7 +1982,18 @@
                     <div class="section-title">Crear Cita Rápida</div>
                     <div class="form-group">
                         <div class="form-field">
-                            <label class="form-label required">Servicio</label>
+                            <label class="form-label">Mecánico</label>
+                            <select id="rapMecanicoModal" class="form-select">
+                                <option value="">Selecciona mecánico</option>
+                                <option value="Miguel Ángel">Miguel Ángel</option>
+                                <option value="Roberto">Roberto</option>
+                                <option value="Carlos Martínez">Carlos Martínez</option>
+                                <option value="Juan López">Juan López</option>
+                                <option value="Pedro González">Pedro González</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label required">Servicio Solicitado</label>
                             <select id="rapServicioModal" class="form-select">
                                 <option value="">Selecciona un servicio</option>
                                 <option value="Revisión periodica">Revisión periodica</option>
@@ -1996,13 +2007,23 @@
                     </div>
                     <div class="form-group">
                         <div class="form-field">
-                            <label class="form-label required">Fecha y Hora</label>
-                            <input type="datetime-local" id="rapDateTimeModal" class="form-input">
+                            <label class="form-label required">Fecha</label>
+                            <input type="date" id="rapFechaModal" class="form-input">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="form-field">
-                            <label class="form-label">Notas</label>
+                            <label class="form-label required">Desde Hora</label>
+                            <input type="time" id="rapDesdeHoraModal" class="form-input">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label required">Hasta Hora</label>
+                            <input type="time" id="rapHastaHoraModal" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Nota (se guardará en la ficha del cliente)</label>
                             <textarea id="rapNotasModal" class="form-textarea" placeholder="Notas adicionales..."></textarea>
                         </div>
                     </div>
@@ -2082,15 +2103,29 @@
             }
 
             const servicio = document.getElementById('rapServicioModal').value;
-            const datetime = document.getElementById('rapDateTimeModal').value;
+            const fecha = document.getElementById('rapFechaModal').value;
+            const desdeHora = document.getElementById('rapDesdeHoraModal').value;
+            const hastaHora = document.getElementById('rapHastaHoraModal').value;
+            const mecanico = document.getElementById('rapMecanicoModal').value;
             const notas = document.getElementById('rapNotasModal').value;
 
-            if (!servicio || !datetime) {
-                alert('Servicio y Fecha/Hora son obligatorios');
+            if (!servicio || !fecha || !desdeHora || !hastaHora) {
+                alert('Servicio, Fecha, Desde Hora y Hasta Hora son obligatorios');
                 return;
             }
 
+            // Validar que hastaHora > desdeHora
+            if (hastaHora <= desdeHora) {
+                alert('La hora de fin debe ser posterior a la hora de inicio');
+                return;
+            }
+
+            // Crear datetime combinando fecha y desdeHora
+            const datetime = fecha + 'T' + desdeHora;
+
             const client = clients.find(c => c.id === clienteSeleccionadoId);
+            
+            // Crear cita
             citas.push({
                 id: Math.max(...citas.map(c => c.id || 0), 0) + 1,
                 clienteId: client.id,
@@ -2099,8 +2134,25 @@
                 datetime: datetime,
                 descripcion: notas,
                 estado: 'pendiente',
+                mecanico: mecanico,
+                horaFin: hastaHora,
                 seguimientos: []
             });
+
+            // Crear nota en la ficha del cliente
+            if (notas.trim()) {
+                const fechaHoy = new Date().toISOString().split('T')[0];
+                const notaObj = {
+                    id: Math.max(...(client.notas ? client.notas.map(n => n.id || 0) : [0]), 0) + 1,
+                    mecanico: mecanico || 'Sin asignar',
+                    nota: notas,
+                    fechaVencimiento: fecha,
+                    fechaCreacion: fechaHoy
+                };
+                
+                if (!client.notas) client.notas = [];
+                client.notas.push(notaObj);
+            }
 
             // Crear orden automáticamente en Pendiente
             const nuevoIdOrden = Math.max(...orders.map(o => o.id || 0), 0) + 1;
@@ -2116,12 +2168,14 @@
             });
 
             // Sincronizar a Supabase
+            syncToSupabase('clientes', client);
             syncToSupabase('ordenes', orders[orders.length - 1]);
             syncToSupabase('citas', citas[citas.length - 1]);
 
             showSaveStatus();
             closeModal();
             renderCitasList();
+            renderCalendarioInterno();
             renderOrdenes();
             clienteSeleccionadoId = null;
         }
@@ -2165,12 +2219,30 @@
                     <div class="section-title">🏍️ Características Moto</div>
                     <div class="form-group">
                         <div class="form-field">
+                            <label class="form-label">Marca</label>
+                            <select class="form-select" id="newMarca">
+                                <option value="">Selecciona marca</option>
+                                <option value="Zontes">Zontes</option>
+                                <option value="Yamaha">Yamaha</option>
+                                <option value="Honda">Honda</option>
+                                <option value="Suzuki">Suzuki</option>
+                                <option value="Ducati">Ducati</option>
+                                <option value="KTM">KTM</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
                             <label class="form-label">Modelo</label>
-                            <input type="text" class="form-input" id="newModelo">
+                            <input type="text" class="form-input" id="newModelo" placeholder="Modelo">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-field">
+                            <label class="form-label">Cilindrada</label>
+                            <input type="text" class="form-input" id="newCilindrada" placeholder="ej: 125cc, 600cc">
                         </div>
                         <div class="form-field">
                             <label class="form-label">Matrícula</label>
-                            <input type="text" class="form-input" id="newMatricula">
+                            <input type="text" class="form-input" id="newMatricula" placeholder="Matrícula">
                         </div>
                     </div>
                 </div>
@@ -2213,12 +2285,15 @@
                 fechaEntrega: '',
                 recambios: [],
                 moto: {
+                    marca: document.getElementById('newMarca').value,
                     modelo: document.getElementById('newModelo').value,
+                    cilindrada: document.getElementById('newCilindrada').value,
                     matricula: document.getElementById('newMatricula').value,
                     bastidor: '',
                     kilometraje: 0
                 },
-                acciones: []
+                acciones: [],
+                notas: []
             };
 
             clients.push(nuevoCliente);
@@ -3566,6 +3641,18 @@
             return citasFiltradas;
         }
 
+
+        function filtrarCitasPorVista(vista) {
+            // Solo filtra el listado de citas, NO el calendario
+            let filtroVista = vista;
+            renderCitasList();
+            
+            // Actualizar estilos de botones
+            document.getElementById('btnDiaFiltro').style.background = vista === 'dia' ? '#333333' : '#f0f0f0';
+            document.getElementById('btnDiaFiltro').style.color = vista === 'dia' ? 'white' : '#333';
+            document.getElementById('btnSemanaFiltro').style.background = vista === 'semana' ? '#333333' : '#f0f0f0';
+            document.getElementById('btnSemanaFiltro').style.color = vista === 'semana' ? 'white' : '#333';
+        }
 
         function filtrarCitas() {
             renderCitasList();
