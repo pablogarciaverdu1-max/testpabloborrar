@@ -1164,7 +1164,7 @@
             <button class="nav-tab" onclick="switchTab('seguimientos')">📋 Seguimientos</button>
             <button class="nav-tab" onclick="switchTab('ordenes')">Órdenes</button>
             <button class="nav-tab" onclick="switchTab('informes')">Informes</button>
-            <button class="nav-tab" onclick="switchTab('admin')" style="margin-left: auto;">Administración</button>
+
         </div>
 
         <div class="content">
@@ -1279,20 +1279,28 @@
                             <div style="padding: 16px; background: white; border-radius: 6px; border: 1px solid #e5e5e5;">
                                 <!-- BOTONES DE VISTA -->
                                 <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                                    <button class="btn" onclick="cambiarVistaCalendario('dia')" id="btnDia" style="background: #f0f0f0; color: #333;">📆 Día</button>
-                                    <button class="btn" onclick="cambiarVistaCalendario('semana')" id="btnSemana" style="background: #f0f0f0; color: #333;">📅 Semana</button>
-                                    <button class="btn" onclick="cambiarVistaCalendario('mes')" id="btnMes" style="background: #333333; color: white;">📊 Mes</button>
+                                    <button class="btn" onclick="cambiarVistaCalendario('dia')" id="btnDia" style="background: #f0f0f0; color: #333;">📆 Hoy</button>
+                                    <button class="btn" onclick="cambiarVistaCalendario('semana')" id="btnSemana" style="background: #333333; color: white;">📅 Semana</button>
+                                    <button class="btn" onclick="cambiarVistaCalendario('mes')" id="btnMes" style="background: #f0f0f0; color: #333;">📊 Mes</button>
                                 </div>
 
                                 <!-- LEYENDA -->
-                                <div style="background: #f9f9f9; padding: 12px; border-radius: 4px; margin-bottom: 16px; font-size: 12px;">
-                                    <div style="font-weight: 600; margin-bottom: 8px;">Leyenda de Servicios:</div>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #ff6b6b; border-radius: 2px;"></div> <span>Revisión periodica</span></div>
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #ffa94d; border-radius: 2px;"></div> <span>Siniestro</span></div>
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #4ecdc4; border-radius: 2px;"></div> <span>Reparación moto</span></div>
-                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #95e1d3; border-radius: 2px;"></div> <span>Revisión ITV</span></div>
+                                <div style="background: #f9f9f9; padding: 8px 12px; border-radius: 4px; margin-bottom: 16px; font-size: 11px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #ff6b6b; border-radius: 2px;"></div> <span>Revisión periodica</span></div>
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #ffa94d; border-radius: 2px;"></div> <span>Siniestro</span></div>
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #4ecdc4; border-radius: 2px;"></div> <span>Reparación moto</span></div>
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #95e1d3; border-radius: 2px;"></div> <span>Revisión ITV</span></div>
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #a29bfe; border-radius: 2px;"></div> <span>1ª Visita</span></div>
+                                        <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #fdcb6e; border-radius: 2px;"></div> <span>Mantenimiento</span></div>
                                     </div>
+                                </div>
+
+                                <!-- NAVEGACIÓN SEMANA -->
+                                <div id="navegacionSemana" style="display: none; margin-bottom: 16px; text-align: center;">
+                                    <button class="btn" onclick="semanaAnteriorCitas()" style="background: #333333; color: white; padding: 6px 12px; font-size: 12px;">← Semana Anterior</button>
+                                    <button class="btn" onclick="resetSemana()" style="background: #f0f0f0; color: #333; padding: 6px 12px; font-size: 12px; margin: 0 8px;">Hoy</button>
+                                    <button class="btn" onclick="semanaSiguienteCitas()" style="background: #333333; color: white; padding: 6px 12px; font-size: 12px;">Semana Siguiente →</button>
                                 </div>
 
                                 <!-- CALENDARIO -->
@@ -1315,28 +1323,6 @@
                 <div class="informes-grid" id="informesGrid"></div>
             </div>
 
-            <!-- ADMINISTRACIÓN -->
-            <div id="view-admin" class="view">
-                <div style="padding: 20px;">
-                    <h2 style="margin-top: 0; color: #333;">⚙️ Administración</h2>
-                    
-                    <div style="max-width: 800px;">
-                        <div style="background: white; border: 1px solid #e1e4e8; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-                            <h3 style="margin-top: 0; color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">Gestionar Mecánicos</h3>
-                            
-                            <div id="mecanicosListAdmin" style="margin-bottom: 20px;"></div>
-                            
-                            <div style="border-top: 1px solid #e1e4e8; padding-top: 15px;">
-                                <h4 style="margin-top: 0; color: #555;">Agregar Nuevo Mecánico</h4>
-                                <div style="display: flex; gap: 10px;">
-                                    <input type="text" id="nuevoMecanicoInput" placeholder="Nombre del mecánico" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                                    <button class="btn btn-primary" onclick="agregarMecanico()" style="padding: 10px 20px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">+ Agregar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -3043,14 +3029,12 @@
                             <option value="1200cc">1200cc</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-group">
                     <div class="form-field">
                         <label class="form-label">Matrícula</label>
                         <input type="text" class="form-input" id="citaMatricula" placeholder="Ej: 8542JKL">
                     </div>
                 </div>
-                <div class="form-group full">
+                <div class="form-group">
                     <div class="form-field">
                         <label class="form-label required">Tipo de Servicio</label>
                         <select class="form-select" id="citaServicio">
@@ -3473,7 +3457,24 @@
             renderCalendarioInterno();
         }
 
-        let vistaCalendarioActual = 'mes';
+        let vistaCalendarioActual = 'semana';
+
+        let fechaActualCitas = new Date();
+
+        function semanaAnteriorCitas() {
+            fechaActualCitas.setDate(fechaActualCitas.getDate() - 7);
+            renderCalendarioInterno();
+        }
+
+        function semanaSiguienteCitas() {
+            fechaActualCitas.setDate(fechaActualCitas.getDate() + 7);
+            renderCalendarioInterno();
+        }
+
+        function resetSemana() {
+            fechaActualCitas = new Date();
+            renderCalendarioInterno();
+        }
 
         function cambiarVistaCalendario(vista) {
             vistaCalendarioActual = vista;
@@ -3494,6 +3495,9 @@
 
         function renderCalendarioDia() {
             const calendario = document.getElementById('calendarioInterno');
+            const navegacionDiv = document.getElementById('navegacionSemana');
+            if (navegacionDiv) navegacionDiv.style.display = 'none';
+            
             const hoy = new Date();
             const citasHoy = obtenerCitasFiltradas().filter(c => c.datetime.startsWith(hoy.toISOString().split('T')[0])).sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
             
@@ -3521,7 +3525,10 @@
 
         function renderCalendarioSemana() {
             const calendario = document.getElementById('calendarioInterno');
-            const hoy = new Date();
+            const navegacionDiv = document.getElementById('navegacionSemana');
+            if (navegacionDiv) navegacionDiv.style.display = 'block';
+            
+            const hoy = new Date(fechaActualCitas);
             const inicioSemana = new Date(hoy);
             inicioSemana.setDate(hoy.getDate() - hoy.getDay());
             
@@ -3563,6 +3570,9 @@
 
         function renderCalendarioMes() {
             const calendario = document.getElementById('calendarioInterno');
+            const navegacionDiv = document.getElementById('navegacionSemana');
+            if (navegacionDiv) navegacionDiv.style.display = 'none';
+            
             const hoy = new Date();
             const mes = hoy.getMonth();
             const año = hoy.getFullYear();
@@ -4607,22 +4617,26 @@
             document.getElementById('tituloSemana').textContent = 
                 `${dias[0].fecha.toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})} - ${dias[4].fecha.toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'})}`;
 
-            // Generar tabla - UNA FILA POR HORA
+            // Horas
             const horas = [];
             for (let h = 7; h < 19; h++) {
                 horas.push(`${String(h).padStart(2, '0')}:00`);
             }
 
-            let html = '<thead><tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;"><th style="padding: 8px; border: 1px solid #ddd; width: 80px; font-weight: 600;">Hora</th>';
+            // Crear estructura tipo Google Calendar
+            let html = `<div style="display: grid; grid-template-columns: 80px repeat(5, 1fr); gap: 0; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; background: white;">
+                <!-- ENCABEZADO -->
+                <div style="background: #f5f5f5; border-right: 1px solid #ddd;"></div>`;
             
             dias.forEach(d => {
-                html += `<th style="padding: 8px; border: 1px solid #ddd; font-weight: 600; background: #e3f2fd;">${d.nombre}<br><small style="font-weight: 400; color: #666;">${d.fecha.toLocaleDateString('es-ES')}</small></th>`;
+                html += `<div style="background: #f5f5f5; padding: 12px 8px; border-right: 1px solid #ddd; text-align: center; font-weight: 600;">
+                    ${d.nombre}<br><small style="font-size: 11px; color: #666;">${d.fecha.toLocaleDateString('es-ES')}</small>
+                </div>`;
             });
             
-            html += '</tr></thead><tbody>';
-
+            // FILAS DE HORAS
             horas.forEach(hora => {
-                html += `<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: 600; background: #f9f9f9; font-size: 11px;">${hora}</td>`;
+                html += `<div style="background: #f9f9f9; padding: 8px; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; font-weight: 600; font-size: 12px; text-align: center;">${hora}</div>`;
                 
                 dias.forEach(d => {
                     const tareasDiaHora = seguimientos.filter(s => {
@@ -4631,37 +4645,31 @@
                         if (!s.hora) return false;
                         const [hTarea, mTarea] = s.hora.split(':').map(Number);
                         const [hHora, mHora] = hora.split(':').map(Number);
-                        return hTarea === hHora; // Solo comparar la hora, no los minutos
+                        return hTarea === hHora;
                     });
 
-                    if (tareasDiaHora.length > 0) {
-                        const tarea = tareasDiaHora[0];
+                    html += `<div style="border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; min-height: 80px; padding: 4px; position: relative;">`;
+                    
+                    // Mostrar todas las tareas en esta celda (solapadas)
+                    tareasDiaHora.forEach((tarea, index) => {
                         const cliente = clients.find(c => c.id === tarea.clienteId);
-                        
-                        // Acortar descripción a 35 caracteres
-                        const descripcionCorta = tarea.descripcionTarea && tarea.descripcionTarea.length > 35
-                            ? tarea.descripcionTarea.substring(0, 35) + '...'
+                        const descripcionCorta = tarea.descripcionTarea && tarea.descripcionTarea.length > 30
+                            ? tarea.descripcionTarea.substring(0, 30) + '...'
                             : tarea.descripcionTarea || 'Sin descripción';
                         
-                        html += `<td style="padding: 4px; border: 1px solid #ddd; background: #e3f2fd;">
-                            <div style="background: #2196F3; color: white; padding: 4px; border-radius: 4px; font-size: 10px;">
-                                <div style="display: flex; gap: 4px; align-items: center;">
-                                    <input type="checkbox" style="cursor: pointer;" onclick="marcarCompletadoDesdeCalendario(${tarea.id}); event.stopPropagation();">
-                                    <span style="cursor: pointer; flex: 1;" onclick="abrirClienteEnTareas(${tarea.clienteId})" title="${tarea.descripcionTarea}">
-                                        <strong>${descripcionCorta}</strong>
-                                    </span>
-                                </div>
+                        html += `<div style="background: #2196F3; color: white; padding: 6px; border-radius: 3px; font-size: 11px; margin-bottom: 3px; cursor: pointer; border-left: 3px solid #1565c0;" onclick="abrirClienteEnTareas(${tarea.clienteId})" title="${tarea.descripcionTarea}">
+                            <div style="display: flex; gap: 3px; align-items: flex-start;">
+                                <input type="checkbox" style="cursor: pointer; margin: 2px 0 0 0;" onclick="event.stopPropagation(); marcarCompletadoDesdeCalendario(${tarea.id});" />
+                                <span style="flex: 1; font-weight: 500;">${descripcionCorta}</span>
                             </div>
-                        </td>`;
-                    } else {
-                        html += `<td style="padding: 4px; border: 1px solid #ddd; background: white;"></td>`;
-                    }
+                        </div>`;
+                    });
+                    
+                    html += `</div>`;
                 });
-                
-                html += '</tr>';
             });
-
-            html += '</tbody>';
+            
+            html += `</div>`;
             document.getElementById('tablaCalendario').innerHTML = html;
         }
 
