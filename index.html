@@ -2301,8 +2301,8 @@
             // 🔐 Registrar auditoría
             registrarAuditoria('clientes', 'INSERT', id, null, { nombre, apellido, email });
             
-            // 📤 Sincronizar a Supabase
-            syncToSupabase('clientes', nuevoCliente);
+            // 📤 Sincronizar a Supabase (DESACTIVADO TEMPORALMENTE)
+            // syncToSupabase('clientes', nuevoCliente);
 
             showSaveStatus();
             closeModal();
@@ -3765,10 +3765,24 @@
                 html += `<div style="background: white; padding: 8px; font-size: 11px; font-weight: 500; text-align: center; position: sticky; left: 0; z-index: 4; background: #f9f9f9;">${hora}:00</div>`;
                 diasSemana.forEach(d => {
                     const fechaStr = d.toISOString().split('T')[0];
-                    const citasHora = citasFiltradas.filter(c => c.datetime.startsWith(fechaStr) && new Date(c.datetime).getHours() === hora);
-                    const contenido = citasHora.length > 0 ? citasHora.map(c => {
+                    // Filtrar citas que ocurren en esta hora o después
+                    const citasEnEstaHora = citasFiltradas.filter(c => {
+                        const fechaCita = c.datetime.split('T')[0];
+                        if (fechaCita !== fechaStr) return false;
+                        const horaCita = new Date(c.datetime).getHours();
+                        // Mostrar si comienza en esta hora o si se superpone
+                        const horaFin = c.horaFin ? parseInt(c.horaFin.split(':')[0]) : horaCita + 1;
+                        return horaCita <= hora && hora < horaFin;
+                    });
+                    
+                    const contenido = citasEnEstaHora.length > 0 ? citasEnEstaHora.map(c => {
                         const color = obtenerColorServicio(c.servicio);
-                        return `<div style="background: ${color}; color: white; padding: 4px; font-size: 10px; border-radius: 3px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" onclick="abrirDetallesCita(${c.id})" title="${c.servicio}">${new Date(c.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ${c.servicio}</div>`;
+                        const horaCita = new Date(c.datetime).getHours();
+                        const minCita = new Date(c.datetime).getMinutes();
+                        const horaFin = c.horaFin ? c.horaFin : `${horaCita + 1}:00`;
+                        const duracion = c.horaFin ? `${new Date(c.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${horaFin}` : new Date(c.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        
+                        return `<div style="background: ${color}; color: white; padding: 4px; font-size: 10px; border-radius: 3px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" onclick="abrirDetallesCita(${c.id})" title="${c.servicio} (${duracion})">${duracion} ${c.servicio}</div>`;
                     }).join('') : '';
                     html += `<div style="background: white; padding: 4px; min-height: 60px; border: 1px solid #eee;">${contenido}</div>`;
                 });
