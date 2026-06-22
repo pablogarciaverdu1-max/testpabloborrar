@@ -516,6 +516,21 @@ function renderCal(){
 function slotClick(fecha,hora){openNewCita({fecha,hora});}
 function showCitaDetail(id){
   const c=DB.citas.get(id);const cl=cliById(c.cliente_id);const m=DB.motos.get(c.moto_id);
+  const stageColors={pendiente:'#1e3a5f',en_progreso:'#3d2f00',listo_entrega:'#2d1b69',entregado_pagado:'#14532d'};
+  const stageBorder={pendiente:'#3b82f6',en_progreso:'#f97316',listo_entrega:'#a855f7',entregado_pagado:'#22c55e'};
+  const stagesHtml=Object.entries(ESTADOS).map(([k,v])=>{
+    const active=c.estado===k;
+    return `<button onclick="setCitaEstadoCalendar('${c.id}','${k}')" style="
+      flex:1;padding:10px 6px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;
+      border:2px solid ${active?stageBorder[k]:'rgba(255,255,255,.1)'};
+      background:${active?stageColors[k]:'rgba(255,255,255,.03)'};
+      color:${active?'#fff':'#666'};
+      box-shadow:${active?`0 0 12px ${stageBorder[k]}44`:'none'};
+      letter-spacing:.02em;text-transform:uppercase;font-size:11px"
+      onmouseover="if(this.dataset.active!=='1')this.style.borderColor='rgba(255,255,255,.25)'"
+      onmouseout="if(this.dataset.active!=='1')this.style.borderColor='rgba(255,255,255,.1)'"
+      data-active="${active?1:0}">${v.label}</button>`;
+  }).join('');
   document.getElementById('citaDetailBody').innerHTML=`
     <div class="field"><label>Servicio</label>${servBadge(c.tipo_servicio)}</div>
     <div class="row2"><div class="field"><label>Fecha</label>${c.fecha_cita}</div><div class="field"><label>Hora</label>${c.hora_cita}</div></div>
@@ -523,9 +538,23 @@ function showCitaDetail(id){
     <div class="field"><label>Moto</label>${m?esc(m.marca+' '+m.modelo+' ('+m.matricula+')'):'—'}</div>
     <div class="field"><label>Mecánico</label>${mecName(c.mecanico_id)}</div>
     <div class="field"><label>Nota</label>${esc(c.nota)||'—'}</div>
-    <div class="field"><label>Estado</label>${estadoBadge(c.estado)}</div>
-    <button class="btn btn-danger" onclick="cancelarCita('${c.id}')">Cancelar cita</button>`;
+    <div class="field">
+      <label style="font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--txt2);margin-bottom:10px;display:block">ETAPA DE LA CITA</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${stagesHtml}</div>
+    </div>
+    <div style="margin-top:14px"><button class="btn btn-danger btn-sm" onclick="cancelarCita('${c.id}')">Eliminar cita</button></div>`;
   openModal('modalCitaDetail');
+}
+function setCitaEstadoCalendar(citaId,nuevoEstado){
+  const c=DB.citas.get(citaId);if(!c||c.estado===nuevoEstado)return;
+  if(nuevoEstado==='entregado_pagado'&&c.estado!=='entregado_pagado'){
+    openCompletar(citaId);
+    const check=setInterval(()=>{if(!document.getElementById('modalCompletar').classList.contains('open')){clearInterval(check);showCitaDetail(citaId);renderKanban();renderCal();}},200);
+    return;
+  }
+  DB.citas.update(citaId,{estado:nuevoEstado});
+  toast('Etapa actualizada','ok');
+  showCitaDetail(citaId);renderKanban();renderCal();
 }
 function cancelarCita(id){
   confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);closeModal('modalCitaDetail');renderCal();renderKanban();toast('Cita cancelada','warn');});
