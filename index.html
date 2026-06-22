@@ -904,49 +904,58 @@
         /* INFORMES */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+            padding: 20px 0;
         }
 
         .stat-card {
             background: white;
-            padding: 16px;
-            border-radius: 6px;
+            padding: 24px 20px;
+            border-radius: 8px;
             border: 1px solid #e5e5e5;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: 700;
             color: #333333;
+            margin-bottom: 12px;
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: 14px;
             color: #666;
-            margin-top: 8px;
+            font-weight: 500;
         }
 
         .informes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 24px;
+            grid-template-columns: 1fr;
+            gap: 40px;
             flex: 1;
+            padding: 20px 0;
         }
 
         .chart-container {
             background: white;
-            padding: 20px;
-            border-radius: 6px;
+            padding: 32px;
+            border-radius: 8px;
             border: 1px solid #e5e5e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .chart-title {
             font-size: 16px;
             font-weight: 700;
             margin-bottom: 16px;
+        }
+
+        #view-informes {
+            padding: 40px 50px !important;
         }
 
         /* MOBILE */
@@ -1178,6 +1187,18 @@
                             <input type="text" class="filter-input" id="searchInput" placeholder="Nombre, teléfono, matrícula..." onkeyup="filterClientes()">
                         </div>
                         <div class="filter-group">
+                            <label class="filter-label">🏍️ Marca Moto</label>
+                            <select class="filter-input" id="filterMarca" onchange="filterClientes()">
+                                <option value="">Todas las marcas</option>
+                                <option value="Zontes">Zontes</option>
+                                <option value="Yamaha">Yamaha</option>
+                                <option value="Honda">Honda</option>
+                                <option value="Suzuki">Suzuki</option>
+                                <option value="Ducati">Ducati</option>
+                                <option value="KTM">KTM</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
                             <label class="filter-label">📅 Filtrar por Entrega</label>
                             <div style="position: relative;">
                                 <input type="text" id="filterEntrega" class="filter-input" placeholder="Selecciona fecha" onclick="abrirCalendarioMini('filterEntrega')" readonly style="cursor: pointer;">
@@ -1216,6 +1237,13 @@
                             <tbody id="seguimientosList">
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- PAGINACIÓN -->
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0; padding: 15px;">
+                        <button class="btn" id="btnPagAnterior" style="background: #333; color: white; padding: 8px 16px;" onclick="paginaAnteriorSeguimientos()">← Anterior</button>
+                        <span id="paginaActualSeguimientos" style="font-weight: 600;">Página 1</span>
+                        <button class="btn" id="btnPagSiguiente" style="background: #333; color: white; padding: 8px 16px;" onclick="paginaSiguienteSeguimientos()">Siguiente →</button>
                     </div>
 
                     <!-- CALENDARIO -->
@@ -1878,15 +1906,18 @@
         function renderClientes() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const filterFecha = document.getElementById('filterEntrega').dataset.value || '';
+            const filterMarca = document.getElementById('filterMarca').value;
             
             let filtered = clients.filter(c => {
                 const matchSearch = (c.nombre + ' ' + c.apellido).toLowerCase().includes(search) ||
                                   c.telefono.toLowerCase().includes(search) ||
+                                  c.email.toLowerCase().includes(search) ||
                                   c.moto.matricula.toLowerCase().includes(search);
                 
                 const matchFecha = !filterFecha || c.fechaEntrega.split('T')[0] === filterFecha;
+                const matchMarca = !filterMarca || c.moto.marca === filterMarca;
                 
-                return matchSearch && matchFecha;
+                return matchSearch && matchFecha && matchMarca;
             });
 
             const list = document.getElementById('clientsList');
@@ -2349,6 +2380,7 @@
 
                         <div id="formularioTareaContainer" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
                             <h3 style="margin-bottom: 12px;" id="titulFormularioTarea">Crear Nueva Tarea</h3>
+                            <div id="mensajeValidacionTarea" style="display: none; background: #ffebee; color: #c62828; padding: 12px; border-radius: 4px; margin-bottom: 16px; border: 1px solid #ef5350;"></div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                                 <div class="form-group">
                                     <div class="form-field">
@@ -2366,11 +2398,17 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="form-field">
-                                        <label class="form-label">Hora</label>
+                                        <label class="form-label">Hora Inicio</label>
                                         <input type="time" class="form-input" id="seguimientoHora" value="08:00">
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <div class="form-field">
+                                        <label class="form-label">Hora Fin</label>
+                                        <input type="time" class="form-input" id="seguimientoHoraFin" value="09:00">
+                                    </div>
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / -1;">
                                     <div class="form-field">
                                         <label class="form-label">Descripción Tarea</label>
                                         <textarea class="form-input" id="seguimientoDescripcionTarea" style="min-height: 80px; resize: vertical;" placeholder="Describe la tarea..."></textarea>
@@ -3645,8 +3683,9 @@
                     telefono.includes(busqueda) || 
                     matricula.includes(busqueda);
                 
-                // Filtro servicio
-                const coincideServicio = !servicioSeleccionado || o.servicio === servicioSeleccionado;
+            // Filtro servicio - comparación robusta
+            const coincideServicio = !servicioSeleccionado || 
+                (o.servicio && o.servicio.trim() === servicioSeleccionado.trim());
                 
                 // Filtro mecánico
                 const coincideMecanico = !mecanicoSeleccionado || o.mecanico === mecanicoSeleccionado;
@@ -3675,6 +3714,7 @@
                                         <div class="order-service" style="margin-top: 8px;">🔧 ${o.servicio}</div>
                                         <div class="order-info">🏍️ ${client.moto.marca} ${client.moto.modelo}</div>
                                         <div class="order-info">Matrícula: ${client.moto.matricula}</div>
+                                        ${o.estado === 'entregado-pagado' && o.importe ? `<div class="order-info" style="margin-top: 8px; font-weight: 600; color: #27ae60; background: #d5f4e6; padding: 6px; border-radius: 4px;">💰 ${o.importe.toFixed(2)}€</div>` : ''}
                                     </div>
                                 `;
                             }).join('')}
@@ -4205,8 +4245,23 @@
             // Ordenar por fecha más cercana a más lejana
             filtered.sort((a, b) => new Date(a.fechaSeguimiento) - new Date(b.fechaSeguimiento));
 
+            // PAGINACIÓN
+            const totalPages = Math.ceil(filtered.length / itemsPorPaginaSeguimientos);
+            if (paginaActualSeguimientos > totalPages && totalPages > 0) {
+                paginaActualSeguimientos = totalPages;
+            }
+            
+            const inicio = (paginaActualSeguimientos - 1) * itemsPorPaginaSeguimientos;
+            const fin = inicio + itemsPorPaginaSeguimientos;
+            const filtroPaginado = filtered.slice(inicio, fin);
+
+            // Actualizar botones de paginación
+            document.getElementById('btnPagAnterior').disabled = paginaActualSeguimientos === 1;
+            document.getElementById('btnPagSiguiente').disabled = paginaActualSeguimientos >= totalPages;
+            document.getElementById('paginaActualSeguimientos').textContent = `Página ${paginaActualSeguimientos} de ${totalPages || 1}`;
+
             const tbody = document.getElementById('seguimientosList');
-            tbody.innerHTML = filtered.map(s => {
+            tbody.innerHTML = filtroPaginado.map(s => {
                 const cliente = clients.find(c => c.id === s.clienteId);
                 const nombreCliente = cliente ? `${cliente.nombre} ${cliente.apellido}` : 'Cliente no encontrado';
                 
@@ -4252,6 +4307,19 @@
         }
 
         function filtrarSeguimientos() {
+            paginaActualSeguimientos = 1;
+            renderSeguimientosGlobales();
+        }
+
+        function paginaAnteriorSeguimientos() {
+            if (paginaActualSeguimientos > 1) {
+                paginaActualSeguimientos--;
+                renderSeguimientosGlobales();
+            }
+        }
+
+        function paginaSiguienteSeguimientos() {
+            paginaActualSeguimientos++;
             renderSeguimientosGlobales();
         }
 
@@ -4387,9 +4455,33 @@
             const descripcionTarea = document.getElementById('seguimientoDescripcionTarea').value;
             const fechaSeguimiento = document.getElementById('seguimientoFechaSeguimiento').value;
             const hora = document.getElementById('seguimientoHora').value;
+            const horaFin = document.getElementById('seguimientoHoraFin').value;
+            const mensajeDiv = document.getElementById('mensajeValidacionTarea');
 
-            if (!mecanico || !descripcionTarea || !fechaSeguimiento || !hora) {
-                alert('Todos los campos son obligatorios');
+            if (!mecanico || !descripcionTarea || !fechaSeguimiento || !hora || !horaFin) {
+                mensajeDiv.style.display = 'block';
+                mensajeDiv.textContent = '⚠️ Todos los campos son obligatorios';
+                return;
+            }
+
+            // VALIDAR: No puede haber otra tarea a la misma hora el mismo día
+            const conflicto = seguimientos.find(s => 
+                s.clienteId === currentClientId && 
+                s.fechaSeguimiento === fechaSeguimiento && 
+                s.hora === hora &&
+                !s.completado
+            );
+
+            if (conflicto) {
+                mensajeDiv.style.display = 'block';
+                mensajeDiv.textContent = `⚠️ Ya existe una tarea para hoy a las ${hora}. No se puede crear otra a la misma hora.`;
+                return;
+            }
+
+            // Validar que horaFin sea posterior a hora
+            if (horaFin <= hora) {
+                mensajeDiv.style.display = 'block';
+                mensajeDiv.textContent = '⚠️ La hora de fin debe ser posterior a la hora de inicio';
                 return;
             }
 
@@ -4403,6 +4495,7 @@
                 estadoMoto: '',
                 fechaSeguimiento: fechaSeguimiento,
                 hora: hora,
+                horaFin: horaFin,
                 completado: false,
                 fechaCreacion: new Date().toISOString().split('T')[0]
             };
@@ -4414,6 +4507,8 @@
             document.getElementById('seguimientoDescripcionTarea').value = '';
             document.getElementById('seguimientoFechaSeguimiento').value = '';
             document.getElementById('seguimientoHora').value = '08:00';
+            document.getElementById('seguimientoHoraFin').value = '09:00';
+            mensajeDiv.style.display = 'none';
 
             ocultarFormularioTarea();
             renderSeguimientosCliente();
@@ -4505,6 +4600,8 @@
 
         // ==================== CALENDARIO ====================
         let fechaActualCalendario = new Date();
+        let paginaActualSeguimientos = 1;
+        const itemsPorPaginaSeguimientos = 10;
 
         function getLunesActual(fecha) {
             const date = new Date(fecha);
