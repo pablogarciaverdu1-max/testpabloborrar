@@ -159,6 +159,7 @@ tr.clickable:hover{background:var(--bg3)}
 .toast{background:var(--modal);border:1px solid var(--border2);border-left:4px solid var(--accent);padding:12px 18px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.7);min-width:220px;animation:slidein .3s}
 .toast.ok{border-left-color:#22c55e}.toast.err{border-left-color:#ef4444}.toast.warn{border-left-color:#f97316}
 @keyframes slidein{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+@keyframes pulse{0%,100%{box-shadow:0 0 4px #ef4444}50%{box-shadow:0 0 10px #ef4444,0 0 4px #ef4444}}
 
 .recambio-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
 .recambio-row .rn{flex:1}
@@ -327,6 +328,10 @@ tr.clickable:hover{background:var(--bg3)}
 
 <div class="modal-bg" id="modalOrden"><div class="modal" style="max-width:760px"><div class="modal-head"><h2 id="ordenTitle">Orden de trabajo</h2><button class="x" onclick="closeModal('modalOrden')">×</button></div>
   <div id="ordenBody"></div>
+</div></div>
+
+<div class="modal-bg" id="modalSolicitudes"><div class="modal" style="max-width:820px"><div class="modal-head"><h2>Solicitudes de reserva</h2><button class="x" onclick="closeModal('modalSolicitudes')">×</button></div>
+  <div id="modalSolicitudesBody" style="padding:4px 0"></div>
 </div></div>
 
 <div class="modal-bg" id="modalTask"><div class="modal"><div class="modal-head"><h2>Detalle tarea</h2><button class="x" onclick="closeModal('modalTask')">×</button></div>
@@ -1461,9 +1466,9 @@ function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;
 function copiarLinkCitas(){
   syncCitasToStorage();
   const url=window.location.href.replace(/[^/]*$/,'')+'booking.html';
-  navigator.clipboard.writeText(url).then(()=>toast('Link copiado','ok')).catch(()=>{
-    prompt('Copia este link:',url);
-  });
+  window.open(url,'_blank');
+  try{navigator.clipboard.writeText(url).then(()=>toast('Página abierta y link copiado','ok')).catch(()=>toast('Página de reservas abierta','ok'));}
+  catch{toast('Página de reservas abierta','ok');}
 }
 
 function checkSolicitudes(){
@@ -1484,34 +1489,69 @@ function renderSolicitudes(pending){
   const el=document.getElementById('solicitudesPanel');
   if(!el)return;
   if(!pending||!pending.length){el.innerHTML='';return;}
+  el.innerHTML=`<div style="background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 6px #ef4444;animation:pulse 1.5s infinite"></div>
+      <span style="font-size:13px;font-weight:700;color:var(--txt)">${pending.length} solicitud${pending.length!==1?'es':''} de reserva pendiente${pending.length!==1?'s':''}</span>
+    </div>
+    <button class="btn btn-sm" style="background:#ef4444;border-color:#ef4444;color:#fff;flex-shrink:0" onclick="openModalSolicitudes()">Ver solicitudes</button>
+  </div>`;
+}
+
+function openModalSolicitudes(){
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+  const pending=list.filter(r=>r.estado==='pendiente_confirmacion');
   const DIAS_N=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   const MESES_N=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  el.innerHTML=`<div style="background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.3);border-radius:12px;padding:16px;margin-bottom:16px">
-    <div style="font-size:12px;font-weight:700;color:#ef4444;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="7"/><path d="M8 5v3.5l2 2" stroke-linecap="round"/></svg>
-      ${pending.length} SOLICITUD${pending.length!==1?'ES':''} PENDIENTE${pending.length!==1?'S':''} DE CONFIRMAR
-    </div>
-    ${pending.map(r=>{
-      const d=new Date(r.fecha+'T12:00:00');
-      const dLabel=`${DIAS_N[d.getDay()]} ${d.getDate()} ${MESES_N[d.getMonth()]} · ${r.hora}`;
-      return `<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:200px">
-          <div style="font-weight:700;font-size:14px;color:var(--txt)">${esc(r.nombre)}</div>
-          <div style="font-size:12px;color:var(--accent-blue);margin:2px 0">${dLabel}</div>
-          <div style="font-size:12px;color:var(--txt2);margin-top:4px">
-            📞 ${esc(r.telefono)}${r.correo?' · '+esc(r.correo):''}
-          </div>
-          <div style="font-size:12px;color:var(--txt2)">🏍 ${esc(r.moto_marca)} ${esc(r.moto_modelo)}${r.moto_matricula?' · '+esc(r.moto_matricula):''}</div>
-          <div style="font-size:12px;color:var(--txt2)">🔧 ${esc(r.servicio)}</div>
-          ${r.descripcion?`<div style="font-size:12px;color:var(--txt2);font-style:italic;margin-top:4px">"${esc(r.descripcion)}"</div>`:''}
-        </div>
-        <div style="display:flex;gap:6px;flex-shrink:0;align-self:flex-start">
-          <button class="btn btn-sm" style="background:#22c55e;border-color:#22c55e;color:#fff" onclick="acceptSolicitud('${r.id}')">Aceptar</button>
-          <button class="btn btn-sm btn-danger" onclick="rejectSolicitud('${r.id}')">Rechazar</button>
-        </div>
-      </div>`;
-    }).join('')}
-  </div>`;
+  document.getElementById('modalSolicitudesBody').innerHTML=pending.length===0?
+    '<div style="text-align:center;padding:40px;color:var(--txt2)">No hay solicitudes pendientes</div>':
+    `<table style="width:100%;border-collapse:collapse">
+      <thead><tr style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border)">
+        <th style="padding:8px 10px;text-align:left;font-weight:700">Fecha / Hora</th>
+        <th style="padding:8px 10px;text-align:left;font-weight:700">Cliente</th>
+        <th style="padding:8px 10px;text-align:left;font-weight:700">Moto</th>
+        <th style="padding:8px 10px;text-align:left;font-weight:700">Servicio</th>
+        <th style="padding:8px 10px;text-align:center;font-weight:700">Acción</th>
+      </tr></thead>
+      <tbody>${pending.map(r=>{
+        const d=new Date(r.fecha+'T12:00:00');
+        const dLabel=`${DIAS_N[d.getDay()]} ${d.getDate()} ${MESES_N[d.getMonth()]}`;
+        return `<tr style="border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s" onclick="toggleSolRow('${r.id}')" id="solrow_${r.id}">
+          <td style="padding:10px 10px;white-space:nowrap">
+            <div style="font-weight:700;font-size:13px;color:var(--accent-blue)">${r.hora}</div>
+            <div style="font-size:11px;color:var(--txt2)">${dLabel}</div>
+          </td>
+          <td style="padding:10px 10px">
+            <div style="font-weight:600;font-size:13px;color:var(--txt)">${esc(r.nombre)}</div>
+            <div style="font-size:11px;color:var(--txt2)">${esc(r.telefono)}</div>
+          </td>
+          <td style="padding:10px 10px;font-size:12px;color:var(--txt2)">${esc(r.moto_marca)} ${esc(r.moto_modelo)}</td>
+          <td style="padding:10px 10px;font-size:12px;color:var(--txt2)">${esc(r.servicio)}</td>
+          <td style="padding:10px 10px;text-align:center;white-space:nowrap">
+            <button class="btn btn-sm" style="background:#22c55e;border-color:#22c55e;color:#fff" onclick="event.stopPropagation();acceptSolicitud('${r.id}')">Aceptar</button>
+            <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="event.stopPropagation();rejectSolicitud('${r.id}')">Rechazar</button>
+          </td>
+        </tr>
+        <tr id="soldetail_${r.id}" style="display:none;background:var(--bg3)">
+          <td colspan="5" style="padding:12px 14px;font-size:12px;color:var(--txt2);border-bottom:1px solid var(--border)">
+            ${r.correo?`<b>Correo:</b> ${esc(r.correo)} &nbsp;·&nbsp; `:''}
+            <b>Matrícula:</b> ${r.moto_matricula||'—'} &nbsp;·&nbsp;
+            <b>Cilindrada:</b> ${r.moto_cilindrada||'—'} &nbsp;·&nbsp;
+            <b>Km:</b> ${r.moto_km?r.moto_km.toLocaleString()+' km':'—'}
+            ${r.descripcion?`<br><b>Descripción:</b> <i>"${esc(r.descripcion)}"</i>`:''}
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  openModal('modalSolicitudes');
+}
+function toggleSolRow(rid){
+  const row=document.getElementById('soldetail_'+rid);
+  if(!row)return;
+  const isOpen=row.style.display!=='none';
+  document.querySelectorAll('[id^="soldetail_"]').forEach(r=>r.style.display='none');
+  if(!isOpen)row.style.display='table-row';
 }
 
 function acceptSolicitud(rid){
@@ -1534,9 +1574,16 @@ function acceptSolicitud(rid){
   r.estado='confirmada';
   localStorage.setItem('gv_reservas',JSON.stringify(list));
   syncCitasToStorage();
+  // Navigate calendar to the week of the new cita
+  calBaseDate=new Date(r.fecha+'T12:00:00');
   renderCal();renderKanban();
   checkSolicitudes();
-  toast('Cita creada en el calendario','ok');
+  // Switch to citas section so user sees it
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-citas').classList.add('active');
+  document.querySelector('[data-sec="citas"]').classList.add('active');
+  toast('Cita creada — calendario actualizado','ok');
 }
 
 function rejectSolicitud(rid){
