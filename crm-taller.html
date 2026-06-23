@@ -99,8 +99,11 @@ tr.clickable:hover{background:var(--bg3)}
 .cd-left{width:240px;min-width:240px;border-right:1px solid var(--border);padding:24px;overflow-y:auto}
 .cd-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .avatar{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin:0 auto 14px;letter-spacing:-.01em;position:relative;border:2px solid rgba(255,255,255,.1);box-shadow:0 0 20px rgba(0,0,0,.5)}
-.cd-info{font-size:13px;line-height:1.9;color:var(--txt2)}
-.cd-info b{color:var(--txt);display:block;font-size:12px}
+.cd-info{font-size:13px;color:var(--txt2)}
+.cd-info .cd-row{padding:8px 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
+.cd-info .cd-row:last-child{border-bottom:none}
+.cd-info b{color:rgba(255,255,255,.45);display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1px}
+.cd-info .cd-val{color:var(--txt);font-size:13px;font-weight:500}
 .quick-stats{display:flex;gap:10px;margin:16px 0}
 .qs{flex:1;background:var(--bg);border-radius:8px;padding:10px;text-align:center}
 .qs .n{font-size:20px;font-weight:700;color:#fff;text-shadow:0 0 14px rgba(255,255,255,.2)}
@@ -170,7 +173,7 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="nav-item active" data-sec="citas"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4" stroke-linecap="round"/></svg>Citas</div>
     <div class="nav-item" data-sec="flujo"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="3.5" height="12" rx="1"/><rect x="6.25" y="2" width="3.5" height="8" rx="1"/><rect x="11.5" y="2" width="3.5" height="10" rx="1"/></svg>Flujo Citas</div>
     <div class="nav-item" data-sec="clientes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke-linecap="round"/></svg>Clientes</div>
-    <div class="nav-item" data-sec="seguimientos"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Seguimientos</div>
+    <div class="nav-item" data-sec="seguimientos"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Tareas</div>
     <div class="nav-item" data-sec="informes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg>Informes</div>
   </div>
   <div class="sidebar-bottom">
@@ -228,7 +231,7 @@ tr.clickable:hover{background:var(--bg3)}
 
   <!-- SEGUIMIENTOS -->
   <div class="section" id="sec-seguimientos">
-    <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>Seguimientos</h1></div><div class="page-sub">Tareas y calendario de tareas</div>
+    <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>Tareas</h1></div><div class="page-sub">Gestión de tareas y seguimientos</div>
     <div class="card" style="margin-bottom:24px">
       <div class="section-title">Lista de tareas</div>
       <table><thead><tr><th>✓</th><th>Vencimiento</th><th>Tarea</th><th>Mecánico</th><th>Creación</th></tr></thead>
@@ -524,7 +527,9 @@ function renderCal(){
       h+=`<td class="slot"${rsAttr} style="position:relative${rsStyle}" onclick="slotClick('${fecha}','${hora}')">`;
       cs.forEach(c=>{const cl=cliById(c.cliente_id);const sv=SERVICIOS[c.tipo_servicio];
         const chipH=rs>1?`height:calc(100% - 4px);display:flex;align-items:center;`:'';
-        h+=`<div class="chip" style="background:${sv.color};${chipH}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${esc(cliFull(cl))} · ${sv.label}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
+        const isRev=c.tipo_servicio==='primera_revision';
+        const stripeOverlay=isRev?`,repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0,rgba(255,255,255,.12) 3px,transparent 3px,transparent 9px)`:'' ;
+        h+=`<div class="chip" style="background:${sv.color}${stripeOverlay};${chipH}${isRev?';outline:1px solid rgba(255,255,255,.4)':''}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${esc(cliFull(cl))} · ${sv.label}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
       h+='</td>';
     });
     h+='</tr>';
@@ -740,11 +745,25 @@ function renderClienteModal(){
       <span style="text-shadow:0 1px 4px rgba(0,0,0,.5)">${esc(initials.toUpperCase())}</span>
     </div>
     <div style="text-align:center;font-weight:700;font-size:16px;margin-bottom:14px">${esc(cliFull(c))}</div>
-    <div class="cd-info"><b>Teléfono</b>${esc(c.telefono)}<b>Correo</b>${esc(c.correo)||'—'}<b>DNI</b>${esc(c.dni||'—')}<b>Alta</b>${c.fecha_creacion}</div>
+    <div class="cd-info">
+      <div class="cd-row"><b>Teléfono</b><span class="cd-val">${esc(c.telefono)||'—'}</span></div>
+      <div class="cd-row"><b>Correo</b><span class="cd-val">${esc(c.correo)||'—'}</span></div>
+      <div class="cd-row"><b>DNI</b><span class="cd-val">${esc(c.dni||'—')}</span></div>
+      <div class="cd-row"><b>Alta</b><span class="cd-val">${c.fecha_creacion}</span></div>
+    </div>
     <div class="quick-stats"><div class="qs"><div class="n">${cs.length}</div><div class="l">Citas</div></div><div class="qs"><div class="n">${ms.length}</div><div class="l">Motos</div></div></div>
     <button class="btn" style="width:100%" onclick="curTab='datos';renderClienteModal()">Editar datos</button>`;
-  const tabs=[['datos','Datos personales'],['motos','Datos Moto/s'],['citas','Citas'],['recambios','Recambios'],['tareas','Tareas'],['orden','Orden de trabajo'],['historial','Historial servicios']];
-  document.getElementById('cdTabs').innerHTML=tabs.map(t=>`<div class="tab ${curTab===t[0]?'active':''}" onclick="curTab='${t[0]}';renderClienteModal()">${t[1]}</div>`).join('');
+  const tabIcons={
+    datos:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke-linecap="round"/></svg>`,
+    motos:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="4" cy="11" rx="3" ry="3"/><ellipse cx="12" cy="11" rx="3" ry="3"/><path d="M7 11h2l2-5H7l-1 2h2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    citas:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4" stroke-linecap="round"/></svg>`,
+    recambios:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2" stroke-linecap="round"/><path d="M3.5 3.5l1.4 1.4M11.1 11.1l1.4 1.4M3.5 12.5l1.4-1.4M11.1 4.9l1.4-1.4" stroke-linecap="round"/></svg>`,
+    tareas:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    orden:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4" stroke-linecap="round"/></svg>`,
+    historial:`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  };
+  const tabs=[['datos','Datos personales'],['motos','Datos Moto/s'],['citas','Citas'],['recambios','Recambios'],['tareas','Tareas'],['orden','Orden de trabajo'],['historial','Historial']];
+  document.getElementById('cdTabs').innerHTML=tabs.map(t=>`<div class="tab ${curTab===t[0]?'active':''}" onclick="curTab='${t[0]}';renderClienteModal()" style="display:flex;align-items:center;gap:5px">${tabIcons[t[0]]}${t[1]}</div>`).join('');
   const ct=document.getElementById('cdContent');
   if(curTab==='datos')ct.innerHTML=tabDatos(c);
   else if(curTab==='motos')ct.innerHTML=tabMotos(c);
@@ -794,8 +813,8 @@ function addAnot(id){const t=document.getElementById('mo_nota_'+id).value.trim()
 function tabCitas(c){
   const cs=DB.citas.byCliente(c.id).slice().sort((a,b)=>b.fecha_cita.localeCompare(a.fecha_cita));
   const estadoOpts=Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
-  const rows=cs.map(x=>`<tr>
-    <td>${x.fecha_cita}</td><td>${x.hora_cita}</td><td>${servBadge(x.tipo_servicio)}</td><td>${mecName(x.mecanico_id)}</td>
+  const rows=cs.map(x=>`<tr data-cita-id="${x.id}">
+    <td>${x.fecha_cita}</td><td>${x.hora_cita}${x.hora_fin?' – '+x.hora_fin:''}</td><td>${servBadge(x.tipo_servicio)}</td><td>${mecName(x.mecanico_id)}</td>
     <td><select style="padding:4px 8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg)" onchange="cambiarEstadoCita('${x.id}',this.value)">
       ${Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}" ${x.estado===k?'selected':''}>${v.label}</option>`).join('')}
     </select></td>
@@ -948,7 +967,9 @@ function renderKanban(){
   const fs=document.getElementById('flujoServicio').value;const fm=document.getElementById('flujoMecanico').value;
   const ff=document.getElementById('flujoFecha').value;
   const cols=Object.keys(ESTADOS);
-  const colColors={pendiente:'#1e3a5f',en_progreso:'#3d2f00',listo_entrega:'#2d1b69',entregado_pagado:'#14532d'};
+  const colColors={pendiente:'#1e3a5f',en_progreso:'#7c4a00',listo_entrega:'#3b1a6e',entregado_pagado:'#14532d'};
+  const colBorders={pendiente:'#3b82f6',en_progreso:'#f97316',listo_entrega:'#a855f7',entregado_pagado:'#22c55e'};
+  const colBg={pendiente:'rgba(59,130,246,.03)',en_progreso:'rgba(249,115,22,.03)',listo_entrega:'rgba(168,85,247,.03)',entregado_pagado:'rgba(34,197,94,.03)'};
   let h='';
   cols.forEach(estado=>{
     const items=citas.filter(c=>{
@@ -957,11 +978,11 @@ function renderKanban(){
       const matchQ=!q||cliFull(cl).toLowerCase().includes(q)||(cl.telefono||'').includes(q)||(cl.dni||'').toLowerCase().includes(q)||(m&&(m.matricula||'').toLowerCase().includes(q));
       return matchQ&&(!fs||c.tipo_servicio===fs)&&(!ff||c.fecha_cita===ff)&&(!fm||c.mecanico_id===fm);
     });
-    h+=`<div class="kcol"><div class="kcol-head" style="background:${colColors[estado]}"><span>${ESTADOS[estado].label}</span><span>${items.length}</span></div>
-      <div class="kcol-body" data-estado="${estado}" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="kDrop(event,'${estado}')">`;
+    h+=`<div class="kcol" style="border:1px solid ${colBorders[estado]}33"><div class="kcol-head" style="background:${colColors[estado]};border-bottom:1px solid ${colBorders[estado]}55"><span>${ESTADOS[estado].label}</span><span>${items.length}</span></div>
+      <div class="kcol-body" style="background:${colBg[estado]}" data-estado="${estado}" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="kDrop(event,'${estado}')">`;
     items.forEach(c=>{
       const cl=cliById(c.cliente_id);const m=DB.motos.get(c.moto_id);
-      h+=`<div class="kcard" draggable="true" ondragstart="kDrag(event,'${c.id}')" onclick="kCardDetail('${c.id}')">
+      h+=`<div class="kcard" id="kc-${c.id}" style="border:1.5px solid ${colBorders[estado]}66" draggable="true" ondragstart="kDrag(event,'${c.id}')" onclick="kCardDetail('${c.id}')">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
           <div class="nm">${esc(cliFull(cl))}</div>
           <button onclick="event.stopPropagation();deleteCitaKanban('${c.id}')" title="Eliminar cita" style="background:none;border:none;cursor:pointer;color:#555;font-size:14px;line-height:1;padding:0 2px;flex-shrink:0;transition:.15s" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#555'">&#x2715;</button>
@@ -994,6 +1015,18 @@ function kCardDetail(id){
   const c=DB.citas.get(id);
   curCliente=c.cliente_id;curTab='citas';recState={};
   renderClienteModal();openModal('modalCliente');
+  setTimeout(()=>{
+    const row=document.querySelector(`tr[data-cita-id="${id}"]`);
+    if(!row)return;
+    row.style.transition='none';
+    row.style.background='rgba(59,130,246,0.22)';
+    row.style.boxShadow='inset 0 0 0 1px rgba(59,130,246,0.5)';
+    row.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>{
+      row.style.transition='background 1.5s ease, box-shadow 1.5s ease';
+      row.style.background='';row.style.boxShadow='';
+    },9000);
+  },80);
 }
 let completarCustom=[],completarCita=null;
 const STD_SERV=['Cambio aceite','Pastillas freno','Revisión general','Cambio filtros','Ajuste cadena','Cambio neumáticos','Diagnóstico'];
