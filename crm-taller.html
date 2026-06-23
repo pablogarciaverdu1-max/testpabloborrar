@@ -273,12 +273,17 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg><h1>Informes</h1></div><div class="page-sub">Estadísticas y KPIs</div>
     <div class="kpi-grid" id="kpiGrid"></div>
     <div class="charts2" style="margin-bottom:20px">
-      <div class="card"><div class="section-title" style="margin-top:0">Embudo de etapas</div><div id="funnelEstados"></div></div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+          <div class="section-title" style="margin:0">Embudo de etapas</div>
+          <select id="funnelMecFiltro" onchange="renderInformes()" style="font-size:12px;padding:6px 10px;min-width:150px"><option value="">Todos los mecánicos</option></select>
+        </div>
+        <div id="funnelEstados"></div>
+      </div>
       <div class="card"><div class="section-title" style="margin-top:0">Tiempo medio por etapa <span style="font-size:11px;font-weight:400;color:var(--txt2)">(días desde fecha de cita)</span></div><div id="funnelTiempo"></div></div>
     </div>
-    <div class="charts2">
+    <div style="margin-bottom:20px">
       <div class="card"><div class="section-title" style="margin-top:0">Citas por tipo de servicio</div><div id="chartServicio"></div></div>
-      <div class="card"><div class="section-title" style="margin-top:0">Distribución por estado</div><div id="chartEstado"></div></div>
     </div>
     <div class="card" style="margin-bottom:24px"><div class="section-title" style="margin-top:0">Últimas 10 citas</div>
       <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Mecánico</th><th>Estado</th></tr></thead><tbody id="informeCitas"></tbody></table>
@@ -734,6 +739,7 @@ function populateFilters(){
   document.getElementById('cliFiltroEstado').innerHTML='<option value="">Estado cita</option>'+es;
   document.getElementById('flujoServicio').innerHTML='<option value="">Tipo servicio</option>'+sv;
   document.getElementById('flujoMecanico').innerHTML='<option value="">Mecánico</option>'+MECANICOS.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
+  document.getElementById('funnelMecFiltro').innerHTML='<option value="">Todos los mecánicos</option>'+MECANICOS.map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
 }
 function renderClientes(){
   const q=(document.getElementById('cliSearch').value||'').toLowerCase().trim();
@@ -1139,11 +1145,13 @@ function renderInformes(){
     <div class="kpi"><div class="n">${pagadas.length}</div><div class="l">Entregadas/Pagadas</div></div>`;
 
   // ---- FUNNEL etapas ----
+  const funnelMec=document.getElementById('funnelMecFiltro').value;
+  const citasFunnel=funnelMec?citas.filter(c=>c.mecanico_id===funnelMec):citas;
   const ordenFunnel=['pendiente','en_progreso','listo_entrega','entregado_pagado'];
   const fColors={pendiente:'#3b82f6',en_progreso:'#f97316',listo_entrega:'#a855f7',entregado_pagado:'#22c55e'};
   const fBg={pendiente:'rgba(59,130,246,.18)',en_progreso:'rgba(249,115,22,.18)',listo_entrega:'rgba(168,85,247,.18)',entregado_pagado:'rgba(34,197,94,.18)'};
-  const counts={};ordenFunnel.forEach(k=>counts[k]=citas.filter(c=>c.estado===k).length);
-  const totalFunnel=citas.length||1;
+  const counts={};ordenFunnel.forEach(k=>counts[k]=citasFunnel.filter(c=>c.estado===k).length);
+  const totalFunnel=citasFunnel.length||1;
   const maxCount=Math.max(1,...Object.values(counts));
   const widths={pendiente:100,en_progreso:82,listo_entrega:64,entregado_pagado:48};
   let fHtml='<div class="funnel-wrap">';
@@ -1180,7 +1188,7 @@ function renderInformes(){
   const todayMs=new Date(today()).getTime();
   const tiempos={};
   ordenFunnel.forEach(estado=>{
-    const grupo=citas.filter(c=>c.estado===estado);
+    const grupo=citasFunnel.filter(c=>c.estado===estado);
     if(!grupo.length){tiempos[estado]=null;return;}
     const avg=grupo.reduce((s,c)=>{
       const diff=(todayMs-new Date(c.fecha_cita).getTime())/(1000*60*60*24);
@@ -1190,7 +1198,7 @@ function renderInformes(){
   });
   const maxT=Math.max(1,...Object.values(tiempos).filter(v=>v!==null));
   // Also compute avg total pipeline (pendiente -> listo_entrega only, not pagadas)
-  const activePipeline=citas.filter(c=>c.estado!=='entregado_pagado');
+  const activePipeline=citasFunnel.filter(c=>c.estado!=='entregado_pagado');
   const avgTotal=activePipeline.length?Math.round(activePipeline.reduce((s,c)=>{return s+(todayMs-new Date(c.fecha_cita).getTime())/(1000*60*60*24);},0)/activePipeline.length*10)/10:0;
 
   let tHtml=`<div style="margin-bottom:14px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:8px;display:flex;align-items:center;gap:12px">
@@ -1220,10 +1228,7 @@ function renderInformes(){
   const cs={};Object.keys(SERVICIOS).forEach(k=>cs[k]=0);citas.forEach(c=>cs[c.tipo_servicio]++);
   const maxS=Math.max(1,...Object.values(cs));
   document.getElementById('chartServicio').innerHTML=Object.entries(SERVICIOS).map(([k,v])=>`<div class="bar-row"><div class="bar-label">${v.label}</div><div class="bar-track"><div class="bar-fill" style="width:${cs[k]/maxS*100}%;background:${v.color}">${cs[k]}</div></div></div>`).join('');
-  const es={};Object.keys(ESTADOS).forEach(k=>es[k]=0);citas.forEach(c=>es[c.estado]++);
-  const maxE=Math.max(1,...Object.values(es));
-  document.getElementById('chartEstado').innerHTML=Object.entries(ESTADOS).map(([k,v])=>`<div class="bar-row"><div class="bar-label">${v.label}</div><div class="bar-track"><div class="bar-fill" style="width:${es[k]/maxE*100}%;background:${v.color}">${es[k]}</div></div></div>`).join('');
-  const ult=citas.slice().sort((a,b)=>(b.fecha_cita+b.hora_cita).localeCompare(a.fecha_cita+a.hora_cita)).slice(0,10);
+const ult=citas.slice().sort((a,b)=>(b.fecha_cita+b.hora_cita).localeCompare(a.fecha_cita+a.hora_cita)).slice(0,10);
   document.getElementById('informeCitas').innerHTML=ult.map(c=>`<tr><td>${c.fecha_cita}</td><td>${esc(cliFull(cliById(c.cliente_id)))}</td><td>${servBadge(c.tipo_servicio)}</td><td>${mecName(c.mecanico_id)}</td><td>${estadoBadge(c.estado)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">—</td></tr>';
   const lim=dateOffset(7);
   const prox=tareas.filter(t=>!t.completada&&t.fecha_vencimiento>=today()&&t.fecha_vencimiento<=lim).slice().sort((a,b)=>a.fecha_vencimiento.localeCompare(b.fecha_vencimiento));
