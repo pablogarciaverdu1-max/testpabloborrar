@@ -963,9 +963,21 @@ function openOrdenForm(cid,oid){
       <div class="field"><label>Cliente</label><input value="${esc(cliFull(c))}" disabled></div>
       <div class="field"><label>Teléfono</label><input value="${esc(c.telefono)}" disabled></div>
     </div>
-    <div class="row2">
-      <div class="field"><label>Moto</label><select id="ordMoto">${ms.map(m=>`<option value="${m.id}" ${existing&&existing.moto_id===m.id?'selected':''}>${esc(m.marca+' '+m.modelo+' – '+m.matricula)}</option>`).join('')}</select></div>
-      <div class="field"><label>Kilómetros</label><input type="number" id="ordKm" value="${existing?existing.kilometros:''}"></div>
+    <div class="field">
+      <label>Moto</label>
+      <select id="ordMoto" onchange="ordMotoChange()">${ms.map(m=>`<option value="${m.id}" ${existing&&existing.moto_id===m.id?'selected':''}>${esc(m.marca+' '+m.modelo+' – '+m.matricula)}</option>`).join('')}</select>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:8px 0 4px" id="ordMotoPanel">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent-blue);font-weight:700;margin-bottom:10px">Datos del vehículo</div>
+      <div class="row2">
+        <div class="field"><label>Marca</label><input id="ordMMarca" oninput="ordenCtx.motoEdit=ordenCtx.motoEdit||{};ordenCtx.motoEdit.marca=this.value"></div>
+        <div class="field"><label>Modelo</label><input id="ordMModelo" oninput="ordenCtx.motoEdit=ordenCtx.motoEdit||{};ordenCtx.motoEdit.modelo=this.value"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Matrícula</label><input id="ordMMat" oninput="ordenCtx.motoEdit=ordenCtx.motoEdit||{};ordenCtx.motoEdit.matricula=this.value"></div>
+        <div class="field"><label>Kilómetros</label><input type="number" id="ordKm" oninput="ordenCtx.motoEdit=ordenCtx.motoEdit||{};ordenCtx.motoEdit.kilometros=+this.value"></div>
+      </div>
+      <div class="field"><label>Bastidor / VIN <span style="font-size:10px;color:var(--txt2)">(no editable)</span></label><input id="ordMVin" disabled style="opacity:.6"></div>
     </div>
     <div class="section-title" style="margin-top:10px">Servicios predefinidos</div>
     <div class="srv-grid" id="srvGrid">${SERVICIOS_GALERIA.map(s=>`<div class="srv-card" id="sgc_${s.id}" onclick="toggleSrvCard('${s.id}')">
@@ -995,7 +1007,21 @@ function openOrdenForm(cid,oid){
     const sgc=document.getElementById('sgc_'+it._sgid);
     if(sgc)sgc.classList.add('active');
   });
+  ordFillMotoPanel(existing?existing.moto_id:ms[0]&&ms[0].id, existing);
   openModal('modalOrden');
+}
+function ordFillMotoPanel(mid, existing){
+  const m=DB.motos.get(mid);if(!m)return;
+  document.getElementById('ordMMarca').value=existing&&existing.moto_marca!=null?existing.moto_marca:m.marca||'';
+  document.getElementById('ordMModelo').value=existing&&existing.moto_modelo!=null?existing.moto_modelo:m.modelo||'';
+  document.getElementById('ordMMat').value=existing&&existing.moto_matricula!=null?existing.moto_matricula:m.matricula||'';
+  document.getElementById('ordKm').value=existing?existing.kilometros:(m.kilometros||'');
+  document.getElementById('ordMVin').value=m.bastidor||'—';
+  ordenCtx.motoEdit={marca:document.getElementById('ordMMarca').value,modelo:document.getElementById('ordMModelo').value,matricula:document.getElementById('ordMMat').value,kilometros:+document.getElementById('ordKm').value||0};
+}
+function ordMotoChange(){
+  const mid=document.getElementById('ordMoto').value;
+  ordFillMotoPanel(mid, null);
 }
 function toggleSrvCard(sgid){
   const sg=SERVICIOS_GALERIA.find(s=>s.id===sgid);if(!sg)return;
@@ -1042,7 +1068,8 @@ function ordenTotals(){
 }
 function saveOrden(genPdf){
   const t=ordenTotals();
-  const data={cliente_id:ordenCtx.cid,moto_id:document.getElementById('ordMoto').value,conceptos:ordenItems.slice(),kilometros:+document.getElementById('ordKm').value||0,observaciones:document.getElementById('ordObs').value.trim(),subtotal:t.sub,iva_total:t.iva,total:t.total};
+  const me=ordenCtx.motoEdit||{};
+  const data={cliente_id:ordenCtx.cid,moto_id:document.getElementById('ordMoto').value,conceptos:ordenItems.slice(),kilometros:me.kilometros||+document.getElementById('ordKm').value||0,moto_marca:me.marca,moto_modelo:me.modelo,moto_matricula:me.matricula,observaciones:document.getElementById('ordObs').value.trim(),subtotal:t.sub,iva_total:t.iva,total:t.total};
   let o;
   if(ordenCtx.oid){DB.ordenes.update(ordenCtx.oid,data);o=DB.ordenes.get(ordenCtx.oid);}
   else o=DB.ordenes.create(data);
@@ -1126,9 +1153,9 @@ function ordenPDF(id){
       </div>
       <div class="info-box">
         <div class="box-title">Datos del vehículo</div>
-        <div class="info-row"><span class="lbl">Marca/Modelo</span><span class="val">${m?esc(m.marca+' '+m.modelo):'—'}</span></div>
-        <div class="info-row"><span class="lbl">Matrícula</span><span class="val">${m?esc(m.matricula):'—'}</span></div>
-        <div class="info-row"><span class="lbl">Bastidor</span><span class="val">${m&&m.bastidor?esc(m.bastidor):'—'}</span></div>
+        <div class="info-row"><span class="lbl">Marca/Modelo</span><span class="val">${esc((o.moto_marca||m&&m.marca||'')+(o.moto_modelo?' '+o.moto_modelo:m&&m.modelo?' '+m.modelo:''))}</span></div>
+        <div class="info-row"><span class="lbl">Matrícula</span><span class="val">${esc(o.moto_matricula||m&&m.matricula||'—')}</span></div>
+        <div class="info-row"><span class="lbl">Bastidor / VIN</span><span class="val">${m&&m.bastidor?esc(m.bastidor):'—'}</span></div>
         <div class="info-row"><span class="lbl">Kilómetros</span><span class="val">${o.kilometros?o.kilometros.toLocaleString()+' km':'—'}</span></div>
       </div>
     </div>
