@@ -211,7 +211,10 @@ tr.clickable:hover{background:var(--bg3)}
       <button class="btn btn-sec" onclick="calToday()">Hoy</button>
       <button class="btn btn-sec" onclick="calWeek(1)">Siguiente ›</button>
       <span id="calWeekLabel" style="font-weight:600;margin-left:8px"></span>
-      <button class="btn btn-sec" onclick="copiarLinkCitas()" style="margin-left:auto;display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 9.5a3.536 3.536 0 0 0 5 0l2-2a3.536 3.536 0 0 0-5-5l-1 1"/><path d="M9.5 6.5a3.536 3.536 0 0 0-5 0l-2 2a3.536 3.536 0 0 0 5 5l1-1"/></svg>Copiar Link Citas</button>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="btn btn-sec" onclick="abrirPaginaReservas()" style="display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="10" height="10" rx="2"/><path d="M5 5h6v6H5z" fill="none"/><path d="M6 11v3a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-3" stroke-linecap="round"/></svg>Abrir reservas</button>
+        <button class="btn btn-sec" onclick="copiarLinkCitas()" style="display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 9.5a3.536 3.536 0 0 0 5 0l2-2a3.536 3.536 0 0 0-5-5l-1 1"/><path d="M9.5 6.5a3.536 3.536 0 0 0-5 0l-2 2a3.536 3.536 0 0 0 5 5l1-1"/></svg>Copiar link</button>
+      </div>
     </div>
     <div id="solicitudesPanel"></div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;align-items:center">
@@ -1470,12 +1473,13 @@ function syncCitasToStorage(){
 }
 function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
 
+function getBookingUrl(){return window.location.href.replace(/[^/]*$/,'')+'booking.html';}
+function abrirPaginaReservas(){syncCitasToStorage();window.open(getBookingUrl(),'_blank');}
 function copiarLinkCitas(){
   syncCitasToStorage();
-  const url=window.location.href.replace(/[^/]*$/,'')+'booking.html';
-  window.open(url,'_blank');
-  try{navigator.clipboard.writeText(url).then(()=>toast('Página abierta y link copiado','ok')).catch(()=>toast('Página de reservas abierta','ok'));}
-  catch{toast('Página de reservas abierta','ok');}
+  const url=getBookingUrl();
+  try{navigator.clipboard.writeText(url).then(()=>toast('Link copiado — pégalo en WhatsApp','ok')).catch(()=>{prompt('Copia este link:',url);});}
+  catch{prompt('Copia este link:',url);}
 }
 
 function checkSolicitudes(){
