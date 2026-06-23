@@ -183,7 +183,7 @@ tr.clickable:hover{background:var(--bg3)}
 .funnel-arrow{width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;margin:0 auto}
 </style>
 </head>
-<body>
+<body class="light">
 
 <div id="sidebar">
   <div class="logo"><div class="name">GRUPO VIA</div><div class="sub">Sistema de Gestión</div></div>
@@ -195,7 +195,7 @@ tr.clickable:hover{background:var(--bg3)}
     <div class="nav-item" data-sec="informes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg>Informes</div>
   </div>
   <div class="sidebar-bottom">
-    <button class="toggle-btn" id="themeToggle">Modo oscuro</button>
+    <button class="toggle-btn" id="themeToggle">Modo oscuro</button><!-- default: light mode active, button offers dark -->
     <div>v1.0.0</div>
   </div>
 </div>
@@ -512,7 +512,7 @@ document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{
 
 /* THEME */
 const themeBtn=document.getElementById('themeToggle');
-themeBtn.onclick=()=>{document.body.classList.toggle('light');const l=document.body.classList.contains('light');themeBtn.textContent=l?'Modo claro':'Modo oscuro';};
+themeBtn.onclick=()=>{document.body.classList.toggle('light');const l=document.body.classList.contains('light');themeBtn.textContent=l?'Modo oscuro':'Modo claro';};
 
 /* ========= CALENDAR (CITAS) ========= */
 let calBaseDate=new Date();
@@ -902,48 +902,142 @@ function saveTask(cid,id){
 function delTask(id,ctx){confirmDelete('¿Eliminar tarea?',()=>{DB.tareas.delete(id);if(ctx==='cli')renderClienteModal();else{renderSeguimientos();renderTaskCal();}toast('Tarea eliminada','warn');});}
 
 /* ORDEN DE TRABAJO TAB */
+const SERVICIOS_GALERIA=[
+  {id:'sg_aceite',icon:'🛢',nombre:'Cambio de aceite y filtro',precio:45,iva:21},
+  {id:'sg_frenos',icon:'⬛',nombre:'Revisión y ajuste de frenos',precio:60,iva:21},
+  {id:'sg_neumaticos',icon:'⭕',nombre:'Cambio de neumáticos',precio:80,iva:21},
+  {id:'sg_cadena',icon:'🔗',nombre:'Ajuste / cambio de cadena',precio:35,iva:21},
+  {id:'sg_bateria',icon:'⚡',nombre:'Sustitución de batería',precio:55,iva:21},
+  {id:'sg_bujias',icon:'🔩',nombre:'Cambio de bujías',precio:30,iva:21},
+  {id:'sg_filtro_aire',icon:'💨',nombre:'Filtro de aire',precio:25,iva:21},
+  {id:'sg_revision',icon:'🔍',nombre:'Revisión general',precio:90,iva:21},
+  {id:'sg_electrico',icon:'🔌',nombre:'Diagnóstico eléctrico',precio:50,iva:21},
+  {id:'sg_suspension',icon:'🏍',nombre:'Revisión suspensión',precio:70,iva:21},
+];
 function tabOrden(c){
   const os=DB.ordenes.byCliente(c.id);
-  return `<div class="tabpane active"><button class="btn" onclick="openOrdenForm('${c.id}')">+ Nueva orden</button>
-    <table style="margin-top:14px"><thead><tr><th>Número</th><th>Fecha</th><th>Moto</th><th>Total</th><th>Estado</th><th></th></tr></thead>
-    <tbody>${os.map(o=>`<tr><td>${o.numero}</td><td>${o.fecha}</td><td>${motoStr(o.moto_id)}</td><td>€${o.total.toFixed(2)}</td><td>${estadoBadge(o.estado)}</td><td><button class="btn btn-sm" onclick="ordenPDF('${o.id}')">PDF</button> <button class="btn btn-sm" onclick="openOrdenForm('${c.id}','${o.id}')">Editar</button> <button class="btn btn-sm btn-danger" onclick="delOrden('${o.id}')">Eliminar</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">Sin órdenes</td></tr>'}</tbody></table></div>`;
+  return `<div class="tabpane active">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="font-size:13px;color:var(--txt2)">${os.length} orden${os.length!==1?'es':''}</span>
+      <button class="btn" onclick="openOrdenForm('${c.id}')">+ Nueva orden</button>
+    </div>
+    ${os.length===0?'<div class="empty" style="padding:40px;text-align:center">Sin órdenes de trabajo</div>':
+    os.map(o=>`<div style="background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:600;font-size:14px;color:var(--accent-blue)">${o.numero}</div>
+        <div style="font-size:12px;color:var(--txt2);margin-top:2px">${o.fecha} &nbsp;·&nbsp; ${motoStr(o.moto_id)}</div>
+        <div style="font-size:12px;margin-top:4px">${o.conceptos.length} servicio${o.conceptos.length!==1?'s':''} &nbsp;·&nbsp; ${estadoBadge(o.estado)}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:20px;font-weight:700;color:var(--txt)">€${o.total.toFixed(2)}</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-sm" onclick="ordenPDF('${o.id}')">PDF</button>
+          <button class="btn btn-sm" onclick="openOrdenForm('${c.id}','${o.id}')">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="delOrden('${o.id}')">Eliminar</button>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`;
 }
 let ordenItems=[],ordenCtx={};
 function openOrdenForm(cid,oid){
   const c=cliById(cid);const ms=DB.motos.byCliente(cid);
   ordenCtx={cid,oid:oid||null};
   let existing=oid?DB.ordenes.get(oid):null;
-  ordenItems=existing?JSON.parse(JSON.stringify(existing.conceptos)):[{desc:'',cant:1,precio:0,iva:21}];
+  ordenItems=existing?JSON.parse(JSON.stringify(existing.conceptos)):[];
   document.getElementById('ordenTitle').textContent=oid?('Editar '+existing.numero):'Nueva orden de trabajo';
   document.getElementById('ordenBody').innerHTML=`
-    <div class="row2"><div class="field"><label>Cliente</label><input value="${esc(cliFull(c))}" disabled></div><div class="field"><label>Teléfono</label><input value="${esc(c.telefono)}" disabled></div></div>
-    <div class="row2"><div class="field"><label>Correo</label><input value="${esc(c.correo||'')}" disabled></div>
-    <div class="field"><label>Moto</label><select id="ordMoto">${ms.map(m=>`<option value="${m.id}" ${existing&&existing.moto_id===m.id?'selected':''}>${esc(m.marca+' '+m.modelo+' - '+m.matricula)}</option>`).join('')}</select></div></div>
-    <div class="field"><label>Kilómetros</label><input type="number" id="ordKm" value="${existing?existing.kilometros:''}"></div>
-    <div class="section-title">Conceptos</div><div id="ordItems"></div>
-    <button class="btn btn-sec btn-sm" onclick="ordenAddItem()">+ Añadir fila</button>
-    <div style="text-align:right;margin-top:14px;line-height:1.8"><div>Subtotal: <b id="ordSub">€0.00</b></div><div>IVA: <b id="ordIva">€0.00</b></div><div style="font-size:18px">Total: <b id="ordTot">€0.00</b></div></div>
+    <style>
+      .srv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:10px 0 16px}
+      .srv-card{border:2px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;transition:all .15s;text-align:center;background:var(--bg2)}
+      .srv-card:hover{border-color:var(--accent-blue);background:var(--bg3)}
+      .srv-card.active{border-color:var(--accent-blue);background:rgba(59,130,246,.12)}
+      .srv-icon{font-size:24px;margin-bottom:6px}
+      .srv-name{font-size:11px;font-weight:600;line-height:1.3;color:var(--txt)}
+      .srv-price{font-size:11px;color:var(--txt2);margin-top:2px}
+      .ord-row{display:grid;grid-template-columns:2fr .6fr .9fr .75fr .9fr auto;gap:6px;align-items:center;margin-bottom:6px}
+      .ord-row input,.ord-row select{font-size:12px}
+      .ord-row-hdr{display:grid;grid-template-columns:2fr .6fr .9fr .75fr .9fr auto;gap:6px;font-size:11px;color:var(--txt2);margin-bottom:4px;padding:0 2px}
+    </style>
+    <div class="row2">
+      <div class="field"><label>Cliente</label><input value="${esc(cliFull(c))}" disabled></div>
+      <div class="field"><label>Teléfono</label><input value="${esc(c.telefono)}" disabled></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Moto</label><select id="ordMoto">${ms.map(m=>`<option value="${m.id}" ${existing&&existing.moto_id===m.id?'selected':''}>${esc(m.marca+' '+m.modelo+' – '+m.matricula)}</option>`).join('')}</select></div>
+      <div class="field"><label>Kilómetros</label><input type="number" id="ordKm" value="${existing?existing.kilometros:''}"></div>
+    </div>
+    <div class="section-title" style="margin-top:10px">Servicios predefinidos</div>
+    <div class="srv-grid" id="srvGrid">${SERVICIOS_GALERIA.map(s=>`<div class="srv-card" id="sgc_${s.id}" onclick="toggleSrvCard('${s.id}')">
+      <div class="srv-icon">${s.icon}</div>
+      <div class="srv-name">${s.nombre}</div>
+      <div class="srv-price">€${s.precio} · ${s.iva}% IVA</div>
+    </div>`).join('')}</div>
+    <div class="section-title">Servicios seleccionados</div>
+    <div class="ord-row-hdr"><span>Descripción</span><span>Cant.</span><span>Precio (€)</span><span>IVA</span><span>Total</span><span></span></div>
+    <div id="ordItems"></div>
+    <div style="display:flex;gap:8px;margin:10px 0 4px;align-items:center">
+      <input id="srvCustom" placeholder="Servicio personalizado..." style="flex:1;font-size:13px">
+      <button class="btn btn-sec btn-sm" onclick="ordenAddCustom()">+ Añadir</button>
+    </div>
+    <div style="text-align:right;margin-top:16px;line-height:2;border-top:1px solid var(--border);padding-top:12px">
+      <div style="color:var(--txt2)">Subtotal: <b id="ordSub" style="color:var(--txt)">€0.00</b></div>
+      <div style="color:var(--txt2)">IVA: <b id="ordIva" style="color:var(--txt)">€0.00</b></div>
+      <div style="font-size:20px;font-weight:700">Total: <b id="ordTot">€0.00</b></div>
+    </div>
     <div class="field" style="margin-top:14px"><label>Observaciones</label><textarea id="ordObs" rows="2">${existing?esc(existing.observaciones):''}</textarea></div>
-    <div style="display:flex;gap:10px"><button class="btn" onclick="saveOrden(false)">Guardar orden</button><button class="btn btn-sec" onclick="saveOrden(true)">Generar PDF</button></div>`;
-  renderOrdenItems();openModal('modalOrden');
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn" onclick="saveOrden(false)">Guardar orden</button>
+      <button class="btn btn-sec" onclick="saveOrden(true)">Guardar y generar PDF</button>
+    </div>`;
+  renderOrdenItems();
+  ordenItems.forEach(it=>{
+    const sgc=document.getElementById('sgc_'+it._sgid);
+    if(sgc)sgc.classList.add('active');
+  });
+  openModal('modalOrden');
+}
+function toggleSrvCard(sgid){
+  const sg=SERVICIOS_GALERIA.find(s=>s.id===sgid);if(!sg)return;
+  const idx=ordenItems.findIndex(it=>it._sgid===sgid);
+  const card=document.getElementById('sgc_'+sgid);
+  if(idx>=0){ordenItems.splice(idx,1);card.classList.remove('active');}
+  else{ordenItems.push({_sgid:sgid,desc:sg.nombre,cant:1,precio:sg.precio,iva:sg.iva});card.classList.add('active');}
+  renderOrdenItems();
+}
+function ordenAddCustom(){
+  const inp=document.getElementById('srvCustom');
+  const txt=inp.value.trim();if(!txt)return;
+  ordenItems.push({desc:txt,cant:1,precio:0,iva:21});
+  inp.value='';renderOrdenItems();
 }
 function renderOrdenItems(){
-  document.getElementById('ordItems').innerHTML=ordenItems.map((it,i)=>`<div style="display:grid;grid-template-columns:2fr .6fr .8fr .7fr .8fr auto;gap:6px;margin-bottom:6px;align-items:center">
+  if(!ordenItems.length){
+    document.getElementById('ordItems').innerHTML='<div style="color:var(--txt2);font-size:13px;padding:8px 0">Selecciona servicios de la galería o añade uno personalizado.</div>';
+    ordenTotals();return;
+  }
+  document.getElementById('ordItems').innerHTML=ordenItems.map((it,i)=>`<div class="ord-row">
     <input placeholder="Descripción" value="${esc(it.desc)}" oninput="ordenItems[${i}].desc=this.value">
     <input type="number" min="1" value="${it.cant}" oninput="ordenItems[${i}].cant=+this.value;ordenTotals()">
     <input type="number" step="0.01" value="${it.precio}" oninput="ordenItems[${i}].precio=+this.value;ordenTotals()">
     <select onchange="ordenItems[${i}].iva=+this.value;ordenTotals()"><option value="0" ${it.iva===0?'selected':''}>0%</option><option value="10" ${it.iva===10?'selected':''}>10%</option><option value="21" ${it.iva===21?'selected':''}>21%</option></select>
-    <div style="text-align:right;font-size:12px">€${(it.cant*it.precio*(1+it.iva/100)).toFixed(2)}</div>
-    <button class="btn btn-sm btn-danger" onclick="ordenRemoveItem(${i})">×</button></div>`).join('');
+    <div style="text-align:right;font-size:12px;font-weight:600">€${(it.cant*it.precio*(1+it.iva/100)).toFixed(2)}</div>
+    <button class="btn btn-sm btn-danger" onclick="ordenRemoveItem(${i})">×</button>
+  </div>`).join('');
   ordenTotals();
 }
-function ordenAddItem(){ordenItems.push({desc:'',cant:1,precio:0,iva:21});renderOrdenItems();}
-function ordenRemoveItem(i){ordenItems.splice(i,1);if(!ordenItems.length)ordenItems.push({desc:'',cant:1,precio:0,iva:21});renderOrdenItems();}
+function ordenRemoveItem(i){
+  const sgid=ordenItems[i]._sgid;
+  ordenItems.splice(i,1);
+  if(sgid){const c=document.getElementById('sgc_'+sgid);if(c)c.classList.remove('active');}
+  renderOrdenItems();
+}
 function ordenTotals(){
   let sub=0,iva=0;ordenItems.forEach(it=>{const b=(it.cant||0)*(it.precio||0);sub+=b;iva+=b*(it.iva||0)/100;});
-  document.getElementById('ordSub').textContent='€'+sub.toFixed(2);
-  document.getElementById('ordIva').textContent='€'+iva.toFixed(2);
-  document.getElementById('ordTot').textContent='€'+(sub+iva).toFixed(2);
+  const elS=document.getElementById('ordSub');const elI=document.getElementById('ordIva');const elT=document.getElementById('ordTot');
+  if(elS)elS.textContent='€'+sub.toFixed(2);
+  if(elI)elI.textContent='€'+iva.toFixed(2);
+  if(elT)elT.textContent='€'+(sub+iva).toFixed(2);
   return {sub,iva,total:sub+iva};
 }
 function saveOrden(genPdf){
@@ -960,23 +1054,105 @@ function delOrden(id){confirmDelete('¿Eliminar orden?',()=>{DB.ordenes.delete(i
 function ordenPDF(id){
   const o=DB.ordenes.get(id);const c=cliById(o.cliente_id);const m=DB.motos.get(o.moto_id);
   const w=window.open('','_blank');
-  const rows=o.conceptos.map(it=>`<tr><td>${esc(it.desc)}</td><td style="text-align:center">${it.cant}</td><td style="text-align:right">€${(+it.precio).toFixed(2)}</td><td style="text-align:center">${it.iva}%</td><td style="text-align:right">€${(it.cant*it.precio*(1+it.iva/100)).toFixed(2)}</td></tr>`).join('');
-  w.document.write(`<html><head><title>${o.numero}</title><style>
-    body{font-family:Arial;padding:40px;color:#111}h1{color:#3b82f6;margin:0}
-    .head{display:flex;justify-content:space-between;border-bottom:3px solid #3b82f6;padding-bottom:16px;margin-bottom:20px}
-    .box{border:1px solid #ccc;border-radius:8px;padding:12px;margin-bottom:14px}
-    table{width:100%;border-collapse:collapse;margin:14px 0}th,td{border:1px solid #ddd;padding:8px;font-size:13px}th{background:#f1f5f9}
-    .tot{text-align:right;line-height:1.8}.sign{display:flex;justify-content:space-between;margin-top:60px}
-    .sign div{border-top:1px solid #000;width:40%;padding-top:6px;text-align:center}
+  let rowNum=1;
+  const rows=o.conceptos.map(it=>`<tr>
+    <td style="text-align:center;color:#64748b">${rowNum++}</td>
+    <td>${esc(it.desc)}</td>
+    <td style="text-align:center">${it.cant}</td>
+    <td style="text-align:right">€${(+it.precio).toFixed(2)}</td>
+    <td style="text-align:center">${it.iva}%</td>
+    <td style="text-align:right;font-weight:600">€${(it.cant*it.precio*(1+it.iva/100)).toFixed(2)}</td>
+  </tr>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Orden ${o.numero}</title><style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;padding:0;color:#1e293b;font-size:13px;background:#fff}
+    .page{max-width:800px;margin:0 auto;padding:40px 48px}
+    .hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #3b82f6;padding-bottom:20px;margin-bottom:24px}
+    .logo-block .brand{font-size:26px;font-weight:800;color:#3b82f6;letter-spacing:-.5px}
+    .logo-block .sub{font-size:11px;color:#64748b;margin-top:3px;letter-spacing:.5px;text-transform:uppercase}
+    .logo-block .contact{font-size:11px;color:#64748b;margin-top:6px;line-height:1.7}
+    .ord-block{text-align:right}
+    .ord-block .ord-num{font-size:20px;font-weight:700;color:#1e293b}
+    .ord-block .ord-date{font-size:12px;color:#64748b;margin-top:4px}
+    .ord-block .badge{display:inline-block;background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe;border-radius:20px;padding:2px 12px;font-size:11px;font-weight:600;margin-top:6px}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+    .info-box{border:1px solid #e2e8f0;border-radius:8px;padding:14px}
+    .info-box .box-title{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#3b82f6;font-weight:700;margin-bottom:8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px}
+    .info-row{display:flex;gap:8px;margin-bottom:4px;font-size:12px}
+    .info-row .lbl{color:#64748b;min-width:70px}
+    .info-row .val{font-weight:500;color:#1e293b}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px}
+    thead tr{background:#3b82f6}
+    thead th{color:#fff;padding:8px 10px;font-size:11px;font-weight:600;text-align:left;letter-spacing:.3px}
+    thead th:last-child,thead th:nth-child(3),thead th:nth-child(4),thead th:nth-child(5){text-align:right}
+    thead th:nth-child(1){text-align:center;width:36px}
+    tbody tr:nth-child(even){background:#f8fafc}
+    tbody td{padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:12px}
+    tbody td:last-child,tbody td:nth-child(4),tbody td:nth-child(5){text-align:right}
+    .tot-block{display:flex;justify-content:flex-end;margin-bottom:20px}
+    .tot-table{width:240px;border-collapse:collapse}
+    .tot-table td{padding:5px 10px;font-size:13px}
+    .tot-table .lbl{color:#64748b}
+    .tot-table .val{text-align:right;font-weight:500}
+    .tot-table tr.grand td{border-top:2px solid #3b82f6;font-size:16px;font-weight:700;padding-top:8px;color:#3b82f6}
+    .obs-box{border:1px solid #e2e8f0;border-radius:8px;padding:14px;margin-bottom:32px}
+    .obs-box .box-title{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#64748b;font-weight:700;margin-bottom:8px}
+    .obs-box p{font-size:12px;color:#475569;line-height:1.6;min-height:40px}
+    .sign-row{display:flex;justify-content:space-between;margin-top:16px}
+    .sign-box{width:44%;border-top:1px solid #94a3b8;padding-top:8px;text-align:center;font-size:11px;color:#64748b}
+    .footer{text-align:center;margin-top:32px;font-size:10px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:12px}
+    @media print{body{padding:0}.page{padding:20px 28px}}
   </style></head><body>
-    <div class="head"><div><h1>GRUPO VIA</h1><div>Taller de motocicletas</div><div style="font-size:12px;color:#666">C/ Ejemplo 123, 28000 Madrid · 910 000 000</div></div>
-    <div style="text-align:right"><h2>Orden ${o.numero}</h2><div>Fecha: ${o.fecha}</div></div></div>
-    <div class="box"><b>Cliente:</b> ${esc(cliFull(c))}<br><b>Teléfono:</b> ${esc(c.telefono)}<br><b>DNI:</b> ${esc(c.dni||'')}<br><b>Correo:</b> ${esc(c.correo||'')}</div>
-    <div class="box"><b>Moto:</b> ${m?esc(m.marca+' '+m.modelo):'—'}<br><b>Matrícula:</b> ${m?esc(m.matricula):'—'}<br><b>Bastidor:</b> ${m?esc(m.bastidor||''):''}<br><b>Kilómetros:</b> ${o.kilometros}</div>
-    <table><thead><tr><th>Descripción</th><th>Cant.</th><th>Precio</th><th>IVA</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="tot"><div>Subtotal: €${o.subtotal.toFixed(2)}</div><div>IVA: €${o.iva_total.toFixed(2)}</div><div style="font-size:18px"><b>Total: €${o.total.toFixed(2)}</b></div></div>
-    <div class="box"><b>Observaciones:</b><br>${esc(o.observaciones)||'—'}</div>
-    <div class="sign"><div>Firma cliente</div><div>Fecha</div></div>
+  <div class="page">
+    <div class="hdr">
+      <div class="logo-block">
+        <div class="brand">GRUPO VIA</div>
+        <div class="sub">Taller de Motocicletas</div>
+        <div class="contact">C/ Ejemplo 123, 28000 Madrid<br>Tel. 910 000 000 &nbsp;·&nbsp; taller@grupovia.es<br>CIF: B12345678</div>
+      </div>
+      <div class="ord-block">
+        <div class="ord-num">${o.numero}</div>
+        <div class="ord-date">Fecha: ${o.fecha}</div>
+        <div class="badge">Orden de Trabajo</div>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-box">
+        <div class="box-title">Datos del cliente</div>
+        <div class="info-row"><span class="lbl">Nombre</span><span class="val">${esc(cliFull(c))}</span></div>
+        <div class="info-row"><span class="lbl">Teléfono</span><span class="val">${esc(c.telefono)}</span></div>
+        <div class="info-row"><span class="lbl">DNI/NIF</span><span class="val">${esc(c.dni||'—')}</span></div>
+        <div class="info-row"><span class="lbl">Correo</span><span class="val">${esc(c.correo||'—')}</span></div>
+      </div>
+      <div class="info-box">
+        <div class="box-title">Datos del vehículo</div>
+        <div class="info-row"><span class="lbl">Marca/Modelo</span><span class="val">${m?esc(m.marca+' '+m.modelo):'—'}</span></div>
+        <div class="info-row"><span class="lbl">Matrícula</span><span class="val">${m?esc(m.matricula):'—'}</span></div>
+        <div class="info-row"><span class="lbl">Bastidor</span><span class="val">${m&&m.bastidor?esc(m.bastidor):'—'}</span></div>
+        <div class="info-row"><span class="lbl">Kilómetros</span><span class="val">${o.kilometros?o.kilometros.toLocaleString()+' km':'—'}</span></div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Descripción del servicio</th><th style="text-align:right">Cant.</th><th style="text-align:right">P. unitario</th><th style="text-align:right">IVA</th><th style="text-align:right">Total</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="tot-block">
+      <table class="tot-table">
+        <tr><td class="lbl">Subtotal</td><td class="val">€${o.subtotal.toFixed(2)}</td></tr>
+        <tr><td class="lbl">IVA</td><td class="val">€${o.iva_total.toFixed(2)}</td></tr>
+        <tr class="grand"><td>TOTAL</td><td>€${o.total.toFixed(2)}</td></tr>
+      </table>
+    </div>
+    <div class="obs-box">
+      <div class="box-title">Observaciones</div>
+      <p>${esc(o.observaciones)||'Sin observaciones.'}</p>
+    </div>
+    <div class="sign-row">
+      <div class="sign-box">Firma del cliente</div>
+      <div class="sign-box">Firma del taller / Fecha</div>
+    </div>
+    <div class="footer">GRUPO VIA · Taller de Motocicletas · CIF B12345678 · grupovia.es</div>
+  </div>
   </body></html>`);
   w.document.close();setTimeout(()=>{try{w.print();}catch(e){}},400);
 }
