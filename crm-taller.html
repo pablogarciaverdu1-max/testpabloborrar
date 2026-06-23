@@ -1470,7 +1470,7 @@ function syncCitasToStorage(){
 }
 function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
 
-function getBookingUrl(){return window.location.href.replace(/[^/]*$/,'')+'booking.html';}
+function getBookingUrl(){return 'https://pablogarciaverdu1-max.github.io/booking_grupo_via/';}
 function abrirPaginaReservas(){syncCitasToStorage();window.open(getBookingUrl(),'_blank');}
 function copiarLinkCitas(){
   syncCitasToStorage();
