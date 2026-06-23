@@ -276,7 +276,7 @@ tr.clickable:hover{background:var(--bg3)}
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
           <div class="section-title" style="margin:0">Embudo de etapas</div>
-          <select id="funnelMecFiltro" onchange="renderInformes()" style="font-size:12px;padding:6px 10px;min-width:150px"><option value="">Todos los mecánicos</option></select>
+          <select id="funnelMecFiltro" onchange="renderFunnel()" style="font-size:12px;padding:6px 10px;min-width:150px"><option value="">Todos los mecánicos</option></select>
         </div>
         <div id="funnelEstados"></div>
       </div>
@@ -1343,18 +1343,7 @@ function showTask(id){
 }
 
 /* ========= INFORMES ========= */
-function renderInformes(){
-  const now=new Date();const mes=now.getMonth(),anio=now.getFullYear();
-  const citasMes=citas.filter(c=>{const d=new Date(c.fecha_cita);return d.getMonth()===mes&&d.getFullYear()===anio;});
-  const pend=citas.filter(c=>c.estado==='pendiente');
-  const pagadas=citas.filter(c=>c.estado==='entregado_pagado');
-  document.getElementById('kpiGrid').innerHTML=`
-    <div class="kpi"><div class="n">${clientes.length}</div><div class="l">Total clientes</div></div>
-    <div class="kpi"><div class="n">${citasMes.length}</div><div class="l">Citas este mes</div></div>
-    <div class="kpi"><div class="n">${pend.length}</div><div class="l">Citas pendientes</div></div>
-    <div class="kpi"><div class="n">${pagadas.length}</div><div class="l">Entregadas/Pagadas</div></div>`;
-
-  // ---- FUNNEL etapas ----
+function renderFunnel(){
   const funnelMec=document.getElementById('funnelMecFiltro').value;
   const citasFunnel=funnelMec?citas.filter(c=>c.mecanico_id===funnelMec):citas;
   const ordenFunnel=['pendiente','en_progreso','listo_entrega','entregado_pagado'];
@@ -1362,7 +1351,6 @@ function renderInformes(){
   const fBg={pendiente:'rgba(59,130,246,.18)',en_progreso:'rgba(249,115,22,.18)',listo_entrega:'rgba(168,85,247,.18)',entregado_pagado:'rgba(34,197,94,.18)'};
   const counts={};ordenFunnel.forEach(k=>counts[k]=citasFunnel.filter(c=>c.estado===k).length);
   const totalFunnel=citasFunnel.length||1;
-  const maxCount=Math.max(1,...Object.values(counts));
   const widths={pendiente:100,en_progreso:82,listo_entrega:64,entregado_pagado:48};
   let fHtml='<div class="funnel-wrap">';
   ordenFunnel.forEach((estado,i)=>{
@@ -1392,9 +1380,7 @@ function renderInformes(){
   fHtml+='</div>';
   document.getElementById('funnelEstados').innerHTML=fHtml;
 
-  // ---- FUNNEL tiempo por etapa ----
-  // Avg days from fecha_cita to today for citas in each active stage
-  // For entregado_pagado: simulate duration as fecha_cita age * 0.6 (they moved faster)
+  // ---- Tiempo por etapa ----
   const todayMs=new Date(today()).getTime();
   const tiempos={};
   ordenFunnel.forEach(estado=>{
@@ -1407,10 +1393,8 @@ function renderInformes(){
     tiempos[estado]=Math.round(avg*10)/10;
   });
   const maxT=Math.max(1,...Object.values(tiempos).filter(v=>v!==null));
-  // Also compute avg total pipeline (pendiente -> listo_entrega only, not pagadas)
   const activePipeline=citasFunnel.filter(c=>c.estado!=='entregado_pagado');
   const avgTotal=activePipeline.length?Math.round(activePipeline.reduce((s,c)=>{return s+(todayMs-new Date(c.fecha_cita).getTime())/(1000*60*60*24);},0)/activePipeline.length*10)/10:0;
-
   let tHtml=`<div style="margin-bottom:14px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:8px;display:flex;align-items:center;gap:12px">
     <div>
       <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Tiempo medio en activo</div>
@@ -1430,9 +1414,21 @@ function renderInformes(){
       <span style="font-size:11px;color:var(--txt2);margin-left:8px;width:36px;text-align:right">${cnt} cita${cnt!==1?'s':''}</span>
     </div>`;
   });
-  // Nota interpretativa
   tHtml+=`<div style="margin-top:14px;font-size:11px;color:var(--txt2);border-top:1px solid var(--border);padding-top:10px">Los tiempos muestran el promedio de días transcurridos desde la fecha de cita hasta hoy en cada etapa. Un tiempo alto en "Pendiente" o "En progreso" indica colas de trabajo.</div>`;
   document.getElementById('funnelTiempo').innerHTML=tHtml;
+}
+function renderInformes(){
+  const now=new Date();const mes=now.getMonth(),anio=now.getFullYear();
+  const citasMes=citas.filter(c=>{const d=new Date(c.fecha_cita);return d.getMonth()===mes&&d.getFullYear()===anio;});
+  const pend=citas.filter(c=>c.estado==='pendiente');
+  const pagadas=citas.filter(c=>c.estado==='entregado_pagado');
+  document.getElementById('kpiGrid').innerHTML=`
+    <div class="kpi"><div class="n">${clientes.length}</div><div class="l">Total clientes</div></div>
+    <div class="kpi"><div class="n">${citasMes.length}</div><div class="l">Citas este mes</div></div>
+    <div class="kpi"><div class="n">${pend.length}</div><div class="l">Citas pendientes</div></div>
+    <div class="kpi"><div class="n">${pagadas.length}</div><div class="l">Entregadas/Pagadas</div></div>`;
+
+  renderFunnel();
 
   // ---- Charts originales ----
   const cs={};Object.keys(SERVICIOS).forEach(k=>cs[k]=0);citas.forEach(c=>cs[c.tipo_servicio]++);
