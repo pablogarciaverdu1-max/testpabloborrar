@@ -495,17 +495,36 @@ function renderCal(){
   const days=weekDays(calBaseDate);
   document.getElementById('calWeekLabel').textContent=days[0].toLocaleDateString('es-ES',{day:'numeric',month:'short'})+' - '+days[4].toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
   const dnames=['Lun','Mar','Mié','Jue','Vie'];
+  // Build skip map: di -> set of hora strings spanned by a multi-slot cita
+  const skip=days.map((d,di)=>{
+    const fecha=ymd(d);const s=new Set();
+    citas.filter(c=>c.fecha_cita===fecha&&c.hora_fin).forEach(c=>{
+      const si=HORAS.indexOf(c.hora_cita);const ei=HORAS.indexOf(c.hora_fin);
+      for(let i=si+1;i<ei&&i>=0;i++)if(HORAS[i])s.add(HORAS[i]);
+    });
+    return s;
+  });
   let h='<table class="cal"><thead><tr><th class="timecol"></th>';
   days.forEach((d,i)=>h+=`<th>${dnames[i]}<br>${d.getDate()}/${d.getMonth()+1}</th>`);
   h+='</tr></thead><tbody>';
-  HORAS.forEach(hora=>{
+  HORAS.forEach((hora,hi)=>{
     h+=`<tr><td class="timecol">${hora}</td>`;
-    days.forEach(d=>{
+    days.forEach((d,di)=>{
+      if(skip[di].has(hora))return; // spanned by earlier cita, skip td
       const fecha=ymd(d);
       const cs=citas.filter(c=>c.fecha_cita===fecha&&c.hora_cita===hora);
-      h+=`<td class="slot" onclick="slotClick('${fecha}','${hora}')">`;
+      // Rowspan: if single cita with hora_fin, span those slots
+      let rs=1;
+      if(cs.length===1&&cs[0].hora_fin){
+        const ei=HORAS.indexOf(cs[0].hora_fin);
+        if(ei>hi)rs=ei-hi;
+      }
+      const rsAttr=rs>1?` rowspan="${rs}"`:'';
+      const rsStyle=rs>1?';vertical-align:top;height:'+(rs*34)+'px':'';
+      h+=`<td class="slot"${rsAttr} style="position:relative${rsStyle}" onclick="slotClick('${fecha}','${hora}')">`;
       cs.forEach(c=>{const cl=cliById(c.cliente_id);const sv=SERVICIOS[c.tipo_servicio];
-        h+=`<div class="chip" style="background:${sv.color}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${esc(cliFull(cl))} · ${sv.label}</div>`;});
+        const chipH=rs>1?`height:calc(100% - 4px);display:flex;align-items:center;`:'';
+        h+=`<div class="chip" style="background:${sv.color};${chipH}" onclick="event.stopPropagation();showCitaDetail('${c.id}')">${esc(cliFull(cl))} · ${sv.label}${rs>1?' ('+c.hora_cita+'–'+c.hora_fin+')':''}</div>`;});
       h+='</td>';
     });
     h+='</tr>';
@@ -514,36 +533,47 @@ function renderCal(){
   document.getElementById('calContainer').innerHTML=h;
 }
 function slotClick(fecha,hora){openNewCita({fecha,hora});}
-function showCitaDetail(id){
-  const c=DB.citas.get(id);const cl=cliById(c.cliente_id);const m=DB.motos.get(c.moto_id);
+function stageButtons(c){
   const stageColors={pendiente:'#1e3a5f',en_progreso:'#3d2f00',listo_entrega:'#2d1b69',entregado_pagado:'#14532d'};
   const stageBorder={pendiente:'#3b82f6',en_progreso:'#f97316',listo_entrega:'#a855f7',entregado_pagado:'#22c55e'};
-  const stagesHtml=Object.entries(ESTADOS).map(([k,v])=>{
+  return Object.entries(ESTADOS).map(([k,v])=>{
     const active=c.estado===k;
-    return `<button onclick="setCitaEstadoCalendar('${c.id}','${k}')" style="
-      flex:1;padding:10px 6px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;
-      border:2px solid ${active?stageBorder[k]:'rgba(255,255,255,.1)'};
-      background:${active?stageColors[k]:'rgba(255,255,255,.03)'};
-      color:${active?'#fff':'#666'};
-      box-shadow:${active?`0 0 12px ${stageBorder[k]}44`:'none'};
-      letter-spacing:.02em;text-transform:uppercase;font-size:11px"
-      onmouseover="if(this.dataset.active!=='1')this.style.borderColor='rgba(255,255,255,.25)'"
-      onmouseout="if(this.dataset.active!=='1')this.style.borderColor='rgba(255,255,255,.1)'"
-      data-active="${active?1:0}">${v.label}</button>`;
+    return `<button onclick="setCitaEstadoCalendar('${c.id}','${k}')" style="flex:1;padding:10px 6px;border-radius:8px;cursor:pointer;transition:.15s;border:2px solid ${active?stageBorder[k]:'rgba(255,255,255,.1)'};background:${active?stageColors[k]:'rgba(255,255,255,.03)'};color:${active?'#fff':'#666'};box-shadow:${active?`0 0 12px ${stageBorder[k]}44`:'none'};letter-spacing:.02em;text-transform:uppercase;font-size:11px;font-weight:700" onmouseover="if(!${active})this.style.borderColor='rgba(255,255,255,.25)'" onmouseout="if(!${active})this.style.borderColor='rgba(255,255,255,.1)'">${v.label}</button>`;
   }).join('');
+}
+function showCitaDetail(id){
+  const c=DB.citas.get(id);const cl=cliById(c.cliente_id);const m=DB.motos.get(c.moto_id);
+  const horaFinOpts=`<option value="">— sin fin —</option>`+HORAS.map(h=>`<option ${h===(c.hora_fin||'')?'selected':''}>${h}</option>`).join('');
   document.getElementById('citaDetailBody').innerHTML=`
-    <div class="field"><label>Servicio</label>${servBadge(c.tipo_servicio)}</div>
-    <div class="row2"><div class="field"><label>Fecha</label>${c.fecha_cita}</div><div class="field"><label>Hora</label>${c.hora_cita}</div></div>
-    <div class="field"><label>Cliente</label>${esc(cliFull(cl))} · ${esc(cl.telefono)}</div>
-    <div class="field"><label>Moto</label>${m?esc(m.marca+' '+m.modelo+' ('+m.matricula+')'):'—'}</div>
-    <div class="field"><label>Mecánico</label>${mecName(c.mecanico_id)}</div>
-    <div class="field"><label>Nota</label>${esc(c.nota)||'—'}</div>
-    <div class="field">
-      <label style="font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--txt2);margin-bottom:10px;display:block">ETAPA DE LA CITA</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">${stagesHtml}</div>
+    <div class="field"><label>Tipo de servicio</label>
+      <select id="eServ">${Object.entries(SERVICIOS).map(([k,v])=>`<option value="${k}" ${c.tipo_servicio===k?'selected':''}>${v.label}</option>`).join('')}</select></div>
+    <div class="field"><label>Fecha</label><input type="date" id="eFecha" value="${c.fecha_cita}"></div>
+    <div class="row2">
+      <div class="field"><label>Hora inicio</label><select id="eHoraIni">${HORAS.map(h=>`<option ${h===c.hora_cita?'selected':''}>${h}</option>`).join('')}</select></div>
+      <div class="field"><label>Hora fin</label><select id="eHoraFin">${horaFinOpts}</select></div>
     </div>
-    <div style="margin-top:14px"><button class="btn btn-danger btn-sm" onclick="cancelarCita('${c.id}')">Eliminar cita</button></div>`;
+    <div class="field"><label>Mecánico</label><select id="eMec">${mecanicoOptions(c.mecanico_id)}</select></div>
+    <div class="field"><label>Cliente</label><span style="color:var(--txt)">${esc(cliFull(cl))} · ${esc(cl.telefono)}</span></div>
+    <div class="field"><label>Moto</label><span style="color:var(--txt)">${m?esc(m.marca+' '+m.modelo+' ('+m.matricula+')'):'—'}</span></div>
+    <div class="field"><label>Nota</label><textarea id="eNota" rows="2">${esc(c.nota||'')}</textarea></div>
+    <div class="field">
+      <label style="font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--txt2);margin-bottom:10px;display:block">ETAPA</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="stageButtons">${stageButtons(c)}</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" onclick="saveCitaEdit('${c.id}')">Guardar cambios</button>
+      <button class="btn btn-danger btn-sm" onclick="cancelarCita('${c.id}')">Eliminar cita</button>
+    </div>`;
   openModal('modalCitaDetail');
+}
+function saveCitaEdit(id){
+  const horaIni=document.getElementById('eHoraIni').value;
+  const horaFin=document.getElementById('eHoraFin').value;
+  if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior al inicio','err');return;}
+  DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});
+  toast('Cita actualizada','ok');
+  showCitaDetail(id);renderCal();renderKanban();
+  if(document.getElementById('modalCliente').classList.contains('open'))renderClienteModal();
 }
 function setCitaEstadoCalendar(citaId,nuevoEstado){
   const c=DB.citas.get(citaId);if(!c||c.estado===nuevoEstado)return;
@@ -592,9 +622,13 @@ function renderWizard(){
     h+=navButtons();b.innerHTML=h;
     if(!ms.length&&!wiz.nuevaMoto)wiz.nuevaMoto={};
   } else if(wiz.step===4){
+    const defFin=HORAS[Math.min(HORAS.indexOf(wiz.hora)+2,HORAS.length-1)];
     b.innerHTML=`<div class="field"><label>Tipo de servicio</label><select id="wServ">${Object.entries(SERVICIOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}</select></div>
-      <div class="row2"><div class="field"><label>Fecha</label><input type="date" id="wFecha" value="${wiz.fecha}"></div>
-      <div class="field"><label>Hora</label><select id="wHora">${HORAS.map(h=>`<option ${h===wiz.hora?'selected':''}>${h}</option>`).join('')}</select></div></div>
+      <div class="field"><label>Fecha</label><input type="date" id="wFecha" value="${wiz.fecha}"></div>
+      <div class="row2">
+        <div class="field"><label>Hora inicio</label><select id="wHora" onchange="wizAutoFin()">${HORAS.map(h=>`<option ${h===wiz.hora?'selected':''}>${h}</option>`).join('')}</select></div>
+        <div class="field"><label>Hora fin</label><select id="wHoraFin">${HORAS.map(h=>`<option ${h===defFin?'selected':''}>${h}</option>`).join('')}</select></div>
+      </div>
       <div class="field"><label>Mecánico</label><select id="wMec">${mecanicoOptions()}</select></div>
       <div class="field"><label>Nota</label><textarea id="wNota" rows="2"></textarea></div>
       <div class="wizard-actions"><button class="btn btn-sec" onclick="wizBack()">‹ Atrás</button><button class="btn" onclick="wizFinish()">Crear cita</button></div>`;
@@ -608,7 +642,8 @@ function motoFormFields(m){
     <div class="field"><label>Modelo</label><input id="wmModelo" value="${esc(m.modelo||'')}"></div>
     <div class="row2"><div class="field"><label>Cilindrada</label><select id="wmCil"><option value="">—</option>${opts(CILINDRADAS,m.cilindrada)}</select></div>
     <div class="field"><label>Matrícula</label><input id="wmMat" value="${esc(m.matricula||'')}"></div></div>
-    <div class="field"><label>Bastidor</label><input id="wmBas" value="${esc(m.bastidor||'')}"></div>`;
+    <div class="row2"><div class="field"><label>Bastidor</label><input id="wmBas" value="${esc(m.bastidor||'')}"></div>
+    <div class="field"><label>Kilometraje <span style="color:var(--txt2);font-weight:400">(opcional)</span></label><input type="number" id="wmKm" min="0" placeholder="km" value="${esc(m.kilometros||'')}"></div></div>`;
 }
 function wizChoice(mode){wiz.mode=mode;wiz.step=2;renderWizard();}
 function wizSearch(){
@@ -624,6 +659,13 @@ function wizSearch(){
 function wizCreateFromSearch(){wiz.mode='nuevo';wiz.step=2;renderWizard();}
 function wizPick(id){wiz.clienteId=id;wiz.motoId=null;wiz.nuevaMoto=null;wiz.step=3;renderWizard();}
 function wizMotoSel(){const v=document.getElementById('wMotoSel').value;const form=document.getElementById('wMotoForm');if(v==='__new'){wiz.nuevaMoto={};wiz.motoId=null;form.innerHTML=motoFormFields({});form.style.display='block';}else{wiz.motoId=v;wiz.nuevaMoto=null;form.style.display='none';}}
+function wizAutoFin(){
+  const ini=document.getElementById('wHora').value;
+  const fin=document.getElementById('wHoraFin');
+  const idx=HORAS.indexOf(ini);
+  const defIdx=Math.min(idx+2,HORAS.length-1);
+  if(HORAS.indexOf(fin.value)<=idx)fin.value=HORAS[defIdx];
+}
 function wizBack(){if(wiz.step===2){wiz.step=1;}else if(wiz.step===3){wiz.step=2;}else if(wiz.step===4){wiz.step=3;}else{closeModal('modalCita');return;}renderWizard();}
 function wizNext(){
   if(wiz.step===2&&wiz.mode==='nuevo'){
@@ -642,15 +684,19 @@ function wizNext(){
       const marca=document.getElementById('wmMarca').value;const modelo=document.getElementById('wmModelo').value.trim();
       const mat=document.getElementById('wmMat').value.trim();
       if(!marca||!modelo){toast('Marca y modelo obligatorios','err');return;}
-      const m=DB.motos.create({cliente_id:wiz.clienteId,marca,modelo,cilindrada:document.getElementById('wmCil').value,matricula:mat,bastidor:document.getElementById('wmBas').value.trim()});
+      const kmVal=document.getElementById('wmKm').value.trim();
+      const m=DB.motos.create({cliente_id:wiz.clienteId,marca,modelo,cilindrada:document.getElementById('wmCil').value,matricula:mat,bastidor:document.getElementById('wmBas').value.trim(),kilometros:kmVal?parseInt(kmVal):null});
       wiz.motoId=m.id;wiz.nuevaMoto=null;wiz.step=4;renderWizard();
     } else if(ms.length){toast('Selecciona o crea una moto','err');}
   }
 }
 function wizFinish(){
   if(!wiz.clienteId||!wiz.motoId){toast('Faltan datos','err');return;}
-  DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:document.getElementById('wHora').value,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
-  closeModal('modalCita');renderCal();renderKanban();renderClientes();toast('Cita creada (pendiente)','ok');
+  const horaIni=document.getElementById('wHora').value;
+  const horaFin=document.getElementById('wHoraFin').value;
+  if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior a la hora inicio','err');return;}
+  DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
+  closeModal('modalCita');renderCal();renderKanban();renderClientes();toast('Cita creada','ok');
 }
 
 /* ========= CLIENTES LIST ========= */
