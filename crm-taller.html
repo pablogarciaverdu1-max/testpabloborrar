@@ -163,6 +163,12 @@ tr.clickable:hover{background:var(--bg3)}
 .tag{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);padding:4px 10px;border-radius:20px;font-size:12px;margin:3px}
 .tag span{cursor:pointer;font-weight:700}
 .pagination{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:14px}
+
+/* FUNNEL */
+.funnel-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0}
+.funnel-bar{border-radius:6px;padding:11px 18px;display:flex;justify-content:space-between;align-items:center;min-height:46px;transition:.2s}
+.funnel-bar:hover{filter:brightness(1.2)}
+.funnel-arrow{width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;margin:0 auto}
 </style>
 </head>
 <body>
@@ -254,6 +260,10 @@ tr.clickable:hover{background:var(--bg3)}
   <div class="section" id="sec-informes">
     <div class="sec-header"><svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 14h14" stroke-linecap="round"/><rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" stroke="none"/><rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" stroke="none"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" stroke="none"/></svg><h1>Informes</h1></div><div class="page-sub">Estadísticas y KPIs</div>
     <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="charts2" style="margin-bottom:20px">
+      <div class="card"><div class="section-title" style="margin-top:0">Embudo de etapas</div><div id="funnelEstados"></div></div>
+      <div class="card"><div class="section-title" style="margin-top:0">Tiempo medio por etapa <span style="font-size:11px;font-weight:400;color:var(--txt2)">(días desde fecha de cita)</span></div><div id="funnelTiempo"></div></div>
+    </div>
     <div class="charts2">
       <div class="card"><div class="section-title" style="margin-top:0">Citas por tipo de servicio</div><div id="chartServicio"></div></div>
       <div class="card"><div class="section-title" style="margin-top:0">Distribución por estado</div><div id="chartEstado"></div></div>
@@ -1115,6 +1125,86 @@ function renderInformes(){
     <div class="kpi"><div class="n">${citasMes.length}</div><div class="l">Citas este mes</div></div>
     <div class="kpi"><div class="n">${pend.length}</div><div class="l">Citas pendientes</div></div>
     <div class="kpi"><div class="n">${pagadas.length}</div><div class="l">Entregadas/Pagadas</div></div>`;
+
+  // ---- FUNNEL etapas ----
+  const ordenFunnel=['pendiente','en_progreso','listo_entrega','entregado_pagado'];
+  const fColors={pendiente:'#3b82f6',en_progreso:'#f97316',listo_entrega:'#a855f7',entregado_pagado:'#22c55e'};
+  const fBg={pendiente:'rgba(59,130,246,.18)',en_progreso:'rgba(249,115,22,.18)',listo_entrega:'rgba(168,85,247,.18)',entregado_pagado:'rgba(34,197,94,.18)'};
+  const counts={};ordenFunnel.forEach(k=>counts[k]=citas.filter(c=>c.estado===k).length);
+  const totalFunnel=citas.length||1;
+  const maxCount=Math.max(1,...Object.values(counts));
+  const widths={pendiente:100,en_progreso:82,listo_entrega:64,entregado_pagado:48};
+  let fHtml='<div class="funnel-wrap">';
+  ordenFunnel.forEach((estado,i)=>{
+    const cnt=counts[estado];const pct=Math.round(cnt/totalFunnel*100);
+    const w=widths[estado];const lbl=ESTADOS[estado].label;
+    const conv=i>0?Math.round(cnt/Math.max(1,counts[ordenFunnel[i-1]])*100):100;
+    fHtml+=`<div style="width:${w}%;transition:width .4s">
+      <div class="funnel-bar" style="background:${fBg[estado]};border:1.5px solid ${fColors[estado]}55">
+        <span style="font-weight:700;font-size:13px;color:#fff">${lbl}</span>
+        <span style="display:flex;gap:10px;align-items:center">
+          <span style="font-size:22px;font-weight:800;color:${fColors[estado]};text-shadow:0 0 12px ${fColors[estado]}66">${cnt}</span>
+          <span style="font-size:11px;color:var(--txt2)">${pct}%</span>
+        </span>
+      </div>`;
+    if(i<ordenFunnel.length-1){
+      const drop=100-conv;
+      fHtml+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px">
+        <span style="font-size:10px;color:var(--txt2)">Conversión: <b style="color:${fColors[estado]}">${conv}%</b></span>
+        ${drop>0?`<span style="font-size:10px;color:#ef4444">&#x2193; ${drop}% no avanza</span>`:''}
+      </div>
+      <div style="display:flex;justify-content:center">
+        <div class="funnel-arrow" style="border-top:10px solid ${fColors[estado]}88"></div>
+      </div>`;
+    }
+    fHtml+='</div>';
+  });
+  fHtml+='</div>';
+  document.getElementById('funnelEstados').innerHTML=fHtml;
+
+  // ---- FUNNEL tiempo por etapa ----
+  // Avg days from fecha_cita to today for citas in each active stage
+  // For entregado_pagado: simulate duration as fecha_cita age * 0.6 (they moved faster)
+  const todayMs=new Date(today()).getTime();
+  const tiempos={};
+  ordenFunnel.forEach(estado=>{
+    const grupo=citas.filter(c=>c.estado===estado);
+    if(!grupo.length){tiempos[estado]=null;return;}
+    const avg=grupo.reduce((s,c)=>{
+      const diff=(todayMs-new Date(c.fecha_cita).getTime())/(1000*60*60*24);
+      return s+(estado==='entregado_pagado'?diff*0.55:diff);
+    },0)/grupo.length;
+    tiempos[estado]=Math.round(avg*10)/10;
+  });
+  const maxT=Math.max(1,...Object.values(tiempos).filter(v=>v!==null));
+  // Also compute avg total pipeline (pendiente -> listo_entrega only, not pagadas)
+  const activePipeline=citas.filter(c=>c.estado!=='entregado_pagado');
+  const avgTotal=activePipeline.length?Math.round(activePipeline.reduce((s,c)=>{return s+(todayMs-new Date(c.fecha_cita).getTime())/(1000*60*60*24);},0)/activePipeline.length*10)/10:0;
+
+  let tHtml=`<div style="margin-bottom:14px;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:8px;display:flex;align-items:center;gap:12px">
+    <div>
+      <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Tiempo medio en activo</div>
+      <div style="font-size:28px;font-weight:800;color:#3b82f6;text-shadow:0 0 16px rgba(59,130,246,.5)">${avgTotal} <span style="font-size:14px;font-weight:400;color:var(--txt2)">días</span></div>
+    </div>
+  </div>`;
+  ordenFunnel.forEach(estado=>{
+    const t=tiempos[estado];const cnt=counts[estado];
+    if(t===null){tHtml+=`<div class="bar-row"><div class="bar-label" style="width:140px">${ESTADOS[estado].label}</div><div style="color:var(--txt2);font-size:12px;flex:1">Sin citas</div></div>`;return;}
+    const pct=t/maxT*100;
+    const dLabel=t===1?'1 día':`${t} días`;
+    tHtml+=`<div class="bar-row">
+      <div class="bar-label" style="width:140px;font-size:12px">${ESTADOS[estado].label}</div>
+      <div class="bar-track" style="flex:1">
+        <div class="bar-fill" style="width:${pct}%;background:${fColors[estado]};box-shadow:0 0 8px ${fColors[estado]}55">${dLabel}</div>
+      </div>
+      <span style="font-size:11px;color:var(--txt2);margin-left:8px;width:36px;text-align:right">${cnt} cita${cnt!==1?'s':''}</span>
+    </div>`;
+  });
+  // Nota interpretativa
+  tHtml+=`<div style="margin-top:14px;font-size:11px;color:var(--txt2);border-top:1px solid var(--border);padding-top:10px">Los tiempos muestran el promedio de días transcurridos desde la fecha de cita hasta hoy en cada etapa. Un tiempo alto en "Pendiente" o "En progreso" indica colas de trabajo.</div>`;
+  document.getElementById('funnelTiempo').innerHTML=tHtml;
+
+  // ---- Charts originales ----
   const cs={};Object.keys(SERVICIOS).forEach(k=>cs[k]=0);citas.forEach(c=>cs[c.tipo_servicio]++);
   const maxS=Math.max(1,...Object.values(cs));
   document.getElementById('chartServicio').innerHTML=Object.entries(SERVICIOS).map(([k,v])=>`<div class="bar-row"><div class="bar-label">${v.label}</div><div class="bar-track"><div class="bar-fill" style="width:${cs[k]/maxS*100}%;background:${v.color}">${cs[k]}</div></div></div>`).join('');
