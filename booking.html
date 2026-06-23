@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRUPO VIA · Reserva tu primera visita</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* HEADER */
+.hdr{background:#fff;border-bottom:3px solid #3b82f6;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-logo{font-size:22px;font-weight:800;color:#3b82f6;letter-spacing:-.5px}
+.hdr-sub{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.hdr-badge{background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#1e40af 100%);color:#fff;padding:40px 24px 32px;text-align:center}
+.hero h1{font-size:26px;font-weight:800;margin-bottom:8px}
+.hero p{font-size:14px;opacity:.8;max-width:480px;margin:0 auto 20px;line-height:1.6}
+.hero-steps{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:4px}
+.hero-step{display:flex;align-items:center;gap:8px;font-size:12px;opacity:.85}
+.hero-step .num{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+
+/* WEEK NAV */
+.week-nav{display:flex;align-items:center;justify-content:center;gap:12px;padding:20px 24px 12px;background:#fff;border-bottom:1px solid #e2e8f0;position:sticky;top:74px;z-index:90}
+.week-btn{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600;color:#475569;transition:all .15s}
+.week-btn:hover{background:#e2e8f0;color:#1e293b}
+.week-label{font-size:14px;font-weight:700;color:#1e293b;min-width:220px;text-align:center}
+
+/* MAIN */
+.main{max-width:700px;margin:0 auto;padding:20px 16px 60px}
+
+/* DAY CARDS */
+.day-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:12px;overflow:hidden;transition:box-shadow .15s}
+.day-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.day-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none}
+.day-head-left{display:flex;align-items:center;gap:12px}
+.day-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0}
+.day-dot.closed{background:#e2e8f0}
+.day-dot.partial{background:#f97316}
+.day-name{font-weight:700;font-size:15px;color:#1e293b}
+.day-date{font-size:12px;color:#64748b;margin-top:1px}
+.day-meta{font-size:12px;color:#64748b;display:flex;align-items:center;gap:6px}
+.day-avail{background:#dcfce7;color:#166534;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600}
+.day-avail.none{background:#fee2e2;color:#991b1b}
+.day-avail.closed-tag{background:#f1f5f9;color:#94a3b8}
+.day-chevron{color:#94a3b8;font-size:18px;transition:transform .2s}
+.day-chevron.open{transform:rotate(180deg)}
+.day-body{display:none;padding:4px 16px 16px;border-top:1px solid #f1f5f9}
+.day-body.open{display:block}
+.closed-msg{text-align:center;padding:20px;color:#94a3b8;font-size:13px}
+
+/* SLOTS */
+.slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px}
+.slot-btn{border:1.5px solid #3b82f6;border-radius:8px;padding:8px 6px;text-align:center;font-size:13px;font-weight:600;color:#3b82f6;background:#eff6ff;cursor:pointer;transition:all .15s}
+.slot-btn:hover{background:#3b82f6;color:#fff;box-shadow:0 2px 8px rgba(59,130,246,.3)}
+.slot-btn.selected{background:#3b82f6;color:#fff;box-shadow:0 2px 8px rgba(59,130,246,.4)}
+.slot-btn.occupied{border-color:#e2e8f0;background:#f8fafc;color:#cbd5e1;cursor:not-allowed}
+.slot-btn.past{border-color:#e2e8f0;background:#f8fafc;color:#cbd5e1;cursor:not-allowed}
+.slot-sep{grid-column:1/-1;height:1px;background:#f1f5f9;margin:4px 0}
+.slot-range-label{grid-column:1/-1;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#94a3b8;font-weight:600;margin-top:4px}
+
+/* FORM */
+.booking-form{background:#fff;border:2px solid #3b82f6;border-radius:14px;padding:24px;margin-top:20px;box-shadow:0 8px 32px rgba(59,130,246,.12)}
+.booking-form h2{font-size:17px;font-weight:800;color:#1e293b;margin-bottom:4px}
+.booking-form .sel-info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:13px;color:#1e40af;display:flex;align-items:center;gap:8px}
+.form-section{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#3b82f6;font-weight:700;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #e2e8f0}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:13px;color:#1e293b;background:#f8fafc;transition:border-color .15s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#3b82f6;background:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.submit-btn{width:100%;background:#3b82f6;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .15s;box-shadow:0 4px 12px rgba(59,130,246,.3)}
+.submit-btn:hover{background:#2563eb;box-shadow:0 6px 16px rgba(59,130,246,.4)}
+.submit-btn:disabled{background:#94a3b8;cursor:not-allowed;box-shadow:none}
+.cancel-btn{width:100%;background:#f1f5f9;color:#64748b;border:none;border-radius:10px;padding:10px;font-size:13px;cursor:pointer;margin-top:8px}
+.cancel-btn:hover{background:#e2e8f0}
+
+/* SUCCESS */
+.success-screen{display:none;text-align:center;padding:60px 24px;max-width:480px;margin:40px auto}
+.success-icon{width:72px;height:72px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px}
+.success-screen h2{font-size:22px;font-weight:800;color:#1e293b;margin-bottom:8px}
+.success-screen p{color:#64748b;font-size:14px;line-height:1.6;margin-bottom:20px}
+.success-detail{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;text-align:left;font-size:13px;line-height:1.9}
+.success-detail b{color:#3b82f6}
+
+/* TOAST */
+.bk-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.bk-toast.show{opacity:1}
+
+/* FOOTER */
+.footer{text-align:center;padding:20px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;margin-top:40px}
+
+@media(max-width:480px){
+  .hero h1{font-size:20px}
+  .hero-steps{gap:16px}
+  .row2{grid-template-columns:1fr}
+  .slots-grid{grid-template-columns:repeat(auto-fill,minmax(68px,1fr))}
+  .hdr-badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">
+    <div>
+      <div class="hdr-logo">GRUPO VIA</div>
+      <div class="hdr-sub">Taller de Motocicletas</div>
+    </div>
+  </div>
+  <div class="hdr-badge">Primera Visita</div>
+</div>
+
+<div class="hero">
+  <h1>Reserva tu primera visita</h1>
+  <p>Selecciona el día y la hora que mejor te venga. La visita dura máximo 15 minutos — analizaremos tu moto y te daremos presupuesto sin compromiso.</p>
+  <div class="hero-steps">
+    <div class="hero-step"><div class="num">1</div>Elige día y hora</div>
+    <div class="hero-step"><div class="num">2</div>Rellena tus datos</div>
+    <div class="hero-step"><div class="num">3</div>Confirmación inmediata</div>
+  </div>
+</div>
+
+<div class="week-nav">
+  <button class="week-btn" onclick="changeWeek(-1)">‹ Anterior</button>
+  <div class="week-label" id="weekLabel"></div>
+  <button class="week-btn" onclick="changeWeek(1)">Siguiente ›</button>
+</div>
+
+<div class="main" id="mainContent">
+  <div id="daysContainer"></div>
+  <div id="bookingFormWrap" style="display:none">
+    <div class="booking-form">
+      <h2>Confirma tu reserva</h2>
+      <div class="sel-info" id="selInfo">
+        📅 <span id="selInfoText"></span>
+      </div>
+      <div class="form-section">Tus datos</div>
+      <div class="field"><label>Nombre completo *</label><input id="bNombre" placeholder="Juan García López" required></div>
+      <div class="row2">
+        <div class="field"><label>Teléfono *</label><input id="bTel" type="tel" placeholder="612 345 678" required></div>
+        <div class="field"><label>Correo electrónico</label><input id="bCorreo" type="email" placeholder="juan@email.com"></div>
+      </div>
+      <div class="form-section">Datos de tu moto</div>
+      <div class="row2">
+        <div class="field"><label>Marca *</label><input id="bMarca" placeholder="Honda, Yamaha..."></div>
+        <div class="field"><label>Modelo *</label><input id="bModelo" placeholder="CBR 600, MT-07..."></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Cilindrada</label><input id="bCil" placeholder="600cc"></div>
+        <div class="field"><label>Matrícula</label><input id="bMat" placeholder="1234 ABC"></div>
+      </div>
+      <div class="field"><label>Kilómetros actuales</label><input id="bKm" type="number" placeholder="25000"></div>
+      <div class="form-section">Tu consulta</div>
+      <div class="field">
+        <label>Servicio solicitado *</label>
+        <select id="bServicio">
+          <option value="">— Selecciona —</option>
+          <option>Mantenimiento / Revisión</option>
+          <option>Reparación</option>
+          <option>Siniestro / Golpe</option>
+          <option>ITV / Puesta a punto</option>
+          <option>Diagnóstico / Fallo desconocido</option>
+          <option>Otros</option>
+        </select>
+      </div>
+      <div class="field"><label>Descripción (opcional)</label><textarea id="bDesc" rows="3" placeholder="Cuéntanos brevemente qué le pasa a tu moto..."></textarea></div>
+      <button class="submit-btn" onclick="submitReserva()">Confirmar reserva</button>
+      <button class="cancel-btn" onclick="cancelForm()">Cancelar y elegir otro horario</button>
+    </div>
+  </div>
+</div>
+
+<div class="main" id="successContent" style="display:none">
+  <div class="success-screen" style="display:block">
+    <div class="success-icon">✓</div>
+    <h2>¡Reserva confirmada!</h2>
+    <p>Hemos recibido tu solicitud. El equipo de GRUPO VIA la confirmará en breve. Te llamaremos al número que nos has dejado si hubiera algún cambio.</p>
+    <div class="success-detail" id="successDetail"></div>
+  </div>
+</div>
+
+<div class="footer">GRUPO VIA · Taller de Motocicletas · grupovia.es</div>
+<div class="bk-toast" id="bkToast"></div>
+
+<script>
+// ─── HORARIO ────────────────────────────────────────────────
+const HORARIO={
+  0:null,
+  1:[{ini:'10:00',fin:'14:00'},{ini:'16:00',fin:'19:30'}],
+  2:[{ini:'10:00',fin:'17:00'}],
+  3:null,
+  4:[{ini:'10:00',fin:'14:00'},{ini:'16:00',fin:'19:30'}],
+  5:[{ini:'10:00',fin:'14:00'},{ini:'16:00',fin:'19:30'}],
+  6:[{ini:'10:00',fin:'14:00'}],
+};
+const DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const SLOT_MIN=15;
+
+// ─── STATE ──────────────────────────────────────────────────
+let baseDate=new Date();
+let selectedSlot=null; // {fecha, hora, label}
+
+// ─── UTILS ──────────────────────────────────────────────────
+function pad(n){return String(n).padStart(2,'0');}
+function dateStr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36);}
+function toMins(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+function fromMins(m){return pad(Math.floor(m/60))+':'+pad(m%60);}
+function addMins(t,n){return fromMins(toMins(t)+n);}
+function nowStr(){const n=new Date();return n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate())+'T'+pad(n.getHours())+':'+pad(n.getMinutes());}
+
+function getMondayOf(d){
+  const day=d.getDay();
+  const diff=day===0?-6:1-day;
+  const mon=new Date(d);
+  mon.setDate(d.getDate()+diff);
+  return mon;
+}
+
+function weekDays(monday){
+  return Array.from({length:7},(_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);return d;});
+}
+
+// ─── STORAGE ────────────────────────────────────────────────
+function getOcupados(){
+  try{return JSON.parse(localStorage.getItem('gv_ocupados')||'[]');}catch{return[];}
+}
+function getPendientes(){
+  try{return JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{return[];}
+}
+function saveReserva(r){
+  const list=getPendientes();
+  list.push(r);
+  localStorage.setItem('gv_reservas',JSON.stringify(list));
+}
+
+// ─── SLOT LOGIC ─────────────────────────────────────────────
+function generateSlots(date){
+  const dow=date.getDay();
+  const ranges=HORARIO[dow];
+  if(!ranges)return[];
+  const result=[];
+  ranges.forEach(({ini,fin})=>{
+    let cur=toMins(ini);
+    const end=toMins(fin);
+    while(cur+SLOT_MIN<=end){
+      result.push({time:fromMins(cur),range:ini+'-'+fin});
+      cur+=SLOT_MIN;
+    }
+  });
+  return result;
+}
+
+function isOccupied(fecha,slotTime){
+  const ocupados=getOcupados();
+  const pendientes=getPendientes().filter(p=>p.fecha===fecha);
+  const si=toMins(slotTime);
+  const sf=si+SLOT_MIN;
+  const overlap=(oIni,oFin)=>si<oFin&&sf>oIni;
+  if(ocupados.some(o=>{
+    if(o.fecha!==fecha)return false;
+    const oi=toMins(o.hora_ini);
+    const of_=toMins(o.hora_fin||addMins(o.hora_ini,30));
+    return overlap(oi,of_);
+  }))return true;
+  if(pendientes.some(p=>overlap(toMins(p.hora),toMins(p.hora)+SLOT_MIN)))return true;
+  return false;
+}
+
+function isPast(fecha,slotTime){
+  const now=new Date();
+  const today=dateStr(now);
+  if(fecha<today)return true;
+  if(fecha>today)return false;
+  const nowMins=now.getHours()*60+now.getMinutes();
+  return toMins(slotTime)<=nowMins;
+}
+
+// ─── RENDER ─────────────────────────────────────────────────
+function changeWeek(n){
+  baseDate.setDate(baseDate.getDate()+n*7);
+  renderWeek();
+}
+
+function renderWeek(){
+  const monday=getMondayOf(baseDate);
+  const days=weekDays(monday);
+  const d0=days[0],d6=days[6];
+  document.getElementById('weekLabel').textContent=
+    `${d0.getDate()} ${MESES[d0.getMonth()]} – ${d6.getDate()} ${MESES[d6.getMonth()]} ${d6.getFullYear()}`;
+
+  const today=dateStr(new Date());
+  let html='';
+  days.forEach((d,i)=>{
+    const fecha=dateStr(d);
+    const dow=d.getDay();
+    const closed=!HORARIO[dow];
+    const slots=generateSlots(d);
+    const isPastDay=fecha<today;
+    const available=slots.filter(s=>!isPast(fecha,s.time)&&!isOccupied(fecha,s.time));
+    const isToday=fecha===today;
+
+    let dotClass=closed||isPastDay?'closed':available.length===0?'closed':'';
+    let tagHtml='';
+    if(closed)tagHtml='<span class="day-avail closed-tag">Cerrado</span>';
+    else if(isPastDay)tagHtml='<span class="day-avail closed-tag">Pasado</span>';
+    else if(available.length===0)tagHtml='<span class="day-avail none">Sin huecos</span>';
+    else tagHtml=`<span class="day-avail">${available.length} hueco${available.length!==1?'s':''}</span>`;
+
+    html+=`<div class="day-card" id="dc_${fecha}">
+      <div class="day-head" onclick="toggleDay('${fecha}',${closed||isPastDay})">
+        <div class="day-head-left">
+          <div class="day-dot ${dotClass}"></div>
+          <div>
+            <div class="day-name">${DIAS[dow]}${isToday?' <span style="font-size:11px;color:#3b82f6;font-weight:600">· HOY</span>':''}</div>
+            <div class="day-date">${d.getDate()} de ${MESES[d.getMonth()]}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${tagHtml}
+          ${!closed&&!isPastDay?`<div class="day-chevron" id="chv_${fecha}">▾</div>`:''}
+        </div>
+      </div>
+      <div class="day-body" id="db_${fecha}">
+        ${renderDayBody(fecha,slots,d)}
+      </div>
+    </div>`;
+  });
+  document.getElementById('daysContainer').innerHTML=html;
+  // Close form when re-rendering
+  if(selectedSlot&&!document.getElementById('dc_'+selectedSlot.fecha)){
+    selectedSlot=null;
+    document.getElementById('bookingFormWrap').style.display='none';
+  }
+}
+
+function renderDayBody(fecha,slots,d){
+  if(!slots.length)return'<div class="closed-msg">Cerrado este día</div>';
+  const today=dateStr(new Date());
+  let html='';
+  let lastRange='';
+  html+='<div class="slots-grid">';
+  slots.forEach(s=>{
+    if(s.range!==lastRange){
+      if(lastRange)html+='<div class="slot-sep"></div>';
+      const [ri,rf]=s.range.split('-');
+      html+=`<div class="slot-range-label">${ri} – ${rf}</div>`;
+      lastRange=s.range;
+    }
+    const past=isPast(fecha,s.time);
+    const occ=isOccupied(fecha,s.time);
+    const sel=selectedSlot&&selectedSlot.fecha===fecha&&selectedSlot.hora===s.time;
+    let cls='slot-btn';
+    if(past||occ)cls+=' '+(past?'past':'occupied');
+    else if(sel)cls+=' selected';
+    html+=`<div class="${cls}" ${(!past&&!occ)?`onclick="selectSlot('${fecha}','${s.time}','${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}')"`:''} title="${occ?'Ocupado':past?'Hora pasada':''}">${s.time}</div>`;
+  });
+  html+='</div>';
+  return html;
+}
+
+function toggleDay(fecha,disabled){
+  if(disabled)return;
+  const body=document.getElementById('db_'+fecha);
+  const chv=document.getElementById('chv_'+fecha);
+  const isOpen=body.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.day-body.open').forEach(el=>el.classList.remove('open'));
+  document.querySelectorAll('.day-chevron.open').forEach(el=>el.classList.remove('open'));
+  if(!isOpen){body.classList.add('open');if(chv)chv.classList.add('open');}
+}
+
+function selectSlot(fecha,hora,label){
+  selectedSlot={fecha,hora,label};
+  // Update all slot buttons
+  document.querySelectorAll('.slot-btn.selected').forEach(el=>el.classList.remove('selected'));
+  const slots=generateSlots(new Date(fecha));
+  const d=new Date(fecha);
+  document.getElementById('db_'+fecha).innerHTML=renderDayBody(fecha,slots,d);
+  // Re-open
+  document.getElementById('db_'+fecha).classList.add('open');
+  document.getElementById('chv_'+fecha)&&document.getElementById('chv_'+fecha).classList.add('open');
+  // Show form
+  document.getElementById('selInfoText').textContent=`${label} a las ${hora}`;
+  document.getElementById('bookingFormWrap').style.display='block';
+  setTimeout(()=>document.getElementById('bookingFormWrap').scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function cancelForm(){
+  selectedSlot=null;
+  document.getElementById('bookingFormWrap').style.display='none';
+  renderWeek();
+}
+
+// ─── SUBMIT ─────────────────────────────────────────────────
+function submitReserva(){
+  if(!selectedSlot){toast('Selecciona un horario primero');return;}
+  const nombre=document.getElementById('bNombre').value.trim();
+  const tel=document.getElementById('bTel').value.trim();
+  const marca=document.getElementById('bMarca').value.trim();
+  const modelo=document.getElementById('bModelo').value.trim();
+  const servicio=document.getElementById('bServicio').value;
+  if(!nombre){toast('Escribe tu nombre completo');return;}
+  if(!tel||tel.length<9){toast('Teléfono inválido');return;}
+  if(!marca||!modelo){toast('Indica la marca y modelo de tu moto');return;}
+  if(!servicio){toast('Selecciona el servicio solicitado');return;}
+
+  const r={
+    id:uid(),
+    fecha:selectedSlot.fecha,
+    hora:selectedSlot.hora,
+    hora_fin:addMins(selectedSlot.hora,SLOT_MIN),
+    nombre,
+    telefono:tel,
+    correo:document.getElementById('bCorreo').value.trim(),
+    moto_marca:marca,
+    moto_modelo:modelo,
+    moto_cilindrada:document.getElementById('bCil').value.trim(),
+    moto_matricula:document.getElementById('bMat').value.trim(),
+    moto_km:parseInt(document.getElementById('bKm').value)||0,
+    servicio,
+    descripcion:document.getElementById('bDesc').value.trim(),
+    tipo:'primera_visita',
+    estado:'pendiente_confirmacion',
+    timestamp:nowStr()
+  };
+
+  saveReserva(r);
+
+  // Show success
+  document.getElementById('mainContent').style.display='none';
+  document.querySelector('.week-nav').style.display='none';
+  document.getElementById('successContent').style.display='block';
+  document.getElementById('successDetail').innerHTML=`
+    <b>Día y hora:</b> ${selectedSlot.label} a las ${selectedSlot.hora}<br>
+    <b>Nombre:</b> ${nombre}<br>
+    <b>Teléfono:</b> ${tel}<br>
+    <b>Moto:</b> ${marca} ${modelo}${document.getElementById('bMat').value?' · '+document.getElementById('bMat').value:''}<br>
+    <b>Servicio:</b> ${servicio}<br>
+    <br>
+    <span style="font-size:12px;color:#64748b">Referencia: <code>${r.id.slice(-8).toUpperCase()}</code></span>
+  `;
+}
+
+// ─── TOAST ──────────────────────────────────────────────────
+function toast(msg){
+  const t=document.getElementById('bkToast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+renderWeek();
+</script>
+</body>
+</html>

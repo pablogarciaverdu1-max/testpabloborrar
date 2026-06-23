@@ -188,7 +188,7 @@ tr.clickable:hover{background:var(--bg3)}
 <div id="sidebar">
   <div class="logo"><div class="name">GRUPO VIA</div><div class="sub">Sistema de Gestión</div></div>
   <div class="nav">
-    <div class="nav-item active" data-sec="citas"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4" stroke-linecap="round"/></svg>Citas</div>
+    <div class="nav-item active" data-sec="citas" style="position:relative"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4" stroke-linecap="round"/></svg>Citas<span id="navBadge" style="display:none;position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1" id="navBadge"></span></div>
     <div class="nav-item" data-sec="flujo"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="3.5" height="12" rx="1"/><rect x="6.25" y="2" width="3.5" height="8" rx="1"/><rect x="11.5" y="2" width="3.5" height="10" rx="1"/></svg>Flujo Citas</div>
     <div class="nav-item" data-sec="clientes"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke-linecap="round"/></svg>Clientes</div>
     <div class="nav-item" data-sec="seguimientos"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M4.5 8l2.5 2.5 4-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Tareas</div>
@@ -210,7 +210,9 @@ tr.clickable:hover{background:var(--bg3)}
       <button class="btn btn-sec" onclick="calToday()">Hoy</button>
       <button class="btn btn-sec" onclick="calWeek(1)">Siguiente ›</button>
       <span id="calWeekLabel" style="font-weight:600;margin-left:8px"></span>
+      <button class="btn btn-sec" onclick="copiarLinkCitas()" style="margin-left:auto;display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 9.5a3.536 3.536 0 0 0 5 0l2-2a3.536 3.536 0 0 0-5-5l-1 1"/><path d="M9.5 6.5a3.536 3.536 0 0 0-5 0l-2 2a3.536 3.536 0 0 0 5 5l1-1"/></svg>Copiar Link Citas</button>
     </div>
+    <div id="solicitudesPanel"></div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;align-items:center">
       <span style="font-size:12px;font-weight:700;color:var(--txt2);margin-right:4px">LEYENDA:</span>
       <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#ef4444;display:inline-block"></span>Mantenimiento</span>
@@ -604,7 +606,7 @@ function saveCitaEdit(id){
   const horaIni=document.getElementById('eHoraIni').value;
   const horaFin=document.getElementById('eHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior al inicio','err');return;}
-  DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});
+  DB.citas.update(id,{tipo_servicio:document.getElementById('eServ').value,fecha_cita:document.getElementById('eFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('eMec').value,nota:document.getElementById('eNota').value.trim()});syncCitasToStorage();
   toast('Cita actualizada','ok');
   showCitaDetail(id);renderCal();renderKanban();
   if(document.getElementById('modalCliente').classList.contains('open'))renderClienteModal();
@@ -621,7 +623,7 @@ function setCitaEstadoCalendar(citaId,nuevoEstado){
   showCitaDetail(citaId);renderKanban();renderCal();
 }
 function cancelarCita(id){
-  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);closeModal('modalCitaDetail');renderCal();renderKanban();toast('Cita cancelada','warn');});
+  confirmDelete('¿Cancelar esta cita?',()=>{DB.citas.delete(id);closeModal('modalCitaDetail');renderCal();renderKanban();syncCitasToStorage();toast('Cita cancelada','warn');});
 }
 
 /* ========= WIZARD NUEVA CITA ========= */
@@ -730,7 +732,7 @@ function wizFinish(){
   const horaFin=document.getElementById('wHoraFin').value;
   if(horaFin&&horaFin<=horaIni){toast('La hora fin debe ser posterior a la hora inicio','err');return;}
   DB.citas.create({cliente_id:wiz.clienteId,moto_id:wiz.motoId,tipo_servicio:document.getElementById('wServ').value,fecha_cita:document.getElementById('wFecha').value,hora_cita:horaIni,hora_fin:horaFin||null,mecanico_id:document.getElementById('wMec').value,nota:document.getElementById('wNota').value.trim()});
-  closeModal('modalCita');renderCal();renderKanban();renderClientes();toast('Cita creada','ok');
+  closeModal('modalCita');renderCal();renderKanban();renderClientes();syncCitasToStorage();toast('Cita creada','ok');
 }
 
 /* ========= CLIENTES LIST ========= */
@@ -1445,7 +1447,110 @@ const ult=citas.slice().sort((a,b)=>(b.fecha_cita+b.hora_cita).localeCompare(a.f
 }
 
 /* ========= INIT ========= */
-seed();populateFilters();renderCal();
+// ─── BOOKING LINK ────────────────────────────────────────────────────────────
+function syncCitasToStorage(){
+  const ocupados=DB.citas.all().map(c=>({
+    fecha:c.fecha_cita,
+    hora_ini:c.hora_cita,
+    hora_fin:c.hora_fin||addMinsStr(c.hora_cita,30)
+  }));
+  try{localStorage.setItem('gv_ocupados',JSON.stringify(ocupados));}catch(e){}
+}
+function addMinsStr(t,n){const[h,m]=t.split(':').map(Number);const tot=h*60+m+n;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0');}
+
+function copiarLinkCitas(){
+  syncCitasToStorage();
+  const url=window.location.href.replace(/[^/]*$/,'')+'booking.html';
+  navigator.clipboard.writeText(url).then(()=>toast('Link copiado','ok')).catch(()=>{
+    prompt('Copia este link:',url);
+  });
+}
+
+function checkSolicitudes(){
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+  const pending=list.filter(r=>r.estado==='pendiente_confirmacion');
+  const badge=document.getElementById('navBadge');
+  if(badge){
+    if(pending.length>0){badge.style.display='flex';badge.textContent=pending.length;}
+    else{badge.style.display='none';}
+  }
+  if(document.getElementById('solicitudesPanel')){
+    renderSolicitudes(pending);
+  }
+}
+
+function renderSolicitudes(pending){
+  const el=document.getElementById('solicitudesPanel');
+  if(!el)return;
+  if(!pending||!pending.length){el.innerHTML='';return;}
+  const DIAS_N=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const MESES_N=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  el.innerHTML=`<div style="background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.3);border-radius:12px;padding:16px;margin-bottom:16px">
+    <div style="font-size:12px;font-weight:700;color:#ef4444;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="7"/><path d="M8 5v3.5l2 2" stroke-linecap="round"/></svg>
+      ${pending.length} SOLICITUD${pending.length!==1?'ES':''} PENDIENTE${pending.length!==1?'S':''} DE CONFIRMAR
+    </div>
+    ${pending.map(r=>{
+      const d=new Date(r.fecha+'T12:00:00');
+      const dLabel=`${DIAS_N[d.getDay()]} ${d.getDate()} ${MESES_N[d.getMonth()]} · ${r.hora}`;
+      return `<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-weight:700;font-size:14px;color:var(--txt)">${esc(r.nombre)}</div>
+          <div style="font-size:12px;color:var(--accent-blue);margin:2px 0">${dLabel}</div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:4px">
+            📞 ${esc(r.telefono)}${r.correo?' · '+esc(r.correo):''}
+          </div>
+          <div style="font-size:12px;color:var(--txt2)">🏍 ${esc(r.moto_marca)} ${esc(r.moto_modelo)}${r.moto_matricula?' · '+esc(r.moto_matricula):''}</div>
+          <div style="font-size:12px;color:var(--txt2)">🔧 ${esc(r.servicio)}</div>
+          ${r.descripcion?`<div style="font-size:12px;color:var(--txt2);font-style:italic;margin-top:4px">"${esc(r.descripcion)}"</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;align-self:flex-start">
+          <button class="btn btn-sm" style="background:#22c55e;border-color:#22c55e;color:#fff" onclick="acceptSolicitud('${r.id}')">Aceptar</button>
+          <button class="btn btn-sm btn-danger" onclick="rejectSolicitud('${r.id}')">Rechazar</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function acceptSolicitud(rid){
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+  const r=list.find(x=>x.id===rid);if(!r)return;
+  // Create client (or find existing by phone)
+  let cliId=null;
+  const existing=citas.length>=0&&DB.clientes.all().find(c=>c.telefono===r.telefono);
+  if(existing){cliId=existing.id;}
+  else{
+    const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:''});
+    cliId=nc.id;
+  }
+  // Create moto
+  const moto=DB.motos.create({cliente_id:cliId,marca:r.moto_marca,modelo:r.moto_modelo,cilindrada:r.moto_cilindrada||'',matricula:r.moto_matricula||'',bastidor:'',kilometros:r.moto_km||null});
+  // Create cita (primera_visita)
+  DB.citas.create({cliente_id:cliId,moto_id:moto.id,tipo_servicio:'primera_revision',fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.servicio+(r.descripcion?' – '+r.descripcion:'')});
+  // Mark reservation as accepted
+  r.estado='confirmada';
+  localStorage.setItem('gv_reservas',JSON.stringify(list));
+  syncCitasToStorage();
+  renderCal();renderKanban();
+  checkSolicitudes();
+  toast('Cita creada en el calendario','ok');
+}
+
+function rejectSolicitud(rid){
+  confirmDelete('¿Rechazar esta solicitud?',()=>{
+    let list=[];
+    try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
+    const r=list.find(x=>x.id===rid);if(r)r.estado='rechazada';
+    localStorage.setItem('gv_reservas',JSON.stringify(list));
+    checkSolicitudes();
+    toast('Solicitud rechazada','warn');
+  });
+}
+
+seed();populateFilters();renderCal();syncCitasToStorage();checkSolicitudes();setInterval(()=>{checkSolicitudes();},15000);
 </script>
 </body>
 </html>
