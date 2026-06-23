@@ -80,10 +80,11 @@ tr.clickable:hover{background:var(--bg3)}
 
 /* CALENDAR */
 .cal-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px}
-.cal{width:100%;border-collapse:collapse;min-width:760px}
+.cal{width:100%;border-collapse:collapse;min-width:760px;table-layout:fixed}
 .cal th,.cal td{border:1px solid var(--border);padding:0;text-align:center}
 .cal th{padding:8px;background:var(--bg3);font-size:12px;color:var(--txt2)}
 .cal .timecol{width:60px;font-size:11px;color:var(--txt2);background:var(--bg3);padding:4px}
+.cal th:not(.timecol){width:calc((100% - 60px) / 5)}
 .cal td.slot{height:34px;cursor:pointer;position:relative;vertical-align:top;background:var(--bg2)}
 .cal td.slot:hover{background:var(--bg4)}
 .chip{font-size:10px;padding:2px 5px;border-radius:4px;color:#fff;margin:1px;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;line-height:1.3}
