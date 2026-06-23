@@ -1557,22 +1557,34 @@ function toggleSolRow(rid){
 function acceptSolicitud(rid){
   let list=[];
   try{list=JSON.parse(localStorage.getItem('gv_reservas')||'[]');}catch{}
-  const r=list.find(x=>x.id===rid);if(!r)return;
+  const r=list.find(x=>x.id===rid);
+  if(!r||r.estado!=='pendiente_confirmacion')return; // guard doble clic
+  // Mark FIRST to prevent duplicate processing
+  r.estado='confirmada';
+  localStorage.setItem('gv_reservas',JSON.stringify(list));
   // Create client (or find existing by phone)
   let cliId=null;
-  const existing=citas.length>=0&&DB.clientes.all().find(c=>c.telefono===r.telefono);
+  const existing=DB.clientes.all().find(c=>c.telefono===r.telefono);
   if(existing){cliId=existing.id;}
   else{
     const nc=DB.clientes.create({nombre:r.nombre.split(' ')[0],apellidos:r.nombre.split(' ').slice(1).join(' '),telefono:r.telefono,correo:r.correo||'',dni:''});
     cliId=nc.id;
   }
-  // Create moto
-  const moto=DB.motos.create({cliente_id:cliId,marca:r.moto_marca,modelo:r.moto_modelo,cilindrada:r.moto_cilindrada||'',matricula:r.moto_matricula||'',bastidor:'',kilometros:r.moto_km||null});
-  // Create cita (primera_visita)
-  DB.citas.create({cliente_id:cliId,moto_id:moto.id,tipo_servicio:'primera_revision',fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.servicio+(r.descripcion?' – '+r.descripcion:'')});
-  // Mark reservation as accepted
-  r.estado='confirmada';
-  localStorage.setItem('gv_reservas',JSON.stringify(list));
+  // Use the CRM service key stored directly by booking.html, fallback to map
+  const srvMap={'Mantenimiento / Revisión':'mantenimiento','Reparación':'reparacion','Siniestro / Golpe':'siniestro','ITV / Puesta a punto':'itv','Primera visita / Consulta':'primera'};
+  const tipoSrv=r.servicio_crm||(srvMap[r.servicio])||'primera';
+  // Create moto (check if same matricula already exists for this client to avoid dups)
+  let motoId=null;
+  if(r.moto_matricula){
+    const exMoto=DB.motos.byCliente(cliId).find(m=>m.matricula&&m.matricula.toUpperCase()===r.moto_matricula.toUpperCase());
+    if(exMoto)motoId=exMoto.id;
+  }
+  if(!motoId){
+    const moto=DB.motos.create({cliente_id:cliId,marca:r.moto_marca,modelo:r.moto_modelo,cilindrada:r.moto_cilindrada||'',matricula:r.moto_matricula||'',bastidor:'',kilometros:r.moto_km||null});
+    motoId=moto.id;
+  }
+  // Create cita
+  DB.citas.create({cliente_id:cliId,moto_id:motoId,tipo_servicio:tipoSrv,fecha_cita:r.fecha,hora_cita:r.hora,hora_fin:r.hora_fin||addMinsStr(r.hora,15),mecanico_id:MECANICOS[0]&&MECANICOS[0].id,nota:r.descripcion||''});
   syncCitasToStorage();
   // Navigate calendar to the week of the new cita
   calBaseDate=new Date(r.fecha+'T12:00:00');

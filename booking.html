@@ -147,11 +147,30 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="form-section">Datos de tu moto</div>
       <div class="row2">
-        <div class="field"><label>Marca *</label><input id="bMarca" placeholder="Honda, Yamaha..."></div>
+        <div class="field">
+          <label>Marca *</label>
+          <select id="bMarca">
+            <option value="">— Selecciona —</option>
+            <option>BMW</option><option>Ducati</option><option>GasGas</option><option>Harley-Davidson</option>
+            <option>Honda</option><option>Husqvarna</option><option>Indian</option><option>Kawasaki</option>
+            <option>KTM</option><option>MotoGuzzi</option><option>MV Agusta</option><option>Piaggio</option>
+            <option>Royal Enfield</option><option>Suzuki</option><option>Triumph</option><option>Vespa</option>
+            <option>Yamaha</option><option>Zontes</option><option>Otra</option>
+          </select>
+        </div>
         <div class="field"><label>Modelo *</label><input id="bModelo" placeholder="CBR 600, MT-07..."></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Cilindrada</label><input id="bCil" placeholder="600cc"></div>
+        <div class="field">
+          <label>Cilindrada</label>
+          <select id="bCil">
+            <option value="">— Selecciona —</option>
+            <option>50cc</option><option>125cc</option><option>250cc</option><option>300cc</option>
+            <option>400cc</option><option>500cc</option><option>600cc</option><option>650cc</option>
+            <option>700cc</option><option>750cc</option><option>800cc</option><option>900cc</option>
+            <option>1000cc</option><option>1100cc</option><option>1200cc</option><option>1300cc +</option>
+          </select>
+        </div>
         <div class="field"><label>Matrícula</label><input id="bMat" placeholder="1234 ABC"></div>
       </div>
       <div class="field"><label>Kilómetros actuales</label><input id="bKm" type="number" placeholder="25000"></div>
@@ -160,12 +179,12 @@ a{color:inherit;text-decoration:none}
         <label>Servicio solicitado *</label>
         <select id="bServicio">
           <option value="">— Selecciona —</option>
-          <option>Mantenimiento / Revisión</option>
-          <option>Reparación</option>
-          <option>Siniestro / Golpe</option>
-          <option>ITV / Puesta a punto</option>
-          <option>Diagnóstico / Fallo desconocido</option>
-          <option>Otros</option>
+          <option value="mantenimiento">Mantenimiento / Revisión</option>
+          <option value="reparacion">Reparación</option>
+          <option value="siniestro">Siniestro / Golpe</option>
+          <option value="itv">ITV / Puesta a punto</option>
+          <option value="mantenimiento">Diagnóstico / Fallo desconocido</option>
+          <option value="primera">Primera visita / Consulta</option>
         </select>
       </div>
       <div class="field"><label>Descripción (opcional)</label><textarea id="bDesc" rows="3" placeholder="Cuéntanos brevemente qué le pasa a tu moto..."></textarea></div>
@@ -403,13 +422,15 @@ function submitReserva(){
   if(!selectedSlot){toast('Selecciona un horario primero');return;}
   const nombre=document.getElementById('bNombre').value.trim();
   const tel=document.getElementById('bTel').value.trim();
-  const marca=document.getElementById('bMarca').value.trim();
+  const marca=document.getElementById('bMarca').value;
   const modelo=document.getElementById('bModelo').value.trim();
-  const servicio=document.getElementById('bServicio').value;
+  const servicioCrm=document.getElementById('bServicio').value;
+  const servicioLabel=document.getElementById('bServicio').options[document.getElementById('bServicio').selectedIndex]?.text||'';
   if(!nombre){toast('Escribe tu nombre completo');return;}
   if(!tel||tel.length<9){toast('Teléfono inválido');return;}
-  if(!marca||!modelo){toast('Indica la marca y modelo de tu moto');return;}
-  if(!servicio){toast('Selecciona el servicio solicitado');return;}
+  if(!marca){toast('Selecciona la marca de tu moto');return;}
+  if(!modelo){toast('Escribe el modelo de tu moto');return;}
+  if(!servicioCrm){toast('Selecciona el servicio solicitado');return;}
 
   const r={
     id:uid(),
@@ -421,10 +442,11 @@ function submitReserva(){
     correo:document.getElementById('bCorreo').value.trim(),
     moto_marca:marca,
     moto_modelo:modelo,
-    moto_cilindrada:document.getElementById('bCil').value.trim(),
+    moto_cilindrada:document.getElementById('bCil').value,
     moto_matricula:document.getElementById('bMat').value.trim(),
     moto_km:parseInt(document.getElementById('bKm').value)||0,
-    servicio,
+    servicio:servicioLabel,
+    servicio_crm:servicioCrm,
     descripcion:document.getElementById('bDesc').value.trim(),
     tipo:'primera_visita',
     estado:'pendiente_confirmacion',
