@@ -1600,9 +1600,9 @@ function acceptSolicitud(rid){
   checkSolicitudes();
   // Refresh solicitudes modal if open, close it when no more pending
   const solModal=document.getElementById('modalSolicitudes');
-  if(solModal&&solModal.style.display==='flex'){
+  if(solModal&&solModal.classList.contains('open')){
     const remaining=JSON.parse(localStorage.getItem('gv_reservas')||'[]').filter(x=>x.estado==='pendiente_confirmacion');
-    if(remaining.length===0){solModal.style.display='none';}
+    if(remaining.length===0){closeModal('modalSolicitudes');}
     else{openModalSolicitudes();}
   }
   // Switch to citas section so user sees it
