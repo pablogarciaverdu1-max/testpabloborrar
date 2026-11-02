@@ -1,5 +1,6 @@
 import { Disc3, MapPin, Mountain, Route, TrendingUp } from 'lucide-react-native';
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
 import { activityById, placeById, songById } from '@/data/catalog';
@@ -12,12 +13,13 @@ type Tone = 'card' | 'onPrimary';
 /** Tarjeta de canción (Spotify simulado). */
 export function SongCard({ songId, tone = 'card', cover }: { songId?: string; tone?: Tone; cover?: ImageSourcePropType }) {
   const song = songById(songId);
+  const [failed, setFailed] = useState(false);
   if (!song) return null;
   const cat = categories.music;
   return (
     <View style={[styles.row, { backgroundColor: tone === 'card' ? cat.soft : colors.white }]}>
-      {cover ? (
-        <Image source={cover as never} style={styles.cover} contentFit="cover" accessibilityLabel="Portada" />
+      {cover && !failed ? (
+        <Image source={cover as never} style={styles.cover} contentFit="cover" accessibilityLabel="Portada" onError={() => setFailed(true)} />
       ) : (
         <View style={[styles.cover, { backgroundColor: cat.solid }]}>
           <Disc3 size={26} color={colors.ink} />

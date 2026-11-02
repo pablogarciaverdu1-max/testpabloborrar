@@ -41,14 +41,14 @@ export function PostBody({ post }: { post: Post }) {
     case 'activity':
       return (
         <View style={styles.stack}>
-          {img ? <PhotoBlock category={post.category} source={img} aspect={16 / 10} label={activityById(post.activityId)?.title} /> : null}
+          {img ? <PhotoBlock category={post.category} source={img} aspect={16 / 10} label={activityById(post.activityId)?.title} hideOnError /> : null}
           <ActivityCard activityId={post.activityId} />
         </View>
       );
     case 'place':
       return (
         <View style={styles.stack}>
-          {img ? <PhotoBlock category={post.category} source={img} aspect={16 / 10} label={placeById(post.placeId)?.name} /> : null}
+          {img ? <PhotoBlock category={post.category} source={img} aspect={16 / 10} label={placeById(post.placeId)?.name} hideOnError /> : null}
           <PlaceCard placeId={post.placeId} />
         </View>
       );

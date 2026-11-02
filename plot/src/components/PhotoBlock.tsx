@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { StyleSheet, View, type ImageSourcePropType, type StyleProp, type ViewStyle } from 'react-native';
 
 import { categories, colors, radius, type CategoryId } from '@/theme';
@@ -15,22 +16,27 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   rounded?: number;
   compact?: boolean;
+  /** Si la foto falla, no mostrar nada (para rutas y lugares, que ya tienen su tarjeta). */
+  hideOnError?: boolean;
 };
 
 /** Foto: real si viene del carrete, o bloque de color de categoría con etiqueta discreta. */
-export function PhotoBlock({ category, label, uri, source, aspect = 4 / 3, style, rounded = radius.tile, compact }: Props) {
+export function PhotoBlock({ category, label, uri, source, aspect = 4 / 3, style, rounded = radius.tile, compact, hideOnError }: Props) {
   const cat = categories[category];
-  if (uri || source) {
+  const [failed, setFailed] = useState(false);
+  if ((uri || source) && !failed) {
     return (
       <Image
         source={uri ? { uri } : (source as never)}
         style={[{ aspectRatio: aspect, borderRadius: rounded, backgroundColor: colors.surface }, style as object]}
         contentFit="cover"
         transition={200}
+        onError={() => setFailed(true)}
         accessibilityLabel={label ? label.replace('Foto · ', 'Foto de ') : 'Foto'}
       />
     );
   }
+  if (failed && hideOnError) return null;
   return (
     <View
       accessible

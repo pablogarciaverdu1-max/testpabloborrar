@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { BadgeCheck } from 'lucide-react-native';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { avatarPhotos } from '@/data/photos';
@@ -21,7 +22,8 @@ type Props = {
 
 /** Avatar con iniciales sobre color de categoría. Anillo violeta si está verificado. */
 export function Avatar({ name, color, size = 56, verified, badge, bordered, photoId }: Props) {
-  const photo = photoId ? avatarPhotos[photoId] : undefined;
+  const [failed, setFailed] = useState(false);
+  const photo = photoId && !failed ? avatarPhotos[photoId] : undefined;
   const ring = verified ? (size === 88 ? 3 : 2) : 0;
   const gap = verified ? 2 : 0;
   const outer = size;
@@ -55,7 +57,7 @@ export function Avatar({ name, color, size = 56, verified, badge, bordered, phot
         ]}
       >
         {photo ? (
-          <Image source={photo as never} style={{ width: inner, height: inner, borderRadius: inner / 2 }} contentFit="cover" />
+          <Image source={photo as never} style={{ width: inner, height: inner, borderRadius: inner / 2 }} contentFit="cover" onError={() => setFailed(true)} />
         ) : (
           <Txt variant={size === 88 ? 'title1' : size === 56 ? 'title2' : 'headline'} color={colors.ink} maxFontSizeMultiplier={1}>
             {initials}
