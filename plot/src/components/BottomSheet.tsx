@@ -35,17 +35,19 @@ export function BottomSheet({ visible, onClose, title, subtitle, children, maxHe
   const y = useSharedValue(height);
   const backdrop = useSharedValue(0);
 
+  // Montar en cuanto se pide abrir (estado derivado durante el render).
+  if (visible && !mounted) setMounted(true);
+
   useEffect(() => {
     if (visible) {
-      setMounted(true);
-      y.value = height;
-      y.value = reduced ? withTiming(0, { duration: motion.fast }) : withSpring(0, motion.spring);
-      backdrop.value = withTiming(1, { duration: motion.base });
-    } else if (mounted) {
-      backdrop.value = withTiming(0, { duration: motion.fast });
-      y.value = withTiming(height, { duration: motion.base, easing: Easing.in(Easing.quad) }, (done) => {
+      y.set(height);
+      y.set(reduced ? withTiming(0, { duration: motion.fast }) : withSpring(0, motion.spring));
+      backdrop.set(withTiming(1, { duration: motion.base }));
+    } else {
+      backdrop.set(withTiming(0, { duration: motion.fast }));
+      y.set(withTiming(height, { duration: motion.base, easing: Easing.in(Easing.quad) }, (done) => {
         if (done) scheduleOnRN(setMounted, false);
-      });
+      }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
@@ -54,14 +56,14 @@ export function BottomSheet({ visible, onClose, title, subtitle, children, maxHe
     activeOffsetY: 8,
     onUpdate: (e) => {
       'worklet';
-      y.value = Math.max(0, e.translationY);
+      y.set(Math.max(0, e.translationY));
     },
     onDeactivate: (e) => {
       'worklet';
       if (e.translationY > 110 || e.velocityY > 900) {
         scheduleOnRN(onClose);
       } else {
-        y.value = withSpring(0, motion.spring);
+        y.set(withSpring(0, motion.spring));
       }
     },
   });
