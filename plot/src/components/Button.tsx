@@ -76,7 +76,7 @@ export function Button({
       ) : (
         <View style={styles.row}>
           {Icon ? <Icon size={size === 'sm' ? 16 : 19} color={disabled ? colors.text3 : p.fg} /> : null}
-          <Txt variant={size === 'sm' ? 'subheadStrong' : 'headline'} color={disabled ? colors.text3 : p.fg} align="center">
+          <Txt variant={size === 'sm' ? 'subheadStrong' : 'headline'} color={disabled ? colors.text3 : p.fg} align="center" style={styles.label}>
             {label}
           </Txt>
         </View>
@@ -87,6 +87,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: { alignItems: 'center', justifyContent: 'center', paddingVertical: space.sm },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flexWrap: 'wrap', justifyContent: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, justifyContent: 'center', maxWidth: '100%' },
+  label: { flexShrink: 1 },
   flex: { flex: 1 },
 });

@@ -24,7 +24,7 @@ export default function Welcome() {
     <View style={styles.root}>
       <StatusBar style="light" />
       <View style={[styles.circle, { backgroundColor: categories.music.solid, top: -60, right: -70 }]} />
-      <View style={[styles.circle, styles.circleSm, { backgroundColor: categories.food.solid, bottom: 220, left: -50 }]} />
+      <View style={[styles.circle, styles.circleSm, { backgroundColor: categories.food.solid, top: 330, left: -60 }]} />
       <View style={[styles.pill, { backgroundColor: categories.places.solid }]} />
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <Txt variant="title2" color={colors.white} style={styles.logo} accessibilityRole="header" accessibilityLabel="PLOT">
@@ -32,14 +32,12 @@ export default function Welcome() {
         </Txt>
         <View style={styles.collage} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
           {collage.map((c, i) => (
-            <Animated.View
-              key={c.label}
-              entering={FadeInUp.delay(80 + i * 45).duration(300)}
-              style={[styles.chip, { backgroundColor: categories[c.cat].solid, top: c.top, left: c.left, transform: [{ rotate: `${c.rotate}deg` }] }]}
-            >
-              <Txt variant="headline" color={colors.ink}>
-                {c.label}
-              </Txt>
+            <Animated.View key={c.label} entering={FadeInUp.delay(80 + i * 45).duration(300)} style={[styles.chipPos, { top: c.top, left: c.left }]}>
+              <View style={[styles.chip, { backgroundColor: categories[c.cat].solid, transform: [{ rotate: `${c.rotate}deg` }] }]}>
+                <Txt variant="headline" color={colors.ink}>
+                  {c.label}
+                </Txt>
+              </View>
             </Animated.View>
           ))}
         </View>
@@ -91,9 +89,10 @@ const styles = StyleSheet.create({
   logo: { marginTop: space.sm, letterSpacing: 2 },
   circle: { position: 'absolute', width: 220, height: 220, borderRadius: 110, opacity: 0.9 },
   circleSm: { width: 140, height: 140, borderRadius: 70 },
-  pill: { position: 'absolute', width: 200, height: 70, borderRadius: 999, right: -60, bottom: 300, transform: [{ rotate: '-24deg' }], opacity: 0.85 },
+  pill: { position: 'absolute', width: 200, height: 70, borderRadius: 999, right: -70, top: 360, transform: [{ rotate: '-24deg' }], opacity: 0.85 },
   collage: { height: 250, marginTop: space.xl },
-  chip: { position: 'absolute', paddingHorizontal: 18, paddingVertical: 11, borderRadius: radius.chip },
+  chipPos: { position: 'absolute' },
+  chip: { paddingHorizontal: 18, paddingVertical: 11, borderRadius: radius.chip },
   copy: { flex: 1, justifyContent: 'flex-end', gap: space.sm, paddingBottom: space.xl },
   hero: { fontSize: 52, lineHeight: 56 },
   actions: { gap: space.md, paddingBottom: space.sm },

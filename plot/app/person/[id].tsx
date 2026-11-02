@@ -198,7 +198,10 @@ export default function PersonProfile() {
         )}
       </View>
 
-      {!isMe ? <SafetySheet personId={id} visible={safety} onClose={() => setSafety(false)} onBlocked={() => router.back()} /> : null}
+      {!isMe ? <SafetySheet personId={id} visible={safety} onClose={() => setSafety(false)} onBlocked={() => {
+        router.dismissAll();
+        router.navigate('/discover');
+      }} /> : null}
     </View>
   );
 }

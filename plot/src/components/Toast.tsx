@@ -1,7 +1,7 @@
 import { CircleCheck, Info, TriangleAlert } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { AccessibilityInfo, StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useToast } from '@/store/useToast';
@@ -11,7 +11,7 @@ import { tapLight } from '@/utils/haptics';
 import { PressableScale } from './PressableScale';
 import { Txt } from './Txt';
 
-/** Toast global con opción «Deshacer». Se coloca por encima de la barra de pestañas. */
+/** Toast global con opción «Deshacer». Aparece arriba, bajo la Dynamic Island, sin tapar botones. */
 export function ToastHost() {
   const t = useToast((s) => s.toast);
   const hide = useToast((s) => s.hide);
@@ -27,8 +27,8 @@ export function ToastHost() {
   if (!t) return null;
   const Icon = t.tone === 'danger' ? TriangleAlert : t.tone === 'success' ? CircleCheck : Info;
   return (
-    <View pointerEvents="box-none" style={[styles.wrap, { bottom: insets.bottom + 74 }]}>
-      <Animated.View key={t.id} entering={FadeInDown.duration(220)} exiting={FadeOutDown.duration(200)} style={styles.toast}>
+    <View pointerEvents="box-none" style={[styles.wrap, { top: insets.top + 6 }]}>
+      <Animated.View key={t.id} entering={FadeInUp.duration(220)} exiting={FadeOutUp.duration(200)} style={styles.toast}>
         <Icon size={20} color={t.tone === 'danger' ? colors.dangerSoft : colors.white} />
         <Txt variant="subheadStrong" color={colors.white} style={styles.msg}>
           {t.message}

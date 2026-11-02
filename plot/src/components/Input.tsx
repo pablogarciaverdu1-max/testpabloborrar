@@ -32,7 +32,7 @@ export function Input({ label, error, hint, right, left, style, onFocus, onBlur,
           multiline && styles.multiline,
         ]}
       >
-        {left}
+        {left ? <View style={styles.adorn}>{left}</View> : null}
         <TextInput
           ref={ref}
           placeholderTextColor={colors.text3}
@@ -51,7 +51,7 @@ export function Input({ label, error, hint, right, left, style, onFocus, onBlur,
           style={[styles.input, multiline && styles.inputMultiline, style]}
           {...rest}
         />
-        {right}
+        {right ? <View style={styles.adorn}>{right}</View> : null}
       </View>
       {error ? (
         <Txt variant="footnoteStrong" color={colors.dangerInk} accessibilityLiveRegion="polite" accessibilityRole="alert">
@@ -68,6 +68,7 @@ export function Input({ label, error, hint, right, left, style, onFocus, onBlur,
 
 const styles = StyleSheet.create({
   wrap: { gap: 6 },
+  adorn: { flexShrink: 0 },
   field: {
     flexDirection: 'row',
     alignItems: 'center',

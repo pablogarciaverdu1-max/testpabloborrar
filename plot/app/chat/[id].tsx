@@ -78,7 +78,6 @@ export default function Conversation() {
   }, [messages]);
 
   const lastMineId = [...messages].reverse().find((m) => m.from === 'me')?.id;
-  const lastMineIsLast = messages[messages.length - 1]?.from === 'me';
 
   const scrollToEnd = useCallback((animated = true) => {
     requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated }));
@@ -276,7 +275,7 @@ export default function Conversation() {
               );
             }
             const m = item.message;
-            const status = m.id === lastMineId && lastMineIsLast ? (conversation?.seen ? 'Leído' : 'Enviado') : undefined;
+            const status = m.id === lastMineId ? (conversation?.seen ? 'Leído' : 'Enviado') : undefined;
             return <Bubble message={m} quoted={posts.find((p) => p.id === m.quotedPostId)} status={status} onLongPress={() => onLongPress(m)} />;
           }}
         />
@@ -314,7 +313,10 @@ export default function Conversation() {
       </KeyboardAvoidingView>
 
       <AttachSheet visible={attach} onClose={() => setAttach(false)} onSend={(a) => send(a)} />
-      <SafetySheet personId={id} visible={safety} onClose={() => setSafety(false)} onBlocked={() => router.back()} />
+      <SafetySheet personId={id} visible={safety} onClose={() => setSafety(false)} onBlocked={() => {
+        router.dismissAll();
+        router.navigate('/chats');
+      }} />
     </View>
   );
 }

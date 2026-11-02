@@ -58,6 +58,7 @@ export default function Report() {
                     block(id);
                     notifySuccess();
                     router.dismissAll();
+                    router.navigate('/discover');
                     toast(`Has bloqueado a ${person.name}`);
                   },
                 })
