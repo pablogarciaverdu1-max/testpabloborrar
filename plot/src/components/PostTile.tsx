@@ -2,6 +2,7 @@ import { Disc3, MapPin, Route } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { activityById, placeById, songById } from '@/data/catalog';
+import { postPhotos } from '@/data/photos';
 import { categories, colors, radius } from '@/theme';
 import type { Post } from '@/types';
 
@@ -14,8 +15,9 @@ import { Txt } from './Txt';
 export function PostTile({ post, onPress }: { post: Post; onPress: () => void }) {
   const cat = categories[post.category];
   let inner: React.ReactNode;
-  if (post.type === 'photo') {
-    inner = <PhotoBlock category={post.category} label={post.photoLabel?.replace('Foto · ', '')} uri={post.photoUri} aspect={1} rounded={0} compact />;
+  const img = postPhotos[post.id];
+  if (post.type === 'photo' || (img && post.type !== 'status')) {
+    inner = <PhotoBlock category={post.category} label={post.photoLabel?.replace('Foto · ', '')} uri={post.photoUri} source={img} aspect={1} rounded={0} compact />;
   } else {
     const Icon = post.type === 'song' ? Disc3 : post.type === 'activity' ? Route : post.type === 'place' ? MapPin : null;
     const title =

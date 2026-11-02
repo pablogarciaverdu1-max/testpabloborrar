@@ -29,7 +29,7 @@ export type CategoryPalette = { solid: string; soft: string; ink: string; label:
 export const categories: Record<CategoryId, CategoryPalette> = {
   music: { solid: '#FF4D94', soft: '#FFE5F0', ink: '#B8165A', label: 'Música' },
   sport: { solid: '#FF7A33', soft: '#FFE9DC', ink: '#B24A0E', label: 'Deporte' },
-  food: { solid: '#FFC93C', soft: '#FFF4CF', ink: '#8A5A00', label: 'Comida' },
+  food: { solid: '#FFC93C', soft: '#FFF4CF', ink: '#8A5A00', label: 'Restaurantes' },
   places: { solid: '#1FCB94', soft: '#DDF8EE', ink: '#0B7A57', label: 'Lugares' },
   culture: { solid: '#3B9BFF', soft: '#E2F0FF', ink: '#0B5FB8', label: 'Cultura' },
 };

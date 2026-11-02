@@ -276,6 +276,20 @@ function buildPosts(): Post[] {
     { id: 'i2', authorId: 'irene', type: 'photo', photoLabel: 'Foto · Vía de escalada', text: 'Martes de rocódromo.', createdAt: days(2), category: 'sport', tag: 'Escalada', visibility: 'everyone' },
     { id: 'i3', authorId: 'irene', type: 'song', songId: 's11', text: 'Para leer en el tren.', createdAt: days(4), category: 'music', tag: 'Indie', visibility: 'everyone' },
     { id: 'i4', authorId: 'irene', type: 'place', placeId: 'p2', text: 'Próximo objetivo.', createdAt: days(11), category: 'places', tag: 'Montaña', visibility: 'everyone' },
+    // Más publicaciones para que cada perfil tenga varias categorías
+    { id: 'l5', authorId: 'laia', type: 'place', placeId: 'p13', text: 'Vermut de domingo después de correr. Ritual sagrado.', createdAt: days(5), category: 'food', tag: 'Vermut', visibility: 'everyone' },
+    { id: 'l6', authorId: 'laia', type: 'photo', photoLabel: 'Foto · Exposición de fotografía', text: 'Expo de fotografía de montaña. Salí con ganas de cumbre.', createdAt: days(9), category: 'culture', tag: 'Fotografía', visibility: 'everyone' },
+    { id: 'n4', authorId: 'nerea', type: 'place', placeId: 'p12', text: 'El mejor ramen del barrio. No acepto discusión.', createdAt: days(2), category: 'food', visibility: 'everyone' },
+    { id: 'x5', authorId: 'alex', type: 'photo', photoLabel: 'Foto · Atardecer en el Carmel', text: 'Mi sitio para desconectar antes de pinchar.', createdAt: days(3), category: 'places', tag: 'Miradores', visibility: 'everyone' },
+    { id: 'x6', authorId: 'alex', type: 'status', text: 'Peli del finde: cualquiera que tenga buena banda sonora. Acepto propuestas.', createdAt: days(7), category: 'culture', tag: 'Cine', visibility: 'everyone' },
+    { id: 'c4', authorId: 'clara', type: 'song', songId: 's3', text: 'Lo que suena mientras dibujo planos.', createdAt: days(2), category: 'music', visibility: 'everyone' },
+    { id: 'c5', authorId: 'clara', type: 'place', placeId: 'p14', text: 'Cena de viernes. Pedid las croquetas.', createdAt: days(6), category: 'food', tag: 'Cocinar', visibility: 'everyone' },
+    { id: 'j4', authorId: 'jordi', type: 'place', placeId: 'p2', text: 'Mirad qué cara norte. Volveré.', createdAt: days(3), category: 'places', tag: 'Pirineo', visibility: 'everyone' },
+    { id: 'j5', authorId: 'jordi', type: 'song', songId: 's10', text: 'Para las subidas largas.', createdAt: days(8), category: 'music', visibility: 'everyone' },
+    { id: 'pa4', authorId: 'paula', type: 'photo', photoLabel: 'Foto · Calles de Gràcia', text: 'Mi barrio a las ocho de la mañana.', createdAt: days(4), category: 'places', visibility: 'everyone' },
+    { id: 'se4', authorId: 'sergi', type: 'place', placeId: 'p11', text: 'Donde ceno cuando no cocino yo.', createdAt: days(2), category: 'food', tag: 'Vermut', visibility: 'everyone' },
+    { id: 'se5', authorId: 'sergi', type: 'place', placeId: 'p8', text: 'Aquí me encontraréis si hay olas.', createdAt: days(8), category: 'places', tag: 'Playa', visibility: 'everyone' },
+    { id: 'i5', authorId: 'irene', type: 'photo', photoLabel: 'Foto · Brunch de domingo', text: 'Brunch antes de la Filmoteca.', createdAt: days(6), category: 'food', visibility: 'everyone' },
   ];
 }
 

@@ -2,6 +2,7 @@ import { CornerDownRight, Lock } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { activityById, placeById, songById } from '@/data/catalog';
+import { postPhotos } from '@/data/photos';
 import { categories, colors, radius, space } from '@/theme';
 import type { Post } from '@/types';
 import { relative } from '@/utils/time';
@@ -31,15 +32,26 @@ type Props = {
 
 /** Contenido de la publicación según su tipo. */
 export function PostBody({ post }: { post: Post }) {
+  const img = postPhotos[post.id];
   switch (post.type) {
     case 'photo':
-      return <PhotoBlock category={post.category} label={post.photoLabel} uri={post.photoUri} />;
+      return <PhotoBlock category={post.category} label={post.photoLabel} uri={post.photoUri} source={img} />;
     case 'song':
-      return <SongCard songId={post.songId} />;
+      return <SongCard songId={post.songId} cover={img} />;
     case 'activity':
-      return <ActivityCard activityId={post.activityId} />;
+      return (
+        <View style={styles.stack}>
+          {img ? <PhotoBlock category={post.category} source={img} aspect={16 / 10} label={activityById(post.activityId)?.title} /> : null}
+          <ActivityCard activityId={post.activityId} />
+        </View>
+      );
     case 'place':
-      return <PlaceCard placeId={post.placeId} />;
+      return (
+        <View style={styles.stack}>
+          {img ? <PhotoBlock category={post.category} source={img} aspect={16 / 10} label={placeById(post.placeId)?.name} /> : null}
+          <PlaceCard placeId={post.placeId} />
+        </View>
+      );
     case 'status':
       return (
         <View style={[styles.status, { backgroundColor: categories[post.category].soft }]}>
@@ -110,6 +122,7 @@ const styles = StyleSheet.create({
   meta: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   lock: { marginLeft: 2 },
   status: { padding: space.lg, borderRadius: radius.tile },
+  stack: { gap: space.sm },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm, flexWrap: 'wrap' },
   reply: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: space.md, borderRadius: 999, backgroundColor: colors.primarySoft },
 });

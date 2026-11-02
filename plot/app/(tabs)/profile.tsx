@@ -28,7 +28,7 @@ export default function MyProfile() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <LargeHeader title="Perfil" right={<IconButton icon={Settings} label="Ajustes" onPress={() => router.push('/settings')} />} />
         <View style={styles.head}>
-          <Avatar name={me.name} color={me.color} size={88} verified badge />
+          <Avatar photoId="me" name={me.name} color={me.color} size={88} verified badge />
           <View style={styles.flex}>
             <Txt variant="title1">
               {me.name}, {me.age}

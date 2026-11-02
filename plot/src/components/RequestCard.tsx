@@ -29,7 +29,7 @@ export function RequestCard({ person, conversation, post, common, onOpenProfile,
   return (
     <View style={styles.card}>
       <PressableScale accessibilityRole="button" accessibilityLabel={`Ver perfil de ${person.name}`} onPress={onOpenProfile} style={styles.head} scaleTo={0.99}>
-        <Avatar name={person.name} color={person.color} size={56} verified={person.verified} />
+        <Avatar photoId={person.id} name={person.name} color={person.color} size={56} verified={person.verified} />
         <View style={styles.flex}>
           <Txt variant="headline">
             {person.name}, {person.age}

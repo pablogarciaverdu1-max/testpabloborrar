@@ -28,7 +28,7 @@ import { dayLabel, sameDay } from '@/utils/time';
 type Row = { kind: 'day'; id: string; label: string } | { kind: 'msg'; id: string; message: Message };
 
 export default function Conversation() {
-  const { id, quote } = useLocalSearchParams<{ id: string; quote?: string }>();
+  const { id, quote, draft } = useLocalSearchParams<{ id: string; quote?: string; draft?: string }>();
   const insets = useSafeAreaInsets();
   const person = personById(id);
   const me = useApp((s) => s.me);
@@ -41,7 +41,7 @@ export default function Conversation() {
   const setActiveChat = useApp((s) => s.setActiveChat);
   const markRead = useApp((s) => s.markRead);
 
-  const [text, setText] = useState('');
+  const [text, setText] = useState(draft ?? '');
   const [quoted, setQuoted] = useState<string | undefined>(quote);
   const [attach, setAttach] = useState(false);
   const [safety, setSafety] = useState(false);
@@ -241,7 +241,7 @@ export default function Conversation() {
       <View style={[styles.header, { paddingTop: insets.top + space.xs }]}>
         <IconButton icon={ChevronLeft} label="Volver" tone="plain" onPress={() => router.back()} />
         <PressableScale accessibilityRole="button" accessibilityLabel={`Ver perfil de ${person.name}`} onPress={openProfile} style={styles.who} scaleTo={0.98}>
-          <Avatar name={person.name} color={person.color} size={40} verified={person.verified} />
+          <Avatar photoId={person.id} name={person.name} color={person.color} size={40} verified={person.verified} />
           <View style={styles.flex}>
             <Txt variant="headline" numberOfLines={1}>
               {person.name}

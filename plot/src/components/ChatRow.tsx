@@ -82,7 +82,7 @@ export function ChatRow({ person, conversation, common, onPress, onMute, onDelet
         scaleTo={0.99}
         style={styles.row}
       >
-        <Avatar name={person.name} color={person.color} size={56} verified={person.verified} />
+        <Avatar photoId={person.id} name={person.name} color={person.color} size={56} verified={person.verified} />
         <View style={styles.flex}>
           <View style={styles.top}>
             <View style={styles.nameRow}>

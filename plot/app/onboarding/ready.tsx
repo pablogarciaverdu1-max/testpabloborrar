@@ -58,7 +58,7 @@ export default function Ready() {
         </Txt>
         <Animated.View entering={ZoomIn.duration(280)} style={styles.card}>
           <View style={styles.head}>
-            <Avatar name={me.name} color={me.color} size={56} />
+            <Avatar photoId="me" name={me.name} color={me.color} size={56} />
             <View style={styles.flex}>
               <Txt variant="title2">
                 {me.name}, {me.age}

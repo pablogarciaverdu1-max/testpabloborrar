@@ -78,6 +78,8 @@ export type Message = {
   attachment?: Attachment;
   /** Publicación citada (mía o suya). */
   quotedPostId?: string;
+  /** Pregunta de ligue enviada desde la burbuja. */
+  questionId?: string;
 };
 
 export type ConversationStatus = 'chat' | 'request';

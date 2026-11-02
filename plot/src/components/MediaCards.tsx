@@ -1,5 +1,6 @@
 import { Disc3, MapPin, Mountain, Route, TrendingUp } from 'lucide-react-native';
-import { StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
 import { activityById, placeById, songById } from '@/data/catalog';
 import { categories, colors, radius, space } from '@/theme';
@@ -9,15 +10,19 @@ import { Txt } from './Txt';
 type Tone = 'card' | 'onPrimary';
 
 /** Tarjeta de canción (Spotify simulado). */
-export function SongCard({ songId, tone = 'card' }: { songId?: string; tone?: Tone }) {
+export function SongCard({ songId, tone = 'card', cover }: { songId?: string; tone?: Tone; cover?: ImageSourcePropType }) {
   const song = songById(songId);
   if (!song) return null;
   const cat = categories.music;
   return (
     <View style={[styles.row, { backgroundColor: tone === 'card' ? cat.soft : colors.white }]}>
-      <View style={[styles.cover, { backgroundColor: cat.solid }]}>
-        <Disc3 size={26} color={colors.ink} />
-      </View>
+      {cover ? (
+        <Image source={cover as never} style={styles.cover} contentFit="cover" accessibilityLabel="Portada" />
+      ) : (
+        <View style={[styles.cover, { backgroundColor: cat.solid }]}>
+          <Disc3 size={26} color={colors.ink} />
+        </View>
+      )}
       <View style={styles.flex}>
         <Txt variant="headline" numberOfLines={2}>{song.title}</Txt>
         <Txt variant="footnote" color={colors.text2} numberOfLines={1}>

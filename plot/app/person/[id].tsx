@@ -12,21 +12,24 @@ import { EmptyState } from '@/components/EmptyState';
 import { IconButton } from '@/components/IconButton';
 import { PostCard } from '@/components/PostCard';
 import { SafetySheet } from '@/components/SafetySheet';
-import { Segmented } from '@/components/Segmented';
+import { FlirtBubble } from '@/components/FlirtBubble';
+import { PressableScale } from '@/components/PressableScale';
 import { Txt } from '@/components/Txt';
 import { appInfo, appOrder } from '@/data/catalog';
 import { others, personById, postsOf, shared } from '@/store/selectors';
 import { useApp } from '@/store/useApp';
-import { categories, colors, gutter, radius, space } from '@/theme';
+import { categories, categoryOrder, colors, gutter, radius, space, type CategoryId } from '@/theme';
 import type { AppId, Post } from '@/types';
+import { tapLight } from '@/utils/haptics';
 
-type Filter = 'all' | 'music' | 'routes' | 'places';
+type Filter = 'all' | CategoryId;
 
-const matches = (p: Post, f: Filter) =>
-  f === 'all' ||
-  (f === 'music' && (p.type === 'song' || p.category === 'music')) ||
-  (f === 'routes' && p.type === 'activity') ||
-  (f === 'places' && (p.type === 'place' || p.category === 'places'));
+const filterTabs: { value: Filter; label: string }[] = [
+  { value: 'all', label: 'Todo' },
+  ...categoryOrder.map((c) => ({ value: c as Filter, label: categories[c].label })),
+];
+
+const matches = (p: Post, f: Filter) => f === 'all' || p.category === f;
 
 export default function PersonProfile() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,6 +41,8 @@ export default function PersonProfile() {
   const showDistance = useApp((s) => s.settings.showDistance);
   const [filter, setFilter] = useState<Filter>('all');
   const [safety, setSafety] = useState(false);
+  const [bubble, setBubble] = useState(false);
+  const sendMessage = useApp((s) => s.sendMessage);
 
   const isMe = id === 'me';
   const person = isMe ? undefined : personById(id);
@@ -85,7 +90,7 @@ export default function PersonProfile() {
           <View style={[styles.coverPill, { backgroundColor: cat.ink }]} />
         </View>
         <View style={styles.avatar}>
-          <Avatar name={profile.name} color={profile.color} size={88} verified={profile.verified} badge bordered />
+          <Avatar photoId={id} name={profile.name} color={profile.color} size={88} verified={profile.verified} badge bordered />
         </View>
 
         <View style={styles.body}>
@@ -156,17 +161,30 @@ export default function PersonProfile() {
 
           <View style={styles.section}>
             <Txt variant="headline">Publicaciones</Txt>
-            <Segmented
-              accessibilityLabel="Filtrar publicaciones"
-              options={[
-                { value: 'all', label: 'Todo' },
-                { value: 'music', label: 'Música' },
-                { value: 'routes', label: 'Rutas' },
-                { value: 'places', label: 'Lugares' },
-              ]}
-              value={filter}
-              onChange={setFilter}
-            />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs} accessibilityRole="tablist" style={styles.tabsScroll}>
+              {filterTabs.map((t) => {
+                const on = t.value === filter;
+                const c = t.value === 'all' ? null : categories[t.value];
+                const count = t.value === 'all' ? theirPosts.length : theirPosts.filter((p) => p.category === t.value).length;
+                return (
+                  <PressableScale
+                    key={t.value}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: on }}
+                    accessibilityLabel={`${t.label}, ${count} publicaciones`}
+                    onPress={() => {
+                      tapLight();
+                      setFilter(t.value);
+                    }}
+                    style={[styles.tab, { backgroundColor: on ? (c ? c.solid : colors.ink) : c ? c.soft : colors.surface }]}
+                  >
+                    <Txt variant="subheadStrong" color={on ? (c ? colors.ink : colors.white) : c ? c.ink : colors.ink}>
+                      {t.label} · {count}
+                    </Txt>
+                  </PressableScale>
+                );
+              })}
+            </ScrollView>
             {visible.length ? (
               visible.map((p) => (
                 <PostCard
@@ -178,7 +196,7 @@ export default function PersonProfile() {
               ))
             ) : (
               <Txt variant="subhead" color={colors.text2} style={styles.emptyPosts}>
-                No hay publicaciones de este tipo todavía.
+                {filter === 'all' ? 'Todavía no ha publicado nada.' : `Aún no ha publicado nada de ${categories[filter].label.toLowerCase()}. Pregúntale tú.`}
               </Txt>
             )}
           </View>
@@ -194,10 +212,31 @@ export default function PersonProfile() {
         {isMe ? (
           <Button label="Volver a mi perfil" variant="dark" onPress={() => router.back()} />
         ) : (
-          <Button label={`Escribir a ${profile.name}`} icon={MessageCircle} onPress={() => write()} />
+          <Button
+            label={filter === 'all' ? `Iniciar chat con ${profile.name}` : `Iniciar chat · ${categories[filter].label}`}
+            icon={MessageCircle}
+            onPress={() => setBubble(true)}
+          />
         )}
       </View>
 
+      {person ? (
+        <FlirtBubble
+          visible={bubble}
+          person={person}
+          topic={filter === 'all' ? 'general' : filter}
+          onClose={() => setBubble(false)}
+          onSend={(questionId, text) => {
+            setBubble(false);
+            sendMessage(id, { text, questionId });
+            router.push({ pathname: '/chat/[id]', params: { id } });
+          }}
+          onWriteOwn={(text) => {
+            setBubble(false);
+            router.push({ pathname: '/chat/[id]', params: { id, draft: text } });
+          }}
+        />
+      ) : null}
       {!isMe ? <SafetySheet personId={id} visible={safety} onClose={() => setSafety(false)} onBlocked={() => {
         router.dismissAll();
         router.navigate('/discover');
@@ -222,6 +261,9 @@ const styles = StyleSheet.create({
   apps: { flexDirection: 'row', flexWrap: 'wrap', gap: space.lg },
   appItem: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   emptyPosts: { paddingVertical: space.lg },
+  tabsScroll: { marginHorizontal: -gutter },
+  tabs: { paddingHorizontal: gutter, gap: space.sm },
+  tab: { minHeight: 40, paddingHorizontal: 14, borderRadius: radius.chip, justifyContent: 'center' },
   flex: { flex: 1 },
   topBar: { position: 'absolute', left: gutter, right: gutter, flexDirection: 'row', justifyContent: 'space-between' },
   sticky: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: gutter, paddingTop: space.md, backgroundColor: colors.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },

@@ -1,7 +1,8 @@
-import { CornerDownRight } from 'lucide-react-native';
+import { CornerDownRight, Sparkles } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
-import { colors, radius, space } from '@/theme';
+import { questionById } from '@/data/flirt';
+import { categories, colors, radius, space } from '@/theme';
 import type { Message, Post } from '@/types';
 import { clock } from '@/utils/time';
 
@@ -23,6 +24,8 @@ export function Bubble({ message, quoted, status, onLongPress }: Props) {
   const mine = message.from === 'me';
   const a = message.attachment;
   const fg = mine ? colors.white : colors.ink;
+  const q = questionById(message.questionId);
+  const topicLabel = q ? (q.topic === 'general' ? 'Primera cita' : categories[q.topic].label) : undefined;
   return (
     <View style={[styles.wrap, mine ? styles.right : styles.left]}>
       <PressableScale
@@ -36,6 +39,14 @@ export function Bubble({ message, quoted, status, onLongPress }: Props) {
         scaleTo={0.97}
         style={[styles.bubble, mine ? styles.mine : styles.theirs, a && styles.withMedia]}
       >
+        {topicLabel ? (
+          <View style={[styles.topic, { backgroundColor: q && q.topic !== 'general' ? categories[q.topic].solid : colors.primarySoft }]}>
+            <Sparkles size={12} color={colors.ink} />
+            <Txt variant="caption" color={colors.ink}>
+              {topicLabel.toUpperCase()}
+            </Txt>
+          </View>
+        ) : null}
         {quoted ? (
           <View style={[styles.quote, { backgroundColor: mine ? colors.primaryInk : colors.surface }]}>
             <CornerDownRight size={14} color={mine ? colors.onPrimaryMuted : colors.text2} />
@@ -80,6 +91,7 @@ const styles = StyleSheet.create({
   theirs: { backgroundColor: colors.bg, borderBottomLeftRadius: 6, borderWidth: 1, borderColor: colors.line },
   quote: { flexDirection: 'row', gap: 6, padding: space.sm, borderRadius: 12, alignItems: 'flex-start' },
   flex: { flex: 1 },
+  topic: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
   media: { borderRadius: radius.tile, overflow: 'hidden' },
   captionPad: { paddingHorizontal: space.sm, paddingBottom: 2 },
   status: { paddingHorizontal: 4 },

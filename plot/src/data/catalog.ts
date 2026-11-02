@@ -69,6 +69,11 @@ export const places: Place[] = [
   { id: 'p8', name: 'Platja de la Mar Bella', area: 'Barcelona', kind: 'Playa' },
   { id: 'p9', name: 'Calella de Palafrugell', area: 'Baix Empordà', kind: 'Pueblo de costa' },
   { id: 'p10', name: 'Mercat de la Llibertat', area: 'Gràcia, Barcelona', kind: 'Mercado' },
+  { id: 'p11', name: 'Taberna La Ola', area: 'Barceloneta, Barcelona', kind: 'Restaurante' },
+  { id: 'p12', name: 'Koto Ramen', area: 'Sant Antoni, Barcelona', kind: 'Restaurante' },
+  { id: 'p13', name: 'Bodega Vermella', area: 'Poblenou, Barcelona', kind: 'Vermutería' },
+  { id: 'p14', name: 'Casa Brava', area: 'Gràcia, Barcelona', kind: 'Restaurante' },
+  { id: 'p15', name: 'Forn de l’Àvia', area: 'Horta, Barcelona', kind: 'Brunch' },
 ];
 
 export const songById = (id?: string) => songs.find((s) => s.id === id);

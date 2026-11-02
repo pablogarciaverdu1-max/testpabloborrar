@@ -37,7 +37,7 @@ export function PersonCard({ person, myInterests, posts }: Props) {
         <View style={[styles.coverPill, { backgroundColor: cat.ink }]} />
       </View>
       <View style={styles.avatar}>
-        <Avatar name={person.name} color={person.color} size={88} verified={person.verified} badge bordered />
+        <Avatar photoId={person.id} name={person.name} color={person.color} size={88} verified={person.verified} badge bordered />
       </View>
       <View style={styles.body}>
         <View style={styles.titleRow}>

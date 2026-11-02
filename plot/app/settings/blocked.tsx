@@ -29,7 +29,7 @@ export default function Blocked() {
           if (!p) return null;
           return (
             <View key={id} style={styles.row}>
-              <Avatar name={p.name} color={p.color} size={40} />
+              <Avatar photoId={p.id} name={p.name} color={p.color} size={40} />
               <View style={styles.flex}>
                 <Txt variant="headline">{p.name}</Txt>
                 <Txt variant="footnote" color={colors.text2}>

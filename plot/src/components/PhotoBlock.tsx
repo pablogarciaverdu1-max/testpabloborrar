@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type ImageSourcePropType, type StyleProp, type ViewStyle } from 'react-native';
 
 import { categories, colors, radius, type CategoryId } from '@/theme';
 
@@ -9,6 +9,8 @@ type Props = {
   category: CategoryId;
   label?: string;
   uri?: string;
+  /** Foto incluida en la app (require). */
+  source?: ImageSourcePropType;
   aspect?: number;
   style?: StyleProp<ViewStyle>;
   rounded?: number;
@@ -16,16 +18,16 @@ type Props = {
 };
 
 /** Foto: real si viene del carrete, o bloque de color de categoría con etiqueta discreta. */
-export function PhotoBlock({ category, label, uri, aspect = 4 / 3, style, rounded = radius.tile, compact }: Props) {
+export function PhotoBlock({ category, label, uri, source, aspect = 4 / 3, style, rounded = radius.tile, compact }: Props) {
   const cat = categories[category];
-  if (uri) {
+  if (uri || source) {
     return (
       <Image
-        source={{ uri }}
+        source={uri ? { uri } : (source as never)}
         style={[{ aspectRatio: aspect, borderRadius: rounded, backgroundColor: colors.surface }, style as object]}
         contentFit="cover"
         transition={200}
-        accessibilityLabel="Foto"
+        accessibilityLabel={label ? label.replace('Foto · ', 'Foto de ') : 'Foto'}
       />
     );
   }

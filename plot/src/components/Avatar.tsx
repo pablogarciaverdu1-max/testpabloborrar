@@ -1,6 +1,8 @@
+import { Image } from 'expo-image';
 import { BadgeCheck } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
+import { avatarPhotos } from '@/data/photos';
 import { categories, colors, type CategoryId } from '@/theme';
 
 import { Txt } from './Txt';
@@ -9,6 +11,8 @@ type Props = {
   name: string;
   color: CategoryId;
   size?: 40 | 56 | 88;
+  /** Id de la persona para buscar su foto real. */
+  photoId?: string;
   verified?: boolean;
   /** Muestra el distintivo de verificación además del anillo. */
   badge?: boolean;
@@ -16,7 +20,8 @@ type Props = {
 };
 
 /** Avatar con iniciales sobre color de categoría. Anillo violeta si está verificado. */
-export function Avatar({ name, color, size = 56, verified, badge, bordered }: Props) {
+export function Avatar({ name, color, size = 56, verified, badge, bordered, photoId }: Props) {
+  const photo = photoId ? avatarPhotos[photoId] : undefined;
   const ring = verified ? (size === 88 ? 3 : 2) : 0;
   const gap = verified ? 2 : 0;
   const outer = size;
@@ -49,13 +54,13 @@ export function Avatar({ name, color, size = 56, verified, badge, bordered }: Pr
           { width: inner, height: inner, borderRadius: inner / 2, backgroundColor: categories[color].solid },
         ]}
       >
-        <Txt
-          variant={size === 88 ? 'title1' : size === 56 ? 'title2' : 'headline'}
-          color={colors.ink}
-          maxFontSizeMultiplier={1}
-        >
-          {initials}
-        </Txt>
+        {photo ? (
+          <Image source={photo as never} style={{ width: inner, height: inner, borderRadius: inner / 2 }} contentFit="cover" />
+        ) : (
+          <Txt variant={size === 88 ? 'title1' : size === 56 ? 'title2' : 'headline'} color={colors.ink} maxFontSizeMultiplier={1}>
+            {initials}
+          </Txt>
+        )}
       </View>
       {verified && badge ? (
         <View style={[styles.badge, size === 88 ? styles.badgeLg : styles.badgeSm]}>

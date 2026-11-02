@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { answerFor } from '@/data/flirt';
 import { createSeed, people } from '@/data/seed';
 import type {
   AppId,
@@ -66,7 +67,7 @@ type Actions = {
 
   setActiveChat: (id: string | null) => void;
   markRead: (id: string) => void;
-  sendMessage: (personId: string, msg: { text?: string; attachment?: Attachment; quotedPostId?: string }) => void;
+  sendMessage: (personId: string, msg: { text?: string; attachment?: Attachment; quotedPostId?: string; questionId?: string }) => void;
   deleteMessage: (personId: string, messageId: string) => void;
   acceptRequest: (personId: string) => void;
   setDismissed: (personId: string, dismissed: boolean) => void;
@@ -179,7 +180,7 @@ export const useApp = create<AppState>()(
             },
           };
         });
-        scheduleReply(personId);
+        scheduleReply(personId, msg.questionId);
       },
 
       deleteMessage: (personId, messageId) =>
@@ -237,7 +238,9 @@ export const useApp = create<AppState>()(
     }),
     {
       name: 'plot-demo',
-      version: 1,
+      // v2: categoría Restaurantes, más publicaciones y fotos reales. Al subir de versión se carga la demo nueva.
+      version: 2,
+      migrate: () => initialData(),
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (s): PersistedState => ({
         loggedIn: s.loggedIn,
@@ -260,7 +263,7 @@ export const useApp = create<AppState>()(
 );
 
 /** Simula que la otra persona lee, escribe y responde en 1,5–2,5 s. */
-function scheduleReply(personId: string) {
+function scheduleReply(personId: string, questionId?: string) {
   const person = people.find((p) => p.id === personId);
   if (!person || person.replies.length === 0) return;
 
@@ -286,12 +289,13 @@ function scheduleReply(personId: string) {
       return;
     }
     const index = s.replyIndex[personId] ?? 0;
-    const text = person.replies[index % person.replies.length];
+    const answer = questionId ? answerFor(questionId, personId) : undefined;
+    const text = answer ?? person.replies[index % person.replies.length];
     const reply: Message = { id: uid('msg'), from: personId, createdAt: new Date().toISOString(), text };
     const viewing = s.activeChat === personId;
     useApp.setState({
       typing: { ...s.typing, [personId]: false },
-      replyIndex: { ...s.replyIndex, [personId]: index + 1 },
+      replyIndex: answer ? s.replyIndex : { ...s.replyIndex, [personId]: index + 1 },
       conversations: {
         ...s.conversations,
         [personId]: {
