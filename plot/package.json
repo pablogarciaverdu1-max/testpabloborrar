@@ -49,7 +49,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build:web": "expo export -p web --output-dir ../docs && cp ../docs/index.html ../docs/404.html && touch ../docs/.nojekyll"
   },
   "private": true
 }

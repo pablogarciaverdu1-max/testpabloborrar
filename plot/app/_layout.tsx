@@ -8,7 +8,7 @@ import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { LucideProvider } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -45,7 +45,7 @@ export default function RootLayout() {
   if (!ready) return null;
 
   return (
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView style={[styles.root, Platform.OS === 'web' && styles.webFrame]}>
       <SafeAreaProvider>
         <LucideProvider strokeWidth={iconStroke} color={colors.ink}>
           <StatusBar style="dark" />
@@ -97,4 +97,8 @@ export default function RootLayout() {
   );
 }
 
-const styles = StyleSheet.create({ root: { flex: 1, backgroundColor: colors.bg } });
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.bg },
+  // Solo en la versión web de prueba: en un ordenador se ve con ancho de móvil.
+  webFrame: { width: '100%', maxWidth: 440, alignSelf: 'center', overflow: 'hidden', borderLeftWidth: StyleSheet.hairlineWidth, borderRightWidth: StyleSheet.hairlineWidth, borderColor: colors.line },
+});
