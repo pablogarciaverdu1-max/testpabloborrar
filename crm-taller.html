@@ -109,6 +109,15 @@ tr.clickable:hover{background:var(--bg3)}
 
 /* CLIENT DETAIL */
 .cd-body{display:flex;flex:1;overflow:hidden}
+.ph{position:relative;padding:20px 24px;display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--border);overflow:hidden}
+.ph .ph-emoji{position:absolute;right:70px;top:50%;transform:translateY(-50%) rotate(-12deg);font-size:96px;opacity:.13;pointer-events:none}
+.ph .ph-av{width:64px;height:64px;min-width:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.25);text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.ph .ph-txt{flex:1;min-width:0;color:#fff}
+.ph h2{margin:0;font-size:20px;color:#fff}
+.ph .ph-chip{display:inline-flex;align-items:center;gap:6px;margin-top:6px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700}
+.ph .ph-desc{margin-top:6px;font-size:12.5px;opacity:.9}
+.ph .ph-quote{margin-top:4px;font-size:12.5px;font-style:italic;opacity:.95}
+.ph .x{color:#fff;position:relative;z-index:1}
 .cd-left{width:240px;min-width:240px;border-right:1px solid var(--border2);padding:24px;overflow-y:auto;background:var(--bg2)}
 .cd-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .avatar{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin:0 auto 14px;letter-spacing:-.01em;position:relative;border:2px solid rgba(255,255,255,.1);box-shadow:0 0 20px rgba(0,0,0,.5)}
@@ -309,7 +318,7 @@ tr.clickable:hover{background:var(--bg3)}
   <div id="citaDetailBody"></div>
 </div></div>
 
-<div class="modal-bg" id="modalCliente"><div class="modal big"><div class="modal-head" style="padding:20px 24px;border-bottom:1px solid var(--border);margin:0"><h2 id="clienteModalTitle">Cliente</h2><button class="x" onclick="closeModal('modalCliente')">×</button></div>
+<div class="modal-bg" id="modalCliente"><div class="modal big"><div class="ph" id="clienteHeader"><h2 id="clienteModalTitle">Cliente</h2><button class="x" onclick="closeModal('modalCliente')">×</button></div>
   <div class="cd-body">
     <div class="cd-left" id="cdLeft"></div>
     <div class="cd-right">
@@ -391,14 +400,37 @@ function today(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+
 function dateOffset(n){const t=new Date();t.setDate(t.getDate()+n);return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());}
 
 /* ========= SEED DATA ========= */
+const PERSONALIDADES={
+  '':{label:'Sin definir',emoji:'🙂',c1:'#2a2f4a',c2:'#4b5275',desc:'Aún no has definido su personalidad. Hazlo en «Editar datos».'},
+  apasionado:{label:'Apasionado de las motos',emoji:'🏍️',c1:'#7c1d1d',c2:'#f97316',desc:'Vive para rodar. Le encanta hablar de su moto y conocer cada detalle.'},
+  exigente:{label:'Exigente / Perfeccionista',emoji:'🎯',c1:'#1e1b4b',c2:'#6366f1',desc:'Quiere todo impecable y bien explicado. Cuida los plazos y el acabado.'},
+  tranquilo:{label:'Tranquilo / Confiado',emoji:'🌿',c1:'#14352d',c2:'#22c55e',desc:'Confía en el taller. Basta con avisarle cuando esté lista.'},
+  prisa:{label:'Siempre con prisa',emoji:'⚡',c1:'#3d2a00',c2:'#eab308',desc:'Valora la rapidez por encima de todo. Ofrécele las primeras citas.'},
+  ahorrador:{label:'Ahorrador',emoji:'💰',c1:'#0f2f3d',c2:'#06b6d4',desc:'Mira mucho el precio. Explícale opciones y presupuestos claros.'},
+  hablador:{label:'Hablador / Cercano',emoji:'💬',c1:'#3d1a2e',c2:'#ec4899',desc:'Le gusta charlar y el trato cercano. Fideliza con un buen rato.'},
+  novato:{label:'Novato / Primera moto',emoji:'🌱',c1:'#2d1f3d',c2:'#a855f7',desc:'Agradece consejos y explicaciones sencillas sin tecnicismos.'}
+};
+function personalidadOptions(sel){return Object.entries(PERSONALIDADES).map(([k,v])=>`<option value="${k}" ${k===(sel||'')?'selected':''}>${v.emoji} ${v.label}</option>`).join('');}
+function renderClienteHeader(c){
+  const p=PERSONALIDADES[c.personalidad||'']||PERSONALIDADES[''];
+  const initials=((c.nombre[0]||'')+((c.apellidos&&c.apellidos[0])||'')).toUpperCase();
+  const h=document.getElementById('clienteHeader');
+  h.style.background=`linear-gradient(120deg,${p.c1} 0%,${p.c2} 100%)`;
+  h.innerHTML=`<div class="ph-emoji">${p.emoji}</div><div class="ph-av">${esc(initials)}</div>
+    <div class="ph-txt"><h2 id="clienteModalTitle">${esc(cliFull(c))}</h2>
+      <div class="ph-chip">${p.emoji} ${esc(p.label)}</div>
+      <div class="ph-desc">${esc(p.desc)}</div>
+      ${c.frase?`<div class="ph-quote">“${esc(c.frase)}”</div>`:''}</div>
+    <button class="x" onclick="closeModal('modalCliente')">×</button>`;
+}
 function seed(){
   const c1=uid(),c2=uid(),c3=uid(),c4=uid(),c5=uid();
   clientes=[
-    {id:c1,nombre:'Carlos',apellidos:'Romero Gil',dni:'12345678A',correo:'carlos@mail.com',telefono:'611222333',fecha_creacion:'2025-01-15'},
-    {id:c2,nombre:'María',apellidos:'Fernández Vega',dni:'23456789B',correo:'maria@mail.com',telefono:'622333444',fecha_creacion:'2025-02-20'},
-    {id:c3,nombre:'José',apellidos:'Martín Ruiz',dni:'34567890C',correo:'jose@mail.com',telefono:'633444555',fecha_creacion:'2025-03-10'},
-    {id:c4,nombre:'Laura',apellidos:'Gómez Soto',dni:'45678901D',correo:'laura@mail.com',telefono:'644555666',fecha_creacion:'2025-04-05'},
-    {id:c5,nombre:'Pedro',apellidos:'Navarro Díaz',dni:'56789012E',correo:'pedro@mail.com',telefono:'655666777',fecha_creacion:'2025-05-12'},
+    {id:c1,nombre:'Carlos',personalidad:'apasionado',frase:'Si suena raro, la quiero aquí ese mismo día.',apellidos:'Romero Gil',dni:'12345678A',correo:'carlos@mail.com',telefono:'611222333',fecha_creacion:'2025-01-15'},
+    {id:c2,nombre:'María',personalidad:'exigente',frase:'Prefiere que le manden fotos del trabajo hecho.',apellidos:'Fernández Vega',dni:'23456789B',correo:'maria@mail.com',telefono:'622333444',fecha_creacion:'2025-02-20'},
+    {id:c3,nombre:'José',personalidad:'tranquilo',frase:'',apellidos:'Martín Ruiz',dni:'34567890C',correo:'jose@mail.com',telefono:'633444555',fecha_creacion:'2025-03-10'},
+    {id:c4,nombre:'Laura',personalidad:'prisa',frase:'Usa la moto para ir a trabajar, no puede estar sin ella.',apellidos:'Gómez Soto',dni:'45678901D',correo:'laura@mail.com',telefono:'644555666',fecha_creacion:'2025-04-05'},
+    {id:c5,nombre:'Pedro',personalidad:'ahorrador',frase:'Pide siempre presupuesto antes de empezar.',apellidos:'Navarro Díaz',dni:'56789012E',correo:'pedro@mail.com',telefono:'655666777',fecha_creacion:'2025-05-12'},
   ];
   const mo=[];
   function mk(cid,marca,modelo,cil,mat,bas,anot){const id=uid();mo.push({id,cliente_id:cid,marca,modelo,cilindrada:cil,matricula:mat,bastidor:bas,anotaciones:anot||[]});return id;}
@@ -773,7 +805,7 @@ let curCliente=null,curTab='datos',recState={};
 function openCliente(id){curCliente=id;curTab='datos';recState={};renderClienteModal();openModal('modalCliente');}
 function renderClienteModal(){
   const c=cliById(curCliente);if(!c)return;
-  document.getElementById('clienteModalTitle').textContent=cliFull(c);
+  renderClienteHeader(c);
   const ms=DB.motos.byCliente(c.id);const cs=DB.citas.byCliente(c.id);
   const initials=(c.nombre[0]||'')+((c.apellidos&&c.apellidos[0])||'');
   const avatarColors=[['#1e3a5f','#3b82f6'],['#3d1f00','#f97316'],['#1a1a3e','#6366f1'],['#14352d','#22c55e'],['#3d1a2e','#ec4899'],['#1e2d40','#06b6d4'],['#2d1f3d','#a855f7'],['#3a2010','#fb923c']];
@@ -820,6 +852,8 @@ function tabDatos(c){return `<div class="tabpane active" style="max-width:560px"
   <div class="row2"><div class="field"><label>DNI</label><input id="edDni" value="${esc(c.dni||'')}"></div>
   <div class="field"><label>Teléfono</label><input id="edTel" value="${esc(c.telefono)}"></div></div>
   <div class="field"><label>Correo</label><input id="edCorreo" value="${esc(c.correo||'')}"></div>
+  <div class="field"><label>Personalidad (cabecera del perfil)</label><select id="edPers">${personalidadOptions(c.personalidad)}</select></div>
+  <div class="field"><label>Frase / cómo tratarle</label><input id="edFrase" maxlength="140" placeholder="Ej: Le gusta que le enseñen las piezas cambiadas" value="${esc(c.frase||'')}"></div>
   <button class="btn" onclick="saveDatos()">Guardar</button></div>`;}
 function saveDatos(){
   const nombre=document.getElementById('edNombre').value.trim();const correo=document.getElementById('edCorreo').value.trim();
@@ -827,7 +861,7 @@ function saveDatos(){
   if(!nombre){toast('Nombre obligatorio','err');return;}
   if(correo&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){toast('Correo no válido','err');return;}
   if(DB.clientes.existsByPhoneOrDni(tel,dni,curCliente)){toast('Teléfono/DNI duplicado','err');return;}
-  DB.clientes.update(curCliente,{nombre,apellidos:document.getElementById('edApellidos').value.trim(),dni,telefono:tel,correo});
+  DB.clientes.update(curCliente,{nombre,apellidos:document.getElementById('edApellidos').value.trim(),dni,telefono:tel,correo,personalidad:document.getElementById('edPers').value,frase:document.getElementById('edFrase').value.trim()});
   renderClienteModal();renderClientes();toast('Datos guardados','ok');
 }
 function tabMotos(c){
