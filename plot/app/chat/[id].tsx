@@ -47,10 +47,6 @@ export default function Conversation() {
   const [safety, setSafety] = useState(false);
   const listRef = useRef<FlatList<Row>>(null);
 
-  useEffect(() => {
-    if (quote) setQuoted(quote);
-  }, [quote]);
-
   useFocusEffect(
     useCallback(() => {
       setActiveChat(id);
@@ -63,7 +59,7 @@ export default function Conversation() {
     if (conversation?.unread) markRead(id);
   }, [conversation?.unread, id, markRead]);
 
-  const messages = conversation?.messages ?? [];
+  const messages = useMemo(() => conversation?.messages ?? [], [conversation]);
   const isEmpty = messages.length === 0;
   const theirPosts = useMemo(() => postsOf(posts, id), [posts, id]);
   const common = person ? shared(me.interests, person.interests) : [];

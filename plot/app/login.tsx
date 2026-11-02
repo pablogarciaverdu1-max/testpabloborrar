@@ -32,13 +32,13 @@ export default function Login() {
       notifyError();
       setError('Contraseña incorrecta');
       if (!reduced) {
-        shake.value = withSequence(
+        shake.set(withSequence(
           withTiming(-10, { duration: 50 }),
           withTiming(10, { duration: 50 }),
           withTiming(-8, { duration: 50 }),
           withTiming(8, { duration: 50 }),
           withTiming(0, { duration: 50 }),
-        );
+        ));
       }
       return;
     }

@@ -13,7 +13,7 @@ import { Txt } from './Txt';
 export function OnboardingHeader({ step }: { step: 1 | 2 | 3 }) {
   const progress = useSharedValue((step - 1) / 3);
   useEffect(() => {
-    progress.value = withTiming(step / 3, { duration: motion.slow });
+    progress.set(withTiming(step / 3, { duration: motion.slow }));
   }, [step, progress]);
   const fill = useAnimatedStyle(() => ({ width: `${progress.value * 100}%` }));
   return (

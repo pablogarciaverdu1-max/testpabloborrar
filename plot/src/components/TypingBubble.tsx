@@ -9,7 +9,7 @@ function Dot({ delay }: { delay: number }) {
   const v = useSharedValue(0);
   useEffect(() => {
     if (reduced) return;
-    v.value = withDelay(delay, withRepeat(withSequence(withTiming(1, { duration: 280 }), withTiming(0, { duration: 280 })), -1));
+    v.set(withDelay(delay, withRepeat(withSequence(withTiming(1, { duration: 280 }), withTiming(0, { duration: 280 })), -1)));
   }, [delay, reduced, v]);
   const style = useAnimatedStyle(() => ({ opacity: 0.35 + v.value * 0.65, transform: [{ translateY: -v.value * 3 }] }));
   return <Animated.View style={[styles.dot, style]} />;

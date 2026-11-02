@@ -26,13 +26,13 @@ export function PressableScale({ style, scaleTo = 0.97, onPressIn, onPressOut, d
       disabled={disabled}
       accessibilityState={{ disabled: !!disabled }}
       onPressIn={(e) => {
-        if (!reduced) scale.value = withSpring(scaleTo, motion.spring);
-        pressed.value = withSpring(1, motion.spring);
+        if (!reduced) scale.set(withSpring(scaleTo, motion.spring));
+        pressed.set(withSpring(1, motion.spring));
         onPressIn?.(e);
       }}
       onPressOut={(e) => {
-        scale.value = withSpring(1, motion.spring);
-        pressed.value = withSpring(0, motion.spring);
+        scale.set(withSpring(1, motion.spring));
+        pressed.set(withSpring(0, motion.spring));
         onPressOut?.(e);
       }}
       style={[style, animatedStyle]}
